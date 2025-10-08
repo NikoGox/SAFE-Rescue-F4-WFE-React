@@ -1,0 +1,15 @@
+╔══════════════════════════════════════════════╗
+║                REGISTRO DE CAMBIOS           ║
+╚══════════════════════════════════════════════╝
+
+❚❙❘ VERSIÓN 1.0.x
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• 
+└─• 
+
+❚❙❘ VERSIÓN 1.0
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se crea el archivo inicial
+├─• Se crean páginas vacias
+└─• Se empieza la migración de navbar y footer
+
