@@ -1,0 +1,123 @@
+/* src/pages/Home/Home.css */
+
+/*
+  CRÍTICO: Las clases de carrusel y tarjeta de contenido
+  fueron movidas aquí desde el CSS general para encapsular el estilo de Home.
+*/
+
+/* Contenedor de la página de inicio */
+.home-page-content {
+    /* Si necesitas algún margen/padding global para esta página, agrégalo aquí */
+    padding-top: 20px; 
+    padding-bottom: 20px;
+}
+
+/* ===== CARRUSEL ===== */
+#mainCarousel {
+    margin-bottom: 20px;
+}
+
+.carousel-inner {
+    max-height: 525px;
+    margin: auto;
+    overflow: hidden;
+    box-shadow: var(--shadow-heavy);
+    height: 525px;
+}
+
+.carousel-item {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-item img,
+.carousel-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* ===== TARJETAS (CARD) - Estructura y Estilos de Contenido ===== */
+.card-base {
+    background-color: var(--color-white);
+    box-shadow: var(--shadow-medium);
+    padding: 2rem;
+    padding-bottom: 100px;
+    color: var(--color-black);
+    height: auto;
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-radius: var(--border-radius-lg);
+    padding-left: 200px;
+    padding-right: 200px;
+}
+
+.card-contenido {
+    /* Altura mínima para asegurar el espacio. Ajusta si es necesario */
+    min-height: 810px; 
+}
+
+/* Estilos de los elementos de información en Home */
+.titulo-info-home {
+    color: var(--color-secondary);
+    border-bottom: 2px solid var(--color-primary-dark);
+    padding-bottom: 0.5rem;
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 45px;
+}
+
+.subtitulo-info-home {
+    text-align: center;
+}
+
+.texto-info-home {
+    margin: 10px 0;
+}
+
+#lista-funcionalidades {
+    /* Estilos para la lista si es necesario, por defecto es list-unstyled en el TSX */
+    list-style: disc; /* O el estilo que prefieras */
+    max-width: 800px;
+    margin: 0 auto 30px auto;
+    padding-left: 20px;
+}
+
+#lista-funcionalidades li {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+/* Estilos para que los H3 (que reemplazaron a los B con ID) se muestren bien */
+.text-p-L_Negrita.text-center {
+    display: block;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+
+/* ===== RESPONSIVE PARA HOME ===== */
+@media (max-width: 768px) {
+    .card-base {
+        padding: 1.5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        width: 95%;
+    }
+    .titulo-info-home {
+        font-size: 35px;
+    }
+}
+@media (max-width: 576px) {
+    .card-base {
+        border-radius: 15px;
+        padding: 1rem 0.5rem;
+    }
+    #lista-funcionalidades {
+        padding-left: 10px;
+    }
+}

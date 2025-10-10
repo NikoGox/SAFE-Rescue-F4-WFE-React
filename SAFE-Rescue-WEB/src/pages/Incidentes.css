@@ -1,0 +1,203 @@
+/*
+ * Archivo: src/pages/Incidentes/Incidentes.css
+ * -------------------------------------------
+ * Contiene: Estilos de Tablas y Formulario de Incidentes.
+ */
+
+/* ===== TABLAS ===== */
+.tabla-contenedor {
+  border-radius: 8px;
+  box-shadow: var(--shadow-medium);
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  max-width: auto;
+  margin: 20px auto;
+  background-color: var(--color-3f4e5f);
+}
+
+.tabla-contenedor h2 {
+  background-color: var(--color-3f4e5f);
+  padding: 15px 20px;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th,
+td {
+  padding: 12px 20px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+thead th {
+  background-color: #f2f2f2;
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: var(--color-white);
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+/* Estilos de botones de acción de tabla */
+.boton-mas,
+#showFormBtn,
+#btnActualizar {
+  display: block;
+  width: 150px;
+  padding: 10px;
+  margin: 20px auto;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  /* Reutilización de estilos de registro/botones */
+  box-shadow: 1px 1px 4px #555454;
+  text-shadow: 1px 1px 1px #555454;
+  transition: background-color 0.3s;
+  text-decoration: none; /* para el .boton-mas que es un enlace */
+}
+
+.boton-mas:hover,
+#showFormBtn:hover,
+#btnActualizar:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.expand-btn {
+  padding: 5px 10px;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.expand-btn:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Estilos para los detalles de la fila expandida */
+.incident-details td {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.details-container {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.details-text {
+  flex: 1;
+}
+
+.details-image img {
+  max-width: 200px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/* ===== FORMULARIO AÑADIR/ACTUALIZAR INCIDENTE ===== */
+.add-incident-form {
+  background-color: var(--color-white);
+  padding: 2rem;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-medium);
+  margin: 2rem auto;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.add-incident-form h3 {
+  text-align: center;
+  color: var(--color-secondary);
+  margin-bottom: 1rem;
+}
+
+.add-incident-form input[type="text"],
+.add-incident-form textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ced4da;
+  border-radius: var(--border-radius-sm);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.add-incident-form input[type="text"]:focus,
+.add-incident-form textarea:focus {
+  border-color: var(--color-primary);
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(32, 163, 216, 0.25);
+}
+
+.add-incident-form label {
+  font-weight: 600;
+  color: var(--color-secondary);
+  display: block;
+}
+
+/* Reutilizando estilos de botones de registro */
+.add-incident-form button {
+  border: none;
+  color: var(--color-white);
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  border-radius: var(--border-radius-sm);
+  transition: background-color 0.15s ease-in-out;
+  box-shadow: 1px 1px 4px #555454;
+  text-shadow: 1px 1px 1px #555454;
+  cursor: pointer;
+}
+
+.add-incident-form button[type="submit"] {
+  background-color: var(--color-primary);
+}
+
+.add-incident-form button[type="submit"]:hover {
+  background-color: var(--color-primary-dark);
+}
+
+#cancelFormBtn {
+  background-color: var(--color-gray);
+}
+
+#cancelFormBtn:hover {
+  background-color: #555454;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* ===== RESPONSIVE TABLA ===== */
+@media (max-width: 768px) {
+  .tabla-responsive {
+    overflow-x: auto;
+  }
+}

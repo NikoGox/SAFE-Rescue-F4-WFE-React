@@ -2,10 +2,15 @@
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
 
-❚❙❘ VERSIÓN 1.0.x
+❚❙❘ VERSIÓN 1.0.1
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
-├─• 
-└─• 
+├─• Se reorganizan los directorios
+├─• Se crean las páginas faltantes
+├─• Se crean los css migrados y separados para cada página
+├─• Se coloca la lógica de página perfiles, contactanos y home
+├─• Se completan resto de páginas con un tsx básico sin contenido
+├─• Se agregan las imagenes y contenido multimedia
+└─• Se separa el footer y el navbar como componentes, ademas se crea un componenete que separa la lógica de inicio de sesión
 
 ❚❙❘ VERSIÓN 1.0
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
