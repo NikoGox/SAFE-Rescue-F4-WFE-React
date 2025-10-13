@@ -8,7 +8,7 @@ import Carrusel3 from "../assets/carrusel_3.png";
 
 const Home: React.FC = () => {
     return (
-        // ⚠️ Usamos una clase específica en lugar de 'contenedor-principal' genérica
+        //Usamos una clase específica en lugar de 'contenedor-principal' genérica
         <div className="home-page-content"> 
             
             {/* 1. CARRUSEL */}
@@ -16,23 +16,22 @@ const Home: React.FC = () => {
                 <div className="carousel-inner">
                     
                     {/* Item 1: El VIDEO debe ser el primer 'active' o el que quieras mostrar primero */}
-                    <div className="carousel-item active" data-bs-interval="4100"> 
-                        <video
-                            src={Carrusel1}
-                            className="d-block w-100"
-                            autoPlay  
-                            loop      
-                            muted   
-                            playsInline  
-                            type="video/mp4" // Usamos 'type' en lugar de 'typeof' para el elemento video
-                            aria-label="Video promocional de Safe Rescue"
-                        >
-                            Tu navegador no soporta el elemento de video.
-                        </video>
+                    <div className="carousel-item active" data-bs-interval="6000"> 
+                            <video
+                                className="d-block w-100"
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                aria-label="Video promocional de Safe Rescue"
+                            >
+                                <source src={Carrusel1} type="video/mp4" />
+                                Tu navegador no soporta el elemento de video.
+                            </video>
                     </div>
 
                     {/* Item 2: Ya no es 'active' */}
-                    <div className="carousel-item" data-bs-interval="4100">
+                    <div className="carousel-item" data-bs-interval="6000">
                         <img
                             src={Carrusel2}
                             alt="Rescatistas preparándose para la acción"
@@ -41,7 +40,7 @@ const Home: React.FC = () => {
                     </div>
                     
                     {/* Item 3 */}
-                    <div className="carousel-item" data-bs-interval="4100">
+                    <div className="carousel-item" data-bs-interval="6000">
                         <img
                             src={Carrusel3}
                             alt="Mapa de incidentes activos"
@@ -49,6 +48,33 @@ const Home: React.FC = () => {
                         />
                     </div>
                 </div>
+
+                {/* Controles prev/next estándar de Bootstrap */}
+                <button
+                    className="carousel-control-prev"
+                    type="button"
+                    data-bs-target="#mainCarousel"
+                    data-bs-slide="prev"
+                    aria-label="Anterior"
+                    onMouseUp={(e) => (e.currentTarget as HTMLElement).blur()}
+                    onClick={(e) => (e.currentTarget as HTMLElement).blur()}
+                >
+                    <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span className="visually-hidden">Previous</span>
+                </button>
+
+                <button
+                    className="carousel-control-next"
+                    type="button"
+                    data-bs-target="#mainCarousel"
+                    data-bs-slide="next"
+                    aria-label="Siguiente"
+                    onMouseUp={(e) => (e.currentTarget as HTMLElement).blur()}
+                    onClick={(e) => (e.currentTarget as HTMLElement).blur()}
+                >
+                    <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span className="visually-hidden">Next</span>
+                </button>
             </div>
 
             {/* 2. TARJETA DE CONTENIDO PRINCIPAL */}
@@ -94,7 +120,6 @@ const Home: React.FC = () => {
                     </li>
                 </ul>
 
-                {/* ⚠️ Eliminamos el espaciador HTML */}
 
                 {/* Párrafo Final */}
                 <p className="text-p-L_Negrita color-3-12 mt-4 text-center">

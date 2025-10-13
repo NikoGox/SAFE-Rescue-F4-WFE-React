@@ -121,3 +121,57 @@
         padding-left: 10px;
     }
 }
+
+/* ===== STYLES: Carousel arrow buttons (custom) ===== */
+/* Fondo gris claro; la flecha (icon) usará `currentColor` para poder cambiar solo su color en hover */
+.carousel-control-prev,
+.carousel-control-next {
+    background-color: transparent !important;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: #ffffff50; /* light gray background */
+    border-radius: 40%;
+    width: 70px;
+    height: 70px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 18px 18px;
+    display: inline-block;
+    /* color usada por el SVG embebido (fill='currentColor') */
+    color: #6c757d; /* gray arrow color */
+    transition: color 150ms ease;
+}
+
+/* Usamos SVG embebido con fill='currentColor' para que cambiar `color` altere solo la flecha */
+.carousel-control-prev-icon {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='currentColor' d='M11.354 1.646a.5.5 0 0 1 0 .708L6.207 7.5l5.147 5.146a.5.5 0 0 1-.708.708l-5.5-5.5a.5.5 0 0 1 0-.708l5.5-5.5a.5.5 0 0 1 .708 0z'/></svg>");
+}
+.carousel-control-next-icon {
+    /* mismo SVG rotado 180deg para la flecha derecha */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' transform='rotate(180)'><path fill='currentColor' d='M11.354 1.646a.5.5 0 0 1 0 .708L6.207 7.5l5.147 5.146a.5.5 0 0 1-.708.708l-5.5-5.5a.5.5 0 0 1 0-.708l5.5-5.5a.5.5 0 0 1 .708 0z'/></svg>");
+}
+
+/* Hover: no cambiar fondo, sólo cambiar el color de la flecha a blanco */
+.carousel-control-prev:hover .carousel-control-prev-icon,
+.carousel-control-next:hover .carousel-control-next-icon {
+    color: #ffffff; /* arrow becomes white */
+}
+
+/* Evitar que el botón quede 'marcado' visualmente al hacer click y mantener presionado.
+   Quitar outline en foco por mouse, pero mantenerlo para usuarios de teclado con :focus-visible. */
+.carousel-control-prev:focus,
+.carousel-control-next:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.carousel-control-prev:focus-visible,
+.carousel-control-next:focus-visible {
+    /* Mantener una señal de foco para accesibilidad cuando el usuario navega con teclado */
+    outline: 2px solid rgba(0,0,0,0.15);
+    outline-offset: 2px;
+}
+
+

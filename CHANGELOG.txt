@@ -2,6 +2,14 @@
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
 
+❚❙❘ VERSIÓN 1.0.2
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se arregló el carrusel de imagenes y se le agregaron flechas para cambiar las imagenes
+├─• Se Cambio el nombre del archivo Donaciones.tsx y Donaciones.css por Donar.tsx y Donar.css
+├─• Se refactorizo el archivo Donaciones.tsx a Donar.tsx tomando en cuenta los demas archivos
+├─• Se agrego implemento completamente la pantalla de donaciones.
+└─• Se incluyeron animaciones en el apartado de donaciones.
+
 ❚❙❘ VERSIÓN 1.0.1
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
 ├─• Se reorganizan los directorios

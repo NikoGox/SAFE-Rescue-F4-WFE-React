@@ -55,7 +55,7 @@ const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, userName }) => {
                         <Link className="text-a-navbar nav-link color-11" to="/contactanos">Contáctanos</Link>
                         
                         <span className="espaciador-navbar color-10-1" aria-hidden="true">|</span>
-                        <Link className="text-a-navbar nav-link color-11" to="/donaciones">Donar</Link>
+                        <Link className="text-a-navbar nav-link color-11" to="/donar">Donar</Link>
 
                         {/* Componente Modular de Autenticación */}
                         {/* Usualmente, aquí va un separador final antes del botón de login */}

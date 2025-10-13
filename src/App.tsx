@@ -7,7 +7,7 @@ import Footer from "./components/Footer";
 
 // Páginas (que van dentro de Routes)
 import Home from "./pages/Home";
-import Donaciones from "./pages/Donaciones";
+import Donar from "./pages/Donar";
 import Contactanos from "./pages/Contactanos";
 import Incidentes from "./pages/Incidentes";
 import Perfil from "./pages/Perfil";
@@ -28,7 +28,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/incidentes" element={<Incidentes />} />
           <Route path="/contactanos" element={<Contactanos />} />
-          <Route path="/donaciones" element={<Donaciones />} />
+          <Route path="/donar" element={<Donar />} />
           <Route path="/perfil" element={<Perfil />} />
         </Routes>
       </div>
