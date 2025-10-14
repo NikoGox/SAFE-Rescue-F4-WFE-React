@@ -1,6 +1,19 @@
 ╔══════════════════════════════════════════════╗
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
+❚❙❘ VERSIÓN 1.0.3
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se agrego el link de incidentes al footer
+├─• Se agrega pagina de configuraciones
+├─• Se agrega contenido de pagina de incidentes
+├─• Se agregan modificaciones de estilos para el perfil e incidentes
+├─• Se agrega logica de registro
+├─• Se modifica el nombre del Dropdown
+├─• Se Agrega un componente del inicio de sesion
+├─• Se modifca incidentes, perfil, contactanos.
+├─• Se agrega el icono del titulo de la pestaña
+└─• Se modifica el navbar
+
 
 ❚❙❘ VERSIÓN 1.0.2
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺

@@ -6,6 +6,7 @@ import "./Footer.css";
 import LogoBomberos from "../assets/bomberos_logo.png";
 import LogoCorfo from "../assets/corfo_logo.png";
 
+
 const Footer: React.FC = () => {
     return (
         // ⚠️ Eliminamos el div contenedor y empezamos directamente con el footer
@@ -47,8 +48,10 @@ const Footer: React.FC = () => {
                 {/* Sección de Navegación */}
                 <ul className="nav justify-content-center pt-2">
                     <li className="nav-item"><Link className="nav-link px-3" to="/">Inicio</Link></li>
+                    <li className="nav-item"><Link className="nav-link px-3" to="/incidentes">Incidentes</Link></li>
                     <li className="nav-item"><Link className="nav-link px-3" to="/contactanos">Contáctanos</Link></li>
-                    <li className="nav-item"><Link className="nav-link px-3" to="/donaciones">Donar</Link></li>
+                    <li className="nav-item"><Link className="nav-link px-3" to="/donar">Donar</Link></li>
+                    
                 </ul>
 
             </div>

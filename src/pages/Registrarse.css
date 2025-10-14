@@ -31,8 +31,7 @@
 .seccion-imagen {
   flex: 0 0 auto;
   width: 40%;
-  /* ⚠️ Asegúrate de que la ruta 'assets/registrarse.png' sea correcta en tu proyecto React */
-  background: url('/assets/registrarse.png') no-repeat center center; 
+  background: url('../assets/registrarse.png') no-repeat center center; 
   background-size: cover;
   display: flex;
   flex-direction: column;

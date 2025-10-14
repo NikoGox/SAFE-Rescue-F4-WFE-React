@@ -11,6 +11,8 @@ import Donar from "./pages/Donar";
 import Contactanos from "./pages/Contactanos";
 import Incidentes from "./pages/Incidentes";
 import Perfil from "./pages/Perfil";
+import Registrarse from "./pages/Registrarse";
+import Configuracion from "./pages/Configuracion";
 
 
 function App() {
@@ -30,6 +32,8 @@ function App() {
           <Route path="/contactanos" element={<Contactanos />} />
           <Route path="/donar" element={<Donar />} />
           <Route path="/perfil" element={<Perfil />} />
+          <Route path="/registrarse" element={<Registrarse />} />
+          <Route path="/configuracion" element={<Configuracion />} />
         </Routes>
       </div>
 

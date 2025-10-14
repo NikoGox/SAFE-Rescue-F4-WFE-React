@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Logo from "../assets/sr_logo.png"; // Ajustar la ruta si es necesario
+import Logo from "../assets/sr_logo.png"; 
 import "./Contactanos.css";
 
 // Define una interfaz para los datos del usuario (simulados)
@@ -10,10 +10,10 @@ interface UserData {
     address: string;
 }
 
-// 🚨 Nota: En una aplicación real, esta función recibiría los datos del contexto de usuario.
+
 const getProfileData = (): UserData | null => {
-    // ⚠️ SIMULACIÓN: Si el usuario estuviera logueado, devolveríamos sus datos.
-    const isAuthenticated = true; // Simular que está logueado
+
+    const isAuthenticated = true; 
     if (isAuthenticated) {
         return {
             name: "Juanito Pérez (Perfil)",
@@ -87,7 +87,7 @@ const Contactanos: React.FC = () => {
                     <img
                         src={Logo}
                         alt="SAFE Rescue Logo"
-                        width="60" // Dimensiones fijas para consistencia
+                        width="60" 
                         height="60"
                         className="d-inline-block align-text-top"
                     />
@@ -201,7 +201,7 @@ const Contactanos: React.FC = () => {
             {/* SECCIÓN IMAGEN/INFORMACIÓN ADICIONAL */}
             <div className="seccion-imagen">
                 <div className="contenido-imagen">
-                    <h3 className="titulo-imagen">Estamos aquí para ayudarte</h3> {/* Usar h3 para jerarquía */}
+                    <h3 className="titulo-imagen">Estamos aquí para ayudarte</h3> 
                     <p className="texto-imagen">Si tienes alguna duda o sugerencia, no dudes en contactarnos. Tu
                         retroalimentación es muy valiosa para nosotros.</p>
                     <ul className="beneficios-lista">

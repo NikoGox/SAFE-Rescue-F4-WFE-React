@@ -1,68 +1,100 @@
+// src/components/Navbar/Navbar.tsx
 import React from "react";
 import { Link } from "react-router-dom";
-import AuthButtonAndDropdown from "./AuthButtonAndDropdown";
+import Dropdown from "./Dropdown";
 import "./Navbar.css";
-
 import Logo from "../assets/sr_logo.png";
+import { useAuth } from "./UseAuth";
 
-interface NavbarProps {
-    isLoggedIn: boolean; 
-    userName?: string; 
-}
+const Navbar: React.FC = () => {
+    const { isLoggedIn, userName, login, logout, loading } = useAuth();
 
-const Navbar: React.FC<NavbarProps> = ({ isLoggedIn, userName }) => {
+    // Mostrar estado de carga
+    if (loading) {
+        return (
+            <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+                <div className="container-fluid">
+                    <div className="navbar-brand d-flex align-items-center">
+                        <div className="spinner-border spinner-border-sm me-2" role="status">
+                            <span className="visually-hidden">Cargando...</span>
+                        </div>
+                        <span>Cargando...</span>
+                    </div>
+                </div>
+            </nav>
+        );
+    }
+
     return (
-        // La clase 'fixed-top' puede ser útil si quieres que siempre esté visible
-        <nav className="navbar navbar-expand-lg bg-body-tertiary">
+        <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top">
             <div className="container-fluid">
-                
-                {/* 1. LOGO Y TÍTULO: Usamos un solo Link para envolver la imagen y el texto.
-                  La clase 'navbar-brand' se aplica al Link, y la clase 'titulo' se usa
-                  para los estilos específicos del texto dentro del Link.
-                */}
+                {/* Logo y marca */}
                 <Link className="navbar-brand logo-brand" to="/">
                     <img
                         src={Logo}
-                        alt="SAFE Rescue Logo - Inicio"
+                        alt="SAFE Rescue Logo"
                         width="50"
                         height="50"
-                        className="d-inline-block align-text-top me-2" // Agregamos margen a la derecha de Bootstrap
+                        className="d-inline-block align-text-top me-2"
                     />
                     <span className="titulo">SAFE Rescue</span>
                 </Link>
 
-                {/* Botón Toggler (Bootstrap estándar) */}
-                <button 
-                    className="navbar-toggler" 
-                    type="button" 
-                    data-bs-toggle="collapse" 
-                    data-bs-target="#navbarNavAltMarkup"
-                    aria-controls="navbarNavAltMarkup" 
-                    aria-expanded="false" 
+                {/* Botón toggler */}
+                <button
+                    className="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarMainContent"
+                    aria-controls="navbarMainContent"
+                    aria-expanded="false"
                     aria-label="Toggle navigation"
                 >
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
-                <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
-                    {/* ms-auto: Mueve los links a la derecha */}
-                    <div className="navbar-nav ms-auto"> 
+                {/* Contenido colapsable - CORREGIDO: usar ul/li */}
+                <div className="collapse navbar-collapse" id="navbarMainContent">
+                    <ul className="navbar-nav ms-auto align-items-center">
+                        {/* Incidentes */}
+                        <li className="nav-item">
+                            <Link className="nav-link text-a-navbar" to="/incidentes">
+                                Incidentes
+                            </Link>
+                        </li>
                         
-                        {/* Links de Navegación: Usamos 'nav-link' directamente en el Link */}
-                        <Link className="text-a-navbar nav-link color-11" to="/incidentes">Incidentes</Link>
+                        {/* Separador */}
+                        <li className="nav-item">
+                            <span className="espaciador-navbar">|</span>
+                        </li>
                         
-                        <span className="espaciador-navbar color-10-1" aria-hidden="true">|</span>
-                        <Link className="text-a-navbar nav-link color-11" to="/contactanos">Contáctanos</Link>
+                        {/* Contáctanos */}
+                        <li className="nav-item">
+                            <Link className="nav-link text-a-navbar" to="/contactanos">
+                                Contáctanos
+                            </Link>
+                        </li>
                         
-                        <span className="espaciador-navbar color-10-1" aria-hidden="true">|</span>
-                        <Link className="text-a-navbar nav-link color-11" to="/donar">Donar</Link>
-
-                        {/* Componente Modular de Autenticación */}
-                        {/* Usualmente, aquí va un separador final antes del botón de login */}
-                        {/* <span className="espaciador-navbar color-10-1" aria-hidden="true">|</span> */}
-
-                        <AuthButtonAndDropdown isLoggedIn={isLoggedIn} userName={userName} />
-                    </div>
+                        {/* Separador */}
+                        <li className="nav-item">
+                            <span className="espaciador-navbar">|</span>
+                        </li>
+                        
+                        {/* Donar */}
+                        <li className="nav-item">
+                            <Link className="nav-link text-a-navbar" to="/donar">
+                                Donar
+                            </Link>
+                        </li>
+                        
+                        {/* Dropdown - CORREGIDO: está dentro de un li */}
+                        <Dropdown
+                            isLoggedIn={isLoggedIn}
+                            userName={userName}
+                            onLogin={login}
+                            onLogout={logout}
+                        />
+                    </ul>
                 </div>
             </div>
         </nav>
