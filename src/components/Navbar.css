@@ -1,0 +1,141 @@
+/*
+ * Archivo: src/components/Navbar/Navbar.css
+ * -----------------------------------------
+ * Contiene: Estilos de la barra de navegación y elementos de usuario.
+ */
+
+/* ===== LAYOUT BASE DEL NAVBAR ===== */
+.navbar.navbar-expand-lg.bg-body-tertiary {
+    position: fixed;
+    z-index: 1000;
+    width: 100%;
+    box-shadow: var(--shadow-light);
+    height: 70px;
+}
+
+/* Espacio reservado para evitar que el contenido sea cubierto por el navbar fijo */
+.fondo-navbar {
+    height: 70px;
+}
+
+.container-fluid {
+    /* Centra el contenido del navbar */
+    justify-content: center;
+}
+
+.navbar-nav {
+    /* Asegura que los links estén alineados al centro y a la derecha */
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* ===== LOGO Y TÍTULO (navbar-brand) ===== */
+/* Estilo para el contenedor del logo y el título */
+.logo-brand { 
+    display: flex;
+    align-items: center;
+}
+
+/* Estilos para el texto del título (ahora un <span> dentro del Link) */
+.navbar-brand .titulo { 
+    font-family: "Montserrat", sans-serif;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 33px;
+    color: var(--color-primary);
+    padding-left: 12px; /* Espacio entre el logo y el texto */
+    /* Eliminamos 'display: flex' y 'align-items: center' de aquí
+       ya que están en .logo-brand */
+}
+
+.navbar-brand .titulo:hover {
+    transition: color 0.3s ease;
+    color: #43bbeb;
+}
+
+/* ===== LINKS DE NAVEGACIÓN Y SEPARADORES ===== */
+
+.text-a-navbar {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500 !important;
+    font-size: 15px;
+    /* Color principal de los links (usa !important para anular Bootstrap) */
+    color: var(--color-gray) !important; 
+}
+
+/* Estilos para los separadores '|' */
+.espaciador-navbar {
+    width: 10px;
+    text-align: center;
+    font-size: large;
+    /* Usa la variable de color */
+    color: var(--color-d8eaff); 
+}
+
+/* ===== BOTONES DE AUTENTICACIÓN ===== */
+
+.boton-iniciar-sesion {
+    display: block;
+    padding: 12px 16px;
+    background-color: var(--color-primary);
+    border: none;
+    border-radius: 5px;
+    box-shadow: 1px 1px 4px #555454;
+    color: var(--color-white);
+    font-weight: bold;
+    text-shadow: 1px 1px 1px #555454;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* Estilos para el botón de usuario (Logueado) */
+.boton-usuario {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #D9F7FF;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px #0791E6;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+.imagen-box-nav {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #ffffff;
+}
+
+.imagen-box-nav img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Ajustes para el dropdown de usuario */
+.dropdown-menu {
+    min-width: 250px;
+}
+
+/* ===== BUSCADOR (Si lo vas a usar) ===== */
+#buscador-navbar {
+    width: 600px;
+}
+
+/* ===== RESPONSIVE NAVBAR/BUSCADOR ===== */
+@media (max-width: 768px) {
+    #buscador-navbar {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    /* Reducimos el tamaño de fuente del título en pantallas pequeñas */
+    .navbar-brand .titulo {
+        font-size: 28px;
+        padding-left: 8px;
+    }
+}

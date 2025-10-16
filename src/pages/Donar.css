@@ -1,0 +1,256 @@
+/*
+ * Archivo: src/pages/Donaciones/Donaciones.css
+ * -------------------------------------------
+ * Contiene: Estilos del formulario de donaciones.
+ */
+
+.card-donacion {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 650px;
+}
+
+/* Mantener altura estable para evitar 'salto' del contenedor al mostrar/ocultar detalles
+   Solo aplicamos en pantallas medianas/anchas para no romper móviles */
+@media (min-width: 768px) {
+  .card-donacion {
+    min-height: 600px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 1.5rem; 
+  }
+}
+
+.card-title-custom {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.card-subtitle-custom {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-gray);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.form-control-custom {
+  background-color: var(--color-light);
+  border: 1px solid var(--color-light-gray);
+  border-radius: var(--border-radius-sm);
+  padding: 0.75rem 1rem;
+  color: var(--color-secondary);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-control-custom:focus {
+  background-color: var(--color-white);
+  box-shadow: 0 0 0 0.25rem rgba(32, 163, 216, 0.25);
+  outline: none;
+}
+
+/* Estilos de validación personalizados para Bootstrap */
+.was-validated .form-control-custom:valid,
+.form-control-custom.is-valid {
+  border-color: var(--color-success);
+  /* SVG para el ícono de éxito */
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right calc(.375em + .1875rem) center;
+  background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+}
+
+.was-validated .form-control-custom:invalid,
+.was-validated .form-control-custom.is-invalid,
+.form-control-custom.is-invalid {
+  border-color: var(--color-error);
+  /* SVG para el ícono de error */
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right calc(.375em + .1875rem) center;
+  background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+}
+
+.was-validated #telefono:placeholder-shown:valid {
+  border-color: #ced4da;
+  background-image: none;
+}
+
+.invalid-feedback {
+  display: none;
+  width: 100%;
+  margin-top: .25rem;
+  font-size: .875em;
+  color: var(--color-error);
+}
+
+.form-control-custom.is-invalid~.invalid-feedback {
+  display: block;
+}
+
+.form-label-custom {
+  font-weight: 600;
+  color: var(--color-secondary);
+}
+
+.btn-custom-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius-sm);
+  transition: background-color 0.3s, border-color 0.3s;
+  width: 100%;
+}
+
+.btn-custom-primary:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  color: var(--color-white);
+}
+
+.btn-secondary {
+  background-color: var(--color-gray) !important;
+  border-color: var(--color-gray) !important;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-secondary) !important;
+  border-color: var(--color-secondary) !important;
+}
+
+
+.form-check-input:checked {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.monto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.monto-btn {
+  background-color: var(--color-light);
+  border: 2px solid var(--color-light-gray);
+  color: var(--color-primary-dark);
+  border-radius: var(--border-radius-sm);
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.monto-btn:hover,
+.monto-btn.active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary-dark);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-light);
+}
+
+.loading-spinner {
+  border: 8px solid var(--color-light);
+  border-top: 8px solid var(--color-primary);
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  animation: spin 1s linear infinite;
+  margin: 2rem auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+#detalles-homenaje {
+  /* inicialmente oculto; la visibilidad se controla con la clase .show en JS/JSX */
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: max-height 300ms ease, opacity 300ms ease, transform 300ms ease, padding 300ms ease;
+  background-color: #f8f9fa;
+  border-radius: var(--border-radius-sm);
+  padding: 0 1rem;
+  margin-top: 0.75rem;
+}
+
+/* clase que activa la animación para mostrar el bloque */
+#detalles-homenaje.show {
+  max-height: 220px; /* suficiente para el contenido; ajustable */
+  opacity: 1;
+  transform: translateY(0);
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+/* pequeño ajuste cuando el label arriba se muestra */
+.form-check + #detalles-homenaje {
+  margin-top: 0.5rem;
+}
+
+.payment-method {
+  border: 2px solid var(--color-primary-dark);
+  background-color: #e9f6fe;
+  padding: 1rem;
+  border-radius: var(--border-radius-sm);
+  text-align: center;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  height: 100%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#monto-formulario {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#monto-formulario {
+  border: 2px solid var(--color-primary-dark);
+}
+
+#monto-formulario:hover {
+  background-color: #d1ecfa;
+  border-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-light);
+  transform: translateY(-2px);
+}
+
+
+.confirm-details p {
+  background-color: #f8f9fa;
+  padding: 0.75rem;
+  border-left: 4px solid var(--color-primary);
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius-sm);
+}
+
+#metodo-pago-fijo {
+  border: var(--color-gray);
+  color: var(--color-secondary);
+}
