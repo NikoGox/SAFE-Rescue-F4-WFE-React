@@ -1,0 +1,29 @@
+/*
+ * Archivo: src/components/Footer/Footer.css
+ * -----------------------------------------
+ * Contiene: Estilos del pie de página.
+ */
+
+/* ===== FOOTER ===== */
+.custom-footer {
+  background-color: var(--color-secondary);
+  margin-top: auto;
+}
+
+.custom-footer .nav-link,
+.custom-footer p {
+  color: var(--color-white) !important;
+  margin: 10px;
+}
+
+.custom-footer .nav-link:hover {
+  color: var(--color-light-gray) !important;
+}
+
+.custom-footer .text-body-secondary {
+  color: var(--color-light-gray) !important;
+}
+
+.footer {
+  margin-bottom: 20px;
+}

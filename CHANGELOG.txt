@@ -1,0 +1,55 @@
+╔══════════════════════════════════════════════╗
+║                REGISTRO DE CAMBIOS           ║
+╚══════════════════════════════════════════════╝
+❚❙❘ VERSIÓN 1.0.4.1
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se eliminó navbar duplicado.
+├─• Se le agregó sombreado al navbar.
+├─• Se incluyo la tecnica CSS Modules para evitar conflictos entres estilos.
+├─• Se importó la libreria React-Icons para mejorar el apartado visual de la aplicación.
+├─• El archivo Incidentes.css se renombró a Incidentes.module.css y se importo a la pagina Incidentes.
+├─• Se eliminaron emojis que sobresaturaban el diseño de la aplicación.
+├─• Se corrigierón las rutas de las imagenes.
+└─• Se agregarón nuevos iconos planos y minimalistas.
+
+❚❙❘ VERSIÓN 1.0.4
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+└ ¡Versión Corrupta!
+
+❚❙❘ VERSIÓN 1.0.3
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se agrego el link de incidentes al footer
+├─• Se agrega pagina de configuraciones
+├─• Se agrega contenido de pagina de incidentes
+├─• Se agregan modificaciones de estilos para el perfil e incidentes
+├─• Se agrega logica de registro
+├─• Se modifica el nombre del Dropdown
+├─• Se Agrega un componente del inicio de sesion
+├─• Se modifca incidentes, perfil, contactanos.
+├─• Se agrega el icono del titulo de la pestaña
+└─• Se modifica el navbar
+
+❚❙❘ VERSIÓN 1.0.2
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se arregló el carrusel de imagenes y se le agregaron flechas para cambiar las imagenes
+├─• Se Cambio el nombre del archivo Donaciones.tsx y Donaciones.css por Donar.tsx y Donar.css
+├─• Se refactorizo el archivo Donaciones.tsx a Donar.tsx tomando en cuenta los demas archivos
+├─• Se agrego implemento completamente la pantalla de donaciones.
+└─• Se incluyeron animaciones en el apartado de donaciones.
+
+❚❙❘ VERSIÓN 1.0.1
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se reorganizan los directorios
+├─• Se crean las páginas faltantes
+├─• Se crean los css migrados y separados para cada página
+├─• Se coloca la lógica de página perfiles, contactanos y home
+├─• Se completan resto de páginas con un tsx básico sin contenido
+├─• Se agregan las imagenes y contenido multimedia
+└─• Se separa el footer y el navbar como componentes, ademas se crea un componenete que separa la lógica de inicio de sesión
+
+❚❙❘ VERSIÓN 1.0
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se crea el archivo inicial
+├─• Se crean páginas vacias
+└─• Se empieza la migración de navbar y footer
+

@@ -1,0 +1,230 @@
+/*
+ * Archivo: src/pages/Registro/RegistroForm.css
+ * -------------------------------------------
+ * Contiene: Estilos del formulario de registro.
+ */
+
+/* ===== FORMULARIO DE REGISTRO ===== */
+
+.contenedor-principal {
+  display: flex;
+  width: 100%;
+  margin: 0;
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-form);
+  background-color: var(--color-white);
+  height: auto;
+  min-height: 100%;
+}
+
+.seccion-formulario {
+  flex: 2;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.seccion-imagen {
+  flex: 0 0 auto;
+  width: 40%;
+  background: url('../assets/registrarse.png') no-repeat center center; 
+  background-size: cover;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-white);
+  position: relative;
+}
+
+.contenido-imagen {
+  text-align: center;
+  max-width: 300px;
+  background-color: rgba(24, 52, 64, 0.7);
+  padding: 1.5rem;
+  border-radius: 10px;
+}
+
+.titulo-imagen {
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.texto-imagen {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.logo-formulario {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.logo-formulario img {
+  height: 60px;
+}
+
+.titulo-formulario {
+  font-weight: 500;
+  color: var(--color-secondary);
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-size: 2rem;
+}
+
+.subtitulo-formulario {
+  color: var(--color-gray);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.form-group-registro {
+  margin-bottom: 1.5rem;
+}
+
+.form-group-registro label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--color-secondary);
+  display: block;
+}
+
+.form-control-registro {
+  border: 1px solid #ced4da;
+  border-radius: var(--border-radius-sm);
+  padding: 0.75rem 1rem;
+  width: 100%;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control-registro:focus {
+  border-color: var(--color-primary);
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(32, 163, 216, 0.25);
+}
+
+.btn-registro {
+  background-color: var(--color-primary);
+  border: none;
+  color: var(--color-white);
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  border-radius: var(--border-radius-sm);
+  width: 100%;
+  margin-top: 1rem;
+  transition: background-color 0.15s ease-in-out;
+  box-shadow: 1px 1px 4px #555454;
+  text-shadow: 1px 1px 1px #555454;
+}
+
+.btn-registro:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 1rem;
+}
+
+.form-col {
+  flex: 1;
+  min-width: 200px;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.checkbox-container input {
+  margin-right: 10px;
+}
+
+.checkbox-container label {
+  color: var(--color-gray);
+}
+
+.mensajeError {
+  color: var(--color-error);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.beneficios-lista {
+  text-align: left;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.beneficios-lista li {
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.beneficios-lista li::before {
+  content: "✓";
+  color: var(--color-success);
+  font-weight: bold;
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+/* ===== RESPONSIVE FORMULARIO ===== */
+@media (max-width: 992px) {
+  .contenedor-principal {
+    flex-direction: column;
+  }
+
+  .seccion-imagen {
+    min-height: 300px;
+    padding: 2rem 1rem;
+    order: -1;
+  }
+
+  .seccion-formulario {
+    padding: 2rem;
+  }
+
+  .form-col {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .contenedor-principal {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .contenido-imagen {
+    max-width: 100%;
+    padding: 1rem;
+  }
+
+  .titulo-formulario {
+    font-size: 1.5rem;
+  }
+
+  .seccion-formulario,
+  .seccion-imagen {
+    padding: 1rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
