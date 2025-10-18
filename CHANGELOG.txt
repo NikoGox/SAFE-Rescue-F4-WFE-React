@@ -1,6 +1,21 @@
 ╔══════════════════════════════════════════════╗
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
+❚❙❘ VERSIÓN 1.0.4.1
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se eliminó navbar duplicado.
+├─• Se le agregó sombreado al navbar.
+├─• Se incluyo la tecnica CSS Modules para evitar conflictos entres estilos.
+├─• Se importó la libreria React-Icons para mejorar el apartado visual de la aplicación.
+├─• El archivo Incidentes.css se renombró a Incidentes.module.css y se importo a la pagina Incidentes.
+├─• Se eliminaron emojis que sobresaturaban el diseño de la aplicación.
+├─• Se corrigierón las rutas de las imagenes.
+└─• Se agregarón nuevos iconos planos y minimalistas.
+
+❚❙❘ VERSIÓN 1.0.4
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+└ ¡Versión Corrupta!
+
 ❚❙❘ VERSIÓN 1.0.3
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
 ├─• Se agrego el link de incidentes al footer
@@ -13,7 +28,6 @@
 ├─• Se modifca incidentes, perfil, contactanos.
 ├─• Se agrega el icono del titulo de la pestaña
 └─• Se modifica el navbar
-
 
 ❚❙❘ VERSIÓN 1.0.2
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
