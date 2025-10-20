@@ -1,4 +1,4 @@
-// src/components/Navbar/Navbar.tsx
+// src/components/Navbar/Navbar.tsx (Código Correcto)
 import React from "react";
 import { Link } from "react-router-dom";
 import Dropdown from "./Dropdown";
@@ -9,7 +9,6 @@ import { useAuth } from "./UseAuth";
 const Navbar: React.FC = () => {
     const { isLoggedIn, userName, login, logout, loading } = useAuth();
 
-    // El estado de carga puede mantener las clases de Bootstrap sin cambios
     if (loading) {
         return (
             <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top ">
@@ -26,7 +25,6 @@ const Navbar: React.FC = () => {
     }
 
     return (
-        // 2. Se combinan las clases de Bootstrap con las del módulo
         <nav className={`${styles.navbarWrapper} navbar navbar-expand-lg navbar-light bg-light fixed-top shadow`}>
             <div className={`${styles.container} container-fluid`}>
                 {/* Logo y marca */}
@@ -38,11 +36,10 @@ const Navbar: React.FC = () => {
                         height="50"
                         className="d-inline-block align-text-top me-2"
                     />
-                    {/* 3. Se aplica la clase de módulo directamente */}
                     <span className={styles.titulo}>SAFE Rescue</span>
                 </Link>
 
-                {/* Botón toggler (no requiere estilos de módulo) */}
+                {/* Botón toggler */}
                 <button
                     className="navbar-toggler"
                     type="button"
@@ -58,44 +55,29 @@ const Navbar: React.FC = () => {
                 {/* Contenido colapsable */}
                 <div className="collapse navbar-collapse" id="navbarMainContent">
                     <ul className={`${styles.navbarNav} navbar-nav ms-auto align-items-center`}>
-                        {/* Incidentes */}
+                        {/* Links de navegación */}
                         <li className="nav-item">
-                            <Link className={`${styles.textANavbar} nav-link`} to="/incidentes">
-                                Incidentes
-                            </Link>
+                            <Link className={`${styles.textANavbar} nav-link`} to="/incidentes">Incidentes</Link>
+                        </li>
+                        <li className="nav-item"><span className={styles.espaciadorNavbar}>|</span></li>
+                        <li className="nav-item">
+                            <Link className={`${styles.textANavbar} nav-link`} to="/contactanos">Contáctanos</Link>
+                        </li>
+                        <li className="nav-item"><span className={styles.espaciadorNavbar}>|</span></li>
+                        <li className="nav-item">
+                            <Link className={`${styles.textANavbar} nav-link`} to="/donar">Donar</Link>
                         </li>
                         
-                        {/* Separador */}
-                        <li className="nav-item">
-                            <span className={styles.espaciadorNavbar}>|</span>
-                        </li>
-                        
-                        {/* Contáctanos */}
-                        <li className="nav-item">
-                            <Link className={`${styles.textANavbar} nav-link`} to="/contactanos">
-                                Contáctanos
-                            </Link>
-                        </li>
-                        
-                        {/* Separador */}
-                        <li className="nav-item">
-                            <span className={styles.espaciadorNavbar}>|</span>
-                        </li>
-                        
-                        {/* Donar */}
-                        <li className="nav-item">
-                            <Link className={`${styles.textANavbar} nav-link`} to="/donar">
-                                Donar
-                            </Link>
-                        </li>
-                        
-                        {/* 4. Se pasan los estilos al componente hijo Dropdown */}
+                        {/* Contenedor del Dropdown/Botón de Login */}
+                        <li className={styles['boton-login']}> 
+
                         <Dropdown
                             isLoggedIn={isLoggedIn}
                             userName={userName}
                             onLogin={login}
                             onLogout={logout}
                         />
+                        </li>
                     </ul>
                 </div>
             </div>

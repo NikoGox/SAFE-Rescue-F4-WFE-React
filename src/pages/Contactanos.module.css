@@ -1,0 +1,187 @@
+/* src/pages/Contactanos/Contactanos.module.css (MÓDULO CSS) */
+
+/*
+ * NOTA: Los estilos de .formGroupRegistro, .formControlRegistro, .btnRegistro etc.,
+ * han sido movidos a App.css para unificación.
+ */
+
+/* ========================================================================= */
+/* 1. LAYOUT PRINCIPAL Y CONTENEDORES (ESPECÍFICO) */
+/* ========================================================================= */
+
+.contactPageContainer {
+    background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
+    min-height: 100vh;
+    padding: 3rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Diferente a Registro, usa align-items: center */
+}
+
+.contenedorPrincipal {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-heavy);
+    background-color: var(--color-white);
+    max-width: 700px; /* Ancho menor, sin columna de imagen */
+    min-height: auto;
+}
+
+/* Columna del Formulario (ahora única) */
+.seccionFormulario {
+    flex: 1;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    overflow-y: auto;
+    /* CAMBIO APLICADO: Fondo blanco fijo */
+    background-image: none;
+    background-color: var(--color-white);
+}
+
+/* ========================================================================= */
+/* 2. CABECERA DEL FORMULARIO (Espaciado reducido) */
+/* ========================================================================= */
+
+.logoFormulario {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.logoFormulario img {
+    height: 70px;
+    /* --- CORRECCIÓN CLAVE: EVITAR ESTIRAMIENTO --- */
+    width: auto;
+    object-fit: contain; /* Asegura que la imagen mantenga proporciones y no se corte */
+    /* ------------------------------------------- */
+}
+
+.tituloFormulario {
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    /* Efecto de texto degradado */
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtituloFormulario {
+    color: var(--color-gray);
+    margin-bottom: 1.25rem;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.formControlRegistro {
+    /* PROPIEDADES BASE UNIFICADAS */
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    height: 44px;
+    font-size: 1rem;
+    line-height: 1.2;
+    transition: all 0.3s ease;
+    background-color: var(--color-white);
+    color: var(--color-light-gray);
+
+}
+
+/* Placeholder color unificado para inputs y textareas */
+.formControlRegistro::placeholder,
+input.formControlRegistro::placeholder,
+textarea.formControlRegistro::placeholder {
+    color: var(--color-light-gray);
+    opacity: 1; /* asegurar visibilidad consistente */
+}
+
+/* Prefijos para navegadores antiguos */
+.formControlRegistro::-webkit-input-placeholder { color: var(--color-light-gray); }
+.formControlRegistro:-ms-input-placeholder { color: var(--color-light-gray); }
+.formControlRegistro::-ms-input-placeholder { color: var(--color-light-gray); }
+
+/* ========================================================================= */
+/* 5. RESPONSIVE DESIGN (Espaciado reducido en móvil/tablet) */
+/* ========================================================================= */
+
+@media (max-width: 768px) {
+    .contenedorPrincipal {
+        max-width: 90%;
+    }
+
+    .seccionFormulario {
+        /* Padding en tablet: armonzado a 2.5rem como Registro para ser coherente */
+        padding: 2.5rem; 
+    }
+
+    /* .formCol y .tituloFormulario se dejan aquí por si su valor de media query difiere de otros */
+    .formCol {
+        min-width: 100%;
+    }
+
+    .tituloFormulario {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .contenedorPrincipal {
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .contactPageContainer {
+        padding: 0;
+    }
+
+    .seccionFormulario {
+        /* Padding en móvil: armonizado a 1.5rem como Registro para ser coherente */
+        padding: 1.5rem;
+    }
+
+    .formRow {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    /* Se vuelven a añadir los ajustes finos de espaciado en móvil */
+    .logoFormulario {
+        margin-bottom: 0.75rem;
+    }
+
+    .logoFormulario img {
+        height: 50px;
+        /* El width y object-fit de arriba se siguen aplicando aquí */
+    }
+
+    .tituloFormulario {
+        font-size: 1.75rem;
+    }
+
+    .subtituloFormulario {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .formGroupRegistro {
+        margin-bottom: 0.5rem;
+    }
+
+    .btnRegistro,
+    .checkboxContainer {
+        margin-top: 0.5rem;
+    }
+}

@@ -1,90 +1,209 @@
 /*
- * Archivo: src/pages/Donaciones/Donaciones.css
- * -------------------------------------------
- * Contiene: Estilos del formulario de donaciones.
- */
+ * Archivo: src/pages/Donaciones/Donar.css (CORREGIDO Y COMPLETO - SOLUCIÓN DEFINITIVA)
+ * -------------------------------------------
+ * Contiene: Estilos del formulario de donaciones, con mejoras de diseño
+ */
 
-.card-donacion {
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 650px;
+/* ===== 0. CONTENEDOR PRINCIPAL (Fondo en el 100% del ancho) ===== */
+
+.donation-page-wrapper {
+  /* AJUSTE CLAVE: El fondo degradado se queda aquí y el wrapper ocupa el 100% del ancho. */
+  background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
+  width: 100%;
+  /*     **AJUSTE SOLICITADO:** Altura mínima y máxima de 1000px. 
+    Se añade overflow para que el contenido sea accesible si se excede la altura. 
+  */
+
+  overflow-y: auto;
+
+  /* **AJUSTE SOLICITADO (1/3):** Añade padding superior e inferior de 3rem para margen visual constante en desktop. */
+  padding: 3rem 0;
+
+  /* Flexbox para centrar el contenido (el nuevo .donation-content-container) */
+  display: flex;
+  justify-content: center;
+  /* Centra horizontalmente */
+
+  /* **AJUSTE SOLICITADO (2/3):** Alinea al inicio para respetar el padding-top (no centrado verticalmente por defecto). */
+  align-items: flex-start;
+
 }
 
-/* Mantener altura estable para evitar 'salto' del contenedor al mostrar/ocultar detalles
-   Solo aplicamos en pantallas medianas/anchas para no romper móviles */
+/* NUEVO: Contenedor para el contenido del formulario que limitará el ancho */
+.donation-content-container {
+  max-width: 700px;
+  /* Aquí se limita el ancho a 800px */
+  width: 100%;
+  /* Ocupa el 100% del max-width de 800px (o menos en pantallas pequeñas) */
+  margin: 0 auto;
+  /* Centra este contenedor dentro del wrapper */
+  padding: 0;
+  /* Asegura que no tenga padding adicional */
+  /* **AJUSTE SOLICITADO:** Altura mínima y máxima de 1000px. */
+
+}
+
+.card-donacion {
+  /* Se eliminan los márgenes auto porque el .donation-content-container ya lo centra */
+  margin-left: 0;
+  /* Ajuste para que no interfiera */
+  margin-right: 0;
+  /* Ajuste para que no interfiera */
+  /* Centrado horizontal */
+  margin: 0 auto;
+  /* ANCHO AJUSTADO: Ahora usa el 100% del ancho de su padre (.donation-content-container de 800px) */
+  max-width: 95%;
+  /* Ocupa todo el ancho disponible del content-container */
+  width: 100%;
+  /* Asegura que se expanda */
+
+  /* AJUSTE SOLICITADO: Se elimina la sombra de la tarjeta. */
+  box-shadow: none;
+  border-radius: var(--border-radius-lg);
+  padding: 2rem;
+  padding-top: 5px !important;
+  background-color: var(--color-white);
+  /* SOLO la tarjeta es blanca */
+
+  /* **AJUSTE SOLICITADO:** Altura mínima y máxima de 1000px. */
+
+  overflow-y: auto;
+}
+
+.card-base {
+  padding-left: 20px;
+  padding-right: 20px;
+  box-shadow: var(--shadow-heavy);
+  /* **AJUSTE SOLICITADO (3/3):** Eliminamos el margin-top de 5px, ya que el wrapper maneja el espacio superior. */
+  margin-top: 0;
+  padding-bottom: 10px;
+  min-height: 880px;
+}
+
+
+
+
+
+/* Mantener altura estable para evitar 'salto' del contenedor */
 @media (min-width: 768px) {
   .card-donacion {
-    min-height: 600px; 
+    /* Se mantiene el flex-direction para la estructura interna del formulario */
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding-top: 1.5rem; 
+    padding-top: 2rem;
+    /* Se eliminó el min-height de 700px para usar el 1000px de la clase principal */
   }
 }
 
+/* ===== 1. CABECERA DEL FORMULARIO (TÍTULO Y LOGO AJUSTADOS) ===== */
+
+.logoFormulario {
+  text-align: center;
+}
+
+.logoFormulario img {
+  height: 70px;
+  width: 70px;
+  margin-bottom: 5px !important;
+
+}
+
 .card-title-custom {
-  font-size: 1.75rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  color: var(--color-primary-dark);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   text-align: center;
   margin-bottom: 0.5rem;
 }
 
 .card-subtitle-custom {
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 1.1rem;
   color: var(--color-gray);
   text-align: center;
   margin-bottom: 2rem;
 }
 
+.logoFormulario {
+  padding: 11px !important;
+}
+
+.icon-fire,
+.icon-heart {
+  vertical-align: middle;
+  margin-left: 0.5rem;
+  color: var(--color-primary);
+}
+
+
+/* ===== 2. CAMPOS DE FORMULARIO (SE MANTIENE) ===== */
+
+.form-label-custom {
+  font-weight: 600;
+  color: var(--color-secondary);
+  font-size: 0.95rem;
+}
+
 .form-control-custom {
-  background-color: var(--color-light);
+  background-color: var(--color-white);
   border: 1px solid var(--color-light-gray);
   border-radius: var(--border-radius-sm);
   padding: 0.75rem 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  height: 44px;
+  font-size: 1rem;
   color: var(--color-secondary);
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition: all 0.3s ease;
 }
 
 .form-control-custom:focus {
   background-color: var(--color-white);
-  box-shadow: 0 0 0 0.25rem rgba(32, 163, 216, 0.25);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.2rem rgba(32, 163, 216, 0.25);
   outline: none;
 }
 
-/* Estilos de validación personalizados para Bootstrap */
+.form-control-custom::placeholder {
+  color: var(--color-gray);
+  opacity: 1;
+}
+
 .was-validated .form-control-custom:valid,
 .form-control-custom.is-valid {
   border-color: var(--color-success);
-  /* SVG para el ícono de éxito */
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
-  background-position: right calc(.375em + .1875rem) center;
+  background-position: right 1rem center;
   background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+  padding-right: 2.5rem;
 }
 
 .was-validated .form-control-custom:invalid,
 .was-validated .form-control-custom.is-invalid,
 .form-control-custom.is-invalid {
   border-color: var(--color-error);
-  /* SVG para el ícono de error */
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
-  background-position: right calc(.375em + .1875rem) center;
+  background-position: right 1rem center;
   background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+  padding-right: 2.5rem;
 }
 
 .was-validated #telefono:placeholder-shown:valid {
-  border-color: #ced4da;
+  border-color: var(--color-secondary);
   background-image: none;
+  padding-right: 1rem;
 }
 
 .invalid-feedback {
   display: none;
   width: 100%;
   margin-top: .25rem;
-  font-size: .875em;
+  font-size: 0.85rem;
   color: var(--color-error);
 }
 
@@ -92,38 +211,46 @@
   display: block;
 }
 
-.form-label-custom {
-  font-weight: 600;
-  color: var(--color-secondary);
-}
+
+/* ===== 3. BOTONES Y MONTO (SE MANTIENE) ===== */
 
 .btn-custom-primary {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-white);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: var(--color-white) !important;
+  border: none;
+  padding: 0.9rem 2rem;
   font-weight: 600;
-  padding: 0.75rem 1.5rem;
   border-radius: var(--border-radius-sm);
-  transition: background-color 0.3s, border-color 0.3s;
   width: 100%;
+  margin-top: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-medium);
 }
 
 .btn-custom-primary:hover {
-  background-color: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
-  color: var(--color-white);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-heavy);
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, #1a5276 100%);
 }
 
 .btn-secondary {
-  background-color: var(--color-gray) !important;
-  border-color: var(--color-gray) !important;
+  background-color: var(--color-light-gray) !important;
+  border-color: var(--color-light-gray) !important;
+  color: var(--color-secondary) !important;
+  font-weight: 600;
+  padding: 0.9rem 2rem;
+  border-radius: var(--border-radius-sm);
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-light);
 }
 
 .btn-secondary:hover {
-  background-color: var(--color-secondary) !important;
-  border-color: var(--color-secondary) !important;
+  background-color: var(--color-gray) !important;
+  border-color: var(--color-gray) !important;
+  color: var(--color-white) !important;
+  box-shadow: var(--shadow-medium);
 }
-
 
 .form-check-input:checked {
   background-color: var(--color-primary);
@@ -132,31 +259,126 @@
 
 .monto-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 65px;
 }
 
 .monto-btn {
-  background-color: var(--color-light);
-  border: 2px solid var(--color-light-gray);
-  color: var(--color-primary-dark);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 1 / 1;
+  background-color: #3a8dbc;
+  border: 2px solid #3a8dbc;
   border-radius: var(--border-radius-sm);
-  padding: 1rem;
-  font-size: 1.1rem;
-  font-weight: 600;
+  padding: 0.5rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
+
+
+.monto-btn-icon-container {
+  font-size: 2.2rem;
+  margin-bottom: 0.3rem;
+  color: #9ad2f1;
+}
+
+.monto-btn-text-container {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #9ad2f1;
+}
+
 .monto-btn:hover,
 .monto-btn.active {
-  background-color: var(--color-primary);
+  background-color: #206c99;
+  border-color: #206c99;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.monto-btn:hover .monto-btn-icon-container,
+.monto-btn.active .monto-btn-icon-container,
+.monto-btn:hover .monto-btn-text-container,
+.monto-btn.active .monto-btn-text-container {
   color: var(--color-white);
+}
+
+#monto-formulario {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-light-gray);
+  background-color: var(--color-white);
+  color: var(--color-secondary);
+}
+
+#monto-formulario:hover {
+  background-color: #f0f0f0;
   border-color: var(--color-primary-dark);
-  transform: translateY(-3px);
   box-shadow: var(--shadow-light);
+  transform: translateY(-2px);
+}
+
+/* ===== 4. DETALLES DE HOMENAJE Y OTROS (SE MANTIENE) ===== */
+
+#detalles-homenaje {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: max-height 300ms ease, opacity 300ms ease, transform 300ms ease, padding 300ms ease;
+  background-color: var(--color-light);
+  border-radius: var(--border-radius-sm);
+  padding: 0 1rem;
+  margin-top: 0.75rem;
+}
+
+#detalles-homenaje.show {
+  max-height: 250px;
+  opacity: 1;
+  transform: translateY(0);
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.confirm-details p {
+  background-color: var(--color-light);
+  padding: 0.75rem;
+  border-left: 4px solid var(--color-primary);
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius-sm);
+}
+
+.payment-method {
+  border: 2px solid var(--color-primary);
+  background-color: #e9f6fe;
+  padding: 1rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  height: 100%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#metodo-pago-fijo {
+  border: 1px solid var(--color-light-gray);
+  color: var(--color-secondary);
+  background-color: var(--color-light);
 }
 
 .loading-spinner {
@@ -179,78 +401,59 @@
   }
 }
 
-#detalles-homenaje {
-  /* inicialmente oculto; la visibilidad se controla con la clase .show en JS/JSX */
-  overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  transform: translateY(-6px);
-  transition: max-height 300ms ease, opacity 300ms ease, transform 300ms ease, padding 300ms ease;
-  background-color: #f8f9fa;
-  border-radius: var(--border-radius-sm);
-  padding: 0 1rem;
-  margin-top: 0.75rem;
+/* ===== 5. RESPONSIVE DESIGN (AJUSTADO) ===== */
+
+@media (max-width: 768px) {
+
+  /* Ajuste el tamaño del título para móvil/tablet */
+  .card-title-custom {
+    font-size: 2rem;
+  }
 }
 
-/* clase que activa la animación para mostrar el bloque */
-#detalles-homenaje.show {
-  max-height: 220px; /* suficiente para el contenido; ajustable */
-  opacity: 1;
-  transform: translateY(0);
-  padding: 1rem;
-  margin-top: 1rem;
-}
+@media (max-width: 576px) {
 
-/* pequeño ajuste cuando el label arriba se muestra */
-.form-check + #detalles-homenaje {
-  margin-top: 0.5rem;
-}
+  /* AJUSTE DE PADDING: En móvil, el wrapper NO limita el ancho, el content-container sí */
+  .donation-page-wrapper {
+    padding: 0;
+    width: 100%;
 
-.payment-method {
-  border: 2px solid var(--color-primary-dark);
-  background-color: #e9f6fe;
-  padding: 1rem;
-  border-radius: var(--border-radius-sm);
-  text-align: center;
-  font-weight: 600;
-  color: var(--color-primary-dark);
-  height: 100%;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  }
 
-#monto-formulario {
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .donation-content-container {
+    max-width: 100%;
+    /* En móvil, el contenido puede ocupar el 100% */
+    /* **AJUSTE SOLICITADO:** Añade padding superior e inferior en móvil para mantener el margen visible. */
+    padding: 1.5rem 1rem;
+  }
 
-#monto-formulario {
-  border: 2px solid var(--color-primary-dark);
-}
+  /* AJUSTE DE CONTENEDOR: Se elimina el borde en móvil al igual que Contactanos */
+  .card-donacion {
+    border-radius: 0;
+    box-shadow: none;
+    /* Se mantiene sin sombra en móvil */
+    padding: 1.5rem;
+    /* Usamos el mismo padding de la secciónFormulario en Contactanos para móvil */
+    max-width: 100%;
+    /* Se eliminaron las restricciones de altura aquí, ya que se aplican en la clase principal */
 
-#monto-formulario:hover {
-  background-color: #d1ecfa;
-  border-color: var(--color-primary-dark);
-  box-shadow: var(--shadow-light);
-  transform: translateY(-2px);
-}
+  }
 
+  .logoFormulario {
+    margin-bottom: 0.75rem;
+  }
 
-.confirm-details p {
-  background-color: #f8f9fa;
-  padding: 0.75rem;
-  border-left: 4px solid var(--color-primary);
-  margin-bottom: 1rem;
-  border-radius: var(--border-radius-sm);
-}
+  .logoFormulario img {
+    height: 50px;
+    width: 50px;
+  }
 
-#metodo-pago-fijo {
-  border: var(--color-gray);
-  color: var(--color-secondary);
+  .card-title-custom {
+    font-size: 1.75rem;
+  }
+
+  .card-subtitle-custom {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
 }

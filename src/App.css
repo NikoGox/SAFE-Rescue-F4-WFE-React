@@ -160,3 +160,164 @@ button:active {
   height: auto;
   min-height: 100%;
 }
+
+/* ========================================================================= */
+/* ===== ESTILOS BASE DE FORMULARIO (UNIFICADOS) ===== */
+/* ========================================================================= */
+
+.formGroupRegistro {
+    margin-bottom: 0.75rem;
+}
+
+.formGroupRegistro label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-secondary);
+    display: block;
+    font-size: 0.95rem;
+}
+
+.formControlRegistro {
+    /* UNIFICADO: propiedades exactas requeridas por la empresa */
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    height: 44px;
+    font-size: 1rem;
+    line-height: 1.2;
+    transition: all 0.3s ease;
+    background-color: var(--color-white);
+}
+
+/* ==== GLOBAL PLACEHOLDER COLOR (FORZAR) ==== */
+/* Aplicado globalmente para cubrir inputs que usan clases normales o módulos */
+.formControlRegistro::placeholder,
+.form-control::placeholder,
+.form-control-custom::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-gray);
+  opacity: 1;
+}
+
+/* Prefijos para navegadores antiguos */
+.formControlRegistro::-webkit-input-placeholder,
+.form-control::-webkit-input-placeholder,
+.form-control-custom::-webkit-input-placeholder,
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder { color: var(--color-gray); }
+.formControlRegistro:-ms-input-placeholder,
+.form-control:-ms-input-placeholder,
+.form-control-custom:-ms-input-placeholder,
+input:-ms-input-placeholder,
+textarea:-ms-input-placeholder { color: var(--color-gray); }
+.formControlRegistro::-ms-input-placeholder,
+.form-control::-ms-input-placeholder,
+.form-control-custom::-ms-input-placeholder,
+input::-ms-input-placeholder,
+textarea::-ms-input-placeholder { color: var(--color-gray); }
+
+.formControlRegistro:focus,
+input.formControlRegistro:focus,
+textarea.formControlRegistro:focus,
+.formControlRegistro:focus-visible {
+    /* UNIFICADO: mismo borde y brillo */
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(32, 163, 216, 0.25);
+}
+
+.formRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.formCol {
+    flex: 1;
+    min-width: 220px;
+}
+
+textarea.formControlRegistro {
+    line-height: 1.5;
+    /* AJUSTE CLAVE: Armonizado a 100px de altura mínima */
+    min-height: 100px;
+    height: auto;
+    resize: vertical;
+}
+
+.mensajeError {
+    color: var(--color-error);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+/* Estilos de Botones */
+.btnRegistro {
+    /* Estilo de botón degradado */
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: var(--color-white);
+    border: none;
+    padding: 0.9rem 2rem;
+    font-weight: 600;
+    border-radius: var(--border-radius-sm);
+    width: 100%;
+    margin-top: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-medium);
+}
+
+.btnRegistro:hover {
+    /* Efecto hover */
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+    background: linear-gradient(135deg, var(--color-primary-dark) 0%, #1a5276 100%);
+}
+
+/* Estilos de Checkbox */
+.checkboxContainer {
+    display: flex;
+    align-items: center;
+    margin-top: 0.75rem;
+}
+
+.checkboxContainer input {
+    margin-right: 10px;
+}
+
+.checkboxContainer label {
+    color: var(--color-secondary);
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.terminosErrorPosition {
+    display: block;
+    margin-left: 30px;
+    margin-top: 0.5rem;
+}
+
+/* Clases de Éxito/Error */
+.inputError {
+    border-color: var(--color-error) !important;
+}
+
+.errorText {
+    color: var(--color-error); /* Añadido color explícito */
+    font-weight: 500;
+}
+
+.successMessageBox {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid #c3e6cb;
+    border-radius: var(--border-radius-sm);
+    text-align: center;
+}

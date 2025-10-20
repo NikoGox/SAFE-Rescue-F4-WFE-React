@@ -1,0 +1,295 @@
+/*
+ * Archivo: src/index.css (Estilos Globales)
+ * ----------------------------------------
+ * Contiene: Fuentes, Variables, Resets y Estilos Base.
+ */
+
+/* ===== FUENTES ===== */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:opsz,wght@9..144,100..900&display=swap");
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('montserrat.woff2') format('woff2'); /* Asegúrate de que esta ruta sea correcta */
+  font-display: optional;
+}
+
+/* ===== VARIABLES ===== */
+:root {
+  --color-primary: #20a3d8;
+  --color-primary-dark: #2a66b0;
+  --color-secondary: #424C57;
+  --color-accent: #f80606;
+  --color-light: #f0f0f0;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-gray: #616f7f;
+  --color-light-gray: #cccccc; /* <-- Color de Borde para Formularios */
+  --color-d8eaff: #d8eaff;
+  --color-245264: #245264;
+  --color-20d2d8: #20d2d8;
+  --color-3f4e5f: #3f4e5f;
+  --color-error: #dc3545;
+  --color-success: #28a745;
+  --color-perfil-navbar: #D9F7FF;
+  --shadow-light: 2px 2px 6px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-form: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --border-radius-sm: 6px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 40px;
+}
+
+/* ===== ESTILOS GENERALES Y BASE (BODY) ===== */
+html {
+  overflow-y: scroll;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+/* Estilo que aplicaría al body o al contenedor principal de App.js */
+.cuerpo {
+  background-color: var(--color-light);
+  font-family: "Montserrat", sans-serif;
+}
+
+/* Estilos de botones genéricos */
+button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== TIPOGRAFÍAS UTILITARIAS ===== */
+.text-p-XS {
+  font-family: "Montserrat", sans-serif;
+  font-weight: normal;
+  font-size: 14px;
+  color: var(--color-black);
+}
+
+.text-p-S {
+  font-family: "Montserrat", sans-serif;
+  font-size: 15px;
+  font-weight: 600; /* semi-bold */
+  color: var(--color-black);
+}
+
+.text-a-navbar {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500 !important;
+  font-size: 15px;
+}
+
+.text-p-L {
+  font-family: "Montserrat", sans-serif;
+  font-size: 17px;
+  color: var(--color-black);
+}
+
+.text-p-L_Negrita {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500; /* semi-medium */
+  font-size: 17px;
+  color: var(--color-black);
+}
+
+.titulo-L {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  font-size: 40px;
+  color: var(--color-3f4e5f);
+}
+
+.titulo-L_Negrita {
+  font-family: "Montserrat", sans-serif;
+  font-size: 40px;
+  font-weight: 600; /* semi-bold */
+  color: var(--color-secondary);
+}
+
+/* ===== COLORES UTILITARIOS ===== */
+.color-3- {
+  color: var(--color-20d2d8);
+}
+
+.color-3-12 {
+  color: var(--color-245264);
+}
+
+.color-blanco {
+  color: var(--color-white);
+}
+
+.color-10-1 {
+  color: var(--color-d8eaff);
+}
+
+.color-11 {
+  color: var(--color-gray);
+}
+
+.color-15 {
+  color: var(--color-perfil-navbar);
+}
+
+/* ===== UTILIDADES ===== */
+.espaciador {
+  width: 20px;
+}
+
+.espaciador-blanco {
+  color: var(--color-white);
+  font-size: medium;
+}
+
+.contenedor-principal {
+  display: flex;
+  width: 100%;
+  margin: 0;
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-form);
+  background-color: var(--color-white);
+  height: auto;
+  min-height: 100%;
+}
+
+/* ========================================================================= */
+/* ===== ESTILOS BASE DE FORMULARIO (UNIFICADOS) ===== */
+/* ========================================================================= */
+
+.formGroupRegistro {
+    margin-bottom: 0.75rem;
+}
+
+.formGroupRegistro label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--color-secondary);
+    display: block;
+    font-size: 0.95rem;
+}
+
+.formControlRegistro {
+    /* UNIFICADO: propiedades exactas requeridas por la empresa */
+    border: 1px solid var(--color-light-gray); /* ✅ Borde Light Gray CONFIRMADO */
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    height: 44px;
+    font-size: 1rem;
+    line-height: 1.2;
+    transition: all 0.3s ease;
+    background-color: var(--color-white);
+}
+
+.formControlRegistro:focus,
+input.formControlRegistro:focus,
+textarea.formControlRegistro:focus,
+.formControlRegistro:focus-visible {
+    /* UNIFICADO: mismo borde y brillo al enfocarse */
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(32, 163, 216, 0.25);
+}
+
+.formRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.formCol {
+    flex: 1;
+    min-width: 220px;
+}
+
+textarea.formControlRegistro {
+    line-height: 1.5;
+    /* AJUSTE CLAVE: Armonizado a 100px de altura mínima */
+    min-height: 100px;
+    height: auto;
+    resize: vertical;
+}
+
+.mensajeError {
+    color: var(--color-error);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+/* Estilos de Botones */
+.btnRegistro {
+    /* Estilo de botón degradado */
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: var(--color-white);
+    border: none;
+    padding: 0.9rem 2rem;
+    font-weight: 600;
+    border-radius: var(--border-radius-sm);
+    width: 100%;
+    margin-top: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-medium);
+}
+
+.btnRegistro:hover {
+    /* Efecto hover */
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+    background: linear-gradient(135deg, var(--color-primary-dark) 0%, #1a5276 100%);
+}
+
+/* Estilos de Checkbox */
+.checkboxContainer {
+    display: flex;
+    align-items: center;
+    margin-top: 0.75rem;
+}
+
+.checkboxContainer input {
+    margin-right: 10px;
+}
+
+.checkboxContainer label {
+    color: var(--color-secondary);
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.terminosErrorPosition {
+    display: block;
+    margin-left: 30px;
+    margin-top: 0.5rem;
+}
+
+/* Clases de Éxito/Error */
+.inputError {
+    border-color: var(--color-error) !important;
+}
+
+.errorText {
+    color: var(--color-error); /* Añadido color explícito */
+    font-weight: 500;
+}
+
+.successMessageBox {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid #c3e6cb;
+    border-radius: var(--border-radius-sm);
+    text-align: center;
+}

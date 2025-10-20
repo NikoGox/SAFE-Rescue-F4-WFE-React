@@ -1,32 +1,40 @@
-/* ===== NAVBAR DROPDOWN CORREGIDO ===== */
-.nav-item.dropdown {
-    position: relative !important;
-}
+/* ===== ESTILOS UNIFICADOS PARA DROPDOWN ===== */
 
+/* Contenedor principal del dropdown-menu */
 .navbar-nav .dropdown-menu {
+    /* 1. POSICIONAMIENTO Y DISEÑO */
     position: absolute !important;
     right: 0 !important;
     left: auto !important;
     top: 100% !important;
-    min-width: 280px;
     z-index: 1001;
-    display: none;
-    margin-top: 0.125rem;
     background: var(--color-white);
     border: 1px solid var(--color-light-gray);
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-heavy);
     padding: 0.5rem 0;
+    
+    /* 🔥 SOLUCIÓN 1: ANCHO AUMENTADO */
+    width: 380px !important;
+
+    /* 🔥 SOLUCIÓN 2: DESPLAZAMIENTO VERTICAL DE 20PX */
+    margin-top: 20px !important;
+
+    /* Oculto por defecto, se muestra con la clase .show */
+    display: none;
 }
 
+/* Muestra el dropdown cuando tiene la clase 'show' */
 .navbar-nav .dropdown-menu.show {
     display: block !important;
 }
 
+/* Oculta la flecha por defecto de Bootstrap */
 .dropdown-toggle::after {
     display: none !important;
 }
 
+/* Estilos para los items dentro del dropdown */
 .dropdown-item {
     padding: 0.75rem 1.5rem;
     color: var(--color-secondary);
@@ -41,25 +49,61 @@
     font-weight: 500;
 }
 
-.dropdown-item:hover {
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item:active {
     background-color: var(--color-light);
     color: var(--color-primary);
+    outline: none;
 }
 
-.dropdown-header {
-    padding: 0.75rem 1.5rem;
-    color: var(--color-gray);
-    font-size: 0.875rem;
+/* --- Estilos de los botones que abren el dropdown --- */
+
+/* Estilo para el botón "Iniciar Sesión" (Gradiente) */
+.botonIniciarSesion {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: var(--color-white) !important;
+    border: none;
+    padding: 0.5rem 1.5rem;
     font-weight: 600;
-    border-bottom: 1px solid var(--color-light-gray);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-medium);
 }
 
-.dropdown-divider {
-    margin: 0.5rem 0;
-    border-top: 1px solid var(--color-light-gray);
+.botonIniciarSesion:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    transform: translateY(-1px);
 }
 
-/* Responsive dropdown */
+/* Estilo para el botón de Usuario (cuando está logueado) */
+.botonUsuario {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #D9F7FF;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 1px 1px 5px #0791E6;
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.botonUsuario:hover {
+    background: #BFE9FF;
+    box-shadow: 1px 1px 8px #0791E6;
+}
+
+.dropdown.show .botonIniciarSesion {
+    background: linear-gradient(135deg, #00567e 0%, #006da8 100%); /* Un poco más oscuro */
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.25); /* Sombra interior */
+    transform: none; /* Anula el efecto hover para que no se "levante" */
+    border-color: white; /* Borde blanco solicitado */
+}
+
+/* --- Media Query para Responsive --- */
 @media (max-width: 991.98px) {
     .navbar-nav .dropdown-menu {
         position: static !important;

@@ -5,11 +5,9 @@
  */
 
 /* ===== LAYOUT BASE DEL NAVBAR ===== */
-/* Esta clase se añadirá al elemento <nav> junto con las de Bootstrap */
-  
 .custom-shadow {
     box-shadow: 0 10px 30px rgba(0, 255, 17, 0.5);
-  }
+}
 
 .navbarWrapper {
     position: fixed;
@@ -18,17 +16,14 @@
     height: 70px;
 }
 
-/* Espacio reservado para evitar que el contenido sea cubierto por el navbar fijo */
 .fondoNavbar {
     height: 70px;
 }
 
-/* Esta clase se añadirá al div con .container-fluid */
 .container {
     justify-content: center;
 }
 
-/* Esta clase se añadirá al <ul> con .navbar-nav */
 .navbarNav {
     display: flex;
     justify-content: flex-end;
@@ -56,7 +51,6 @@
 }
 
 /* ===== LINKS DE NAVEGACIÓN Y SEPARADORES ===== */
-
 .textANavbar {
     font-family: "Montserrat", sans-serif;
     font-weight: 500 !important;
@@ -71,24 +65,49 @@
     color: var(--color-d8eaff); 
 }
 
-/* ===== BOTONES DE AUTENTICACIÓN ===== */
-/* 
-  NOTA: Estas clases deben pasarse como props al componente Dropdown
-  para que las pueda utilizar internamente.
-*/
-.botonIniciarSesion {
-    display: block;
-    padding: 12px 16px;
-    background-color: var(--color-primary);
+/* ---------------------------------------------------- */
+/* === ESTILOS DEL BOTÓN DE INICIAR SESIÓN (GRADIENTE) === */
+/* ---------------------------------------------------- */
+
+/* Estilo por defecto (no presionado) */
+.btn-custom-primary {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: var(--color-white) !important;
     border: none;
-    border-radius: 5px;
-    box-shadow: 1px 1px 4px #555454;
-    color: var(--color-white);
-    font-weight: bold;
-    text-shadow: 1px 1px 1px #555454;
+    padding: 0.5rem 1.5rem; 
+    font-weight: 600;
+    border-radius: var(--border-radius-sm);
+    width: auto; 
+    margin-top: 0; 
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-medium);
+    display: inline-flex; 
+    align-items: center;
+    text-align: center;
 }
+
+.btn-custom-primary:hover {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    transform: translateY(-1px);
+}
+
+.botonIniciarSesion {
+    composes: btn-custom-primary; 
+}
+
+/* 🔥 ESTILO CLAVE: Mantiene el botón de gradiente "presionado" al abrir el dropdown */
+:global(.dropdown.show) .botonIniciarSesion {
+    /* Gradiente con la misma orientación (135deg) pero con colores MÁS OSCUROS */
+    background: linear-gradient(135deg, var(--color-primary-darker) 0%, var(--color-primary-dark) 100%); /* AJUSTADO */
+    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.4); /* Sombra más sutil y de 'presión' */
+    transform: none; /* Evita que se mueva */
+}
+
+/* ---------------------------------------------------- */
+/* === BOTONES DE AUTENTICACIÓN (Usuario Logueado) === */
+/* ---------------------------------------------------- */
 
 .botonUsuario {
     display: flex;
@@ -100,42 +119,114 @@
     box-shadow: 1px 1px 5px #0791E6;
     cursor: pointer;
     padding: 5px 10px;
+    outline: none !important;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.imagenBoxNav {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid #ffffff;
+.botonUsuario:hover {
+    background: #BFE9FF; 
+    box-shadow: 1px 1px 8px #0791E6;
 }
 
-.imagenBoxNav img {
+/* Mantiene el botón de usuario "presionado" al abrir el dropdown */
+:global(.dropdown.show) .botonUsuario {
+    background: #BFE9FF; 
+    box-shadow: 1px 1px 8px #0791E6;
+}
+
+/* ---------------------------------------------------- */
+/* === AJUSTES DE ESTILO Y POSICIÓN DEL DROPDOWN (GLOBAL) === */
+/* ---------------------------------------------------- */
+
+/* Estilos para el contenedor de la lista del dropdown (.dropdown-menu) */
+:global(.navbar-nav .dropdown-menu) {
+    /* 1. POSICIONAMIENTO */
+    position: absolute !important;
+    right: 0 !important;
+    left: auto !important;
+    top: 100% !important;
+
+    /* 2. DESPLAZAMIENTO DE 20PX HACIA ABAJO */
+    --bs-dropdown-spacer: 20px; 
+    
+    /* 3. DISEÑO PROFESIONAL */
+    min-width: 280px;
+    padding: 0.5rem 0;
+    margin-top: 0.125rem;
+    background: var(--color-white);
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--border-radius-md); 
+    box-shadow: var(--shadow-heavy);
+    z-index: 1001;
+}
+
+/* ESTILOS DE LOS ITEMS DEL DROPDOWN */
+:global(.dropdown-item) {
+    padding: 0.75rem 1.5rem;
+    color: var(--color-secondary);
+    text-decoration: none;
+    display: block;
+    border: none;
+    background: none;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    text-align: left;
+    transition: all 0.3s ease;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
 }
 
-/* 
-  Usamos :global() para aplicar estilos a una clase de Bootstrap
-  que se genera fuera de nuestro control directo.
-*/
-:global(.dropdown-menu) {
-    min-width: 250px;
+:global(.dropdown-item:hover) {
+    background-color: var(--color-light);
+    color: var(--color-primary);
 }
 
-/* ===== BUSCADOR (Si lo vas a usar) ===== */
+/* Eliminar cambio de borde/outline en foco/presión */
+:global(.dropdown-item:focus),
+:global(.dropdown-item:active) {
+    outline: none; 
+    background-color: var(--color-light); 
+    color: var(--color-primary);
+}
+
+/* Otros estilos globales de tu código */
+:global(.navbar-nav .dropdown-menu.show) {
+    display: block !important;
+}
+:global(.dropdown-toggle::after) {
+    display: none !important;
+}
+:global(.dropdown-header) {
+    padding: 0.75rem 1.5rem;
+    color: var(--color-gray);
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--color-light-gray);
+}
+:global(.dropdown-divider) {
+    margin: 0.5rem 0;
+    border-top: 1px solid var(--color-light-gray);
+}
+
+/* Responsive dropdown */
+@media (max-width: 991.98px) {
+    :global(.navbar-nav .dropdown-menu) {
+        position: static !important;
+        width: 100%;
+        margin-top: 0.5rem;
+        box-shadow: none;
+        border: none;
+    }
+}
+
+/* ===== BUSCADOR Y RESPONSIVE (Mantenido) ===== */
 .buscadorNavbar {
     width: 600px;
 }
-
-/* ===== RESPONSIVE NAVBAR/BUSCADOR ===== */
 @media (max-width: 768px) {
     .buscadorNavbar {
         width: 100%;
         max-width: 300px;
     }
-
     .titulo {
         font-size: 28px;
         padding-left: 8px;

@@ -1,9 +1,7 @@
-import "./Registrarse.css";
 import React, { useState, useCallback, useEffect } from "react";
 import Logo from "../assets/sr_logo.png";
-
-// En tu componente Registrarse, agrega:
-import { useNavigate } from "react-router-dom";
+import styles from "./Registrarse.module.css"; 
+import { useNavigate } from "react-router-dom"; 
 
 // --- FUNCIÓN PURA: VALIDACIÓN CHILENA (Módulo 11) ---
 const validateRut = (rut: string): boolean => {
@@ -50,28 +48,42 @@ const formatRut = (rut: string): string => {
     if (cleanRut.length <= 1) return cleanRut;
     
     let result = '';
-    let counter = 0;
     
-    // Recorrer de atrás hacia adelante para agregar puntos
-    for (let i = cleanRut.length - 1; i >= 0; i--) {
-        counter++;
-        result = cleanRut.charAt(i) + result;
-        
-        // Agregar puntos cada 3 dígitos, pero no al inicio
-        if (counter === 3 && i > 0) {
-            result = '.' + result;
-            counter = 0;
-        }
-        
-        // Agregar guion antes del dígito verificador
-        if (counter === 1 && i === 1) {
-            result = '-' + result;
-            counter = 0;
+    // Formato X.XXX.XXX-K
+    const body = cleanRut.slice(0, -1);
+    const digit = cleanRut.slice(-1);
+    
+    let bodyFormatted = '';
+    for (let j = body.length - 1, counter = 0; j >= 0; j--, counter++) {
+        bodyFormatted = body.charAt(j) + bodyFormatted;
+        if (counter % 3 === 2 && j > 0) {
+            bodyFormatted = '.' + bodyFormatted;
         }
     }
     
+    result = bodyFormatted + (digit ? '-' + digit : '');
     return result;
 };
+
+// --- FUNCIÓN DE FORMATO DE TELÉFONO (Reutilizada del componente anterior) ---
+const cleanPhoneNumber = (formattedValue: string): string => {
+    return formattedValue.replace(/[^\d]/g, '');
+};
+
+const formatPhoneNumber = (value: string): string => {
+    const cleanValue = cleanPhoneNumber(value);
+    const limit = 9; 
+    let formattedValue = cleanValue.substring(0, limit);
+
+    if (formattedValue.length > 5) {
+        formattedValue = formattedValue.replace(/^(\d)(\d{4})(\d{0,4})$/, '$1 $2 $3');
+    } else if (formattedValue.length > 1) {
+        formattedValue = formattedValue.replace(/^(\d)(\d{0,4})$/, '$1 $2');
+    }
+
+    return formattedValue.trim();
+};
+// FIN FUNCIONES DE FORMATO DE TELÉFONO
 
 // --- Definiciones de Tipos ---
 interface UserType {
@@ -94,6 +106,7 @@ interface Errors {
     contrasena?: string;
     confirmarContrasena?: string;
     terminos?: string;
+    general?: string;
 }
 
 // --- Sub-Componente Campo de Entrada Reutilizable ---
@@ -106,11 +119,11 @@ const InputField: React.FC<{
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     error: string | undefined;
 }> = ({ id, label, placeholder, type = 'text', value, onChange, error }) => (
-    <div className="form-group-registro">
+    <div className={styles.formGroupRegistro}>
         <label htmlFor={id}>{label}</label>
         <input
             type={type}
-            className={`form-control-registro ${error ? 'input-error' : ''}`}
+            className={`${styles.formControlRegistro} ${error ? styles.inputError : ''}`}
             id={id}
             placeholder={placeholder}
             required
@@ -119,7 +132,7 @@ const InputField: React.FC<{
             autoComplete={id.includes('contrasena') ? 'new-password' : 'on'}
         />
         {error && (
-            <p className="mensajeError error-text">{error}</p>
+            <p className={`${styles.mensajeError} ${styles.errorText}`}>{error}</p>
         )}
     </div>
 );
@@ -133,16 +146,17 @@ const RutInputField: React.FC<{
     const [displayValue, setDisplayValue] = useState(value);
 
     useEffect(() => {
+        // Actualiza el valor mostrado cada vez que cambia el valor 'limpio' (value)
         setDisplayValue(formatRut(value));
     }, [value]);
 
     const handleRutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;
         
-        // Limpiar el valor para guardar (sin puntos ni guion)
+        // Limpiar el valor para guardar (solo números y K)
         const cleanValue = inputValue.replace(/[^0-9kK]/g, "").toUpperCase();
         
-        // Crear un evento sintético con el valor limpio
+        // Crear un evento sintético con el valor limpio para que React lo maneje
         const syntheticEvent = {
             ...e,
             target: {
@@ -156,25 +170,76 @@ const RutInputField: React.FC<{
     };
 
     return (
-        <div className="form-group-registro">
+        <div className={styles.formGroupRegistro}>
             <label htmlFor="rut">RUT</label>
             <input
                 type="text"
-                className={`form-control-registro ${error ? 'input-error' : ''}`}
+                className={`${styles.formControlRegistro} ${error ? styles.inputError : ''}`}
                 id="rut"
                 placeholder="12.345.678-9"
                 required
-                value={displayValue}
-                onChange={handleRutChange}
+                value={displayValue} // Usamos el valor formateado para la visualización
+                onChange={handleRutChange} // Usamos el manejador que limpia y formatea
                 autoComplete="rut"
-                maxLength={12} // Longitud máxima con formato
+                maxLength={12} 
             />
             {error && (
-                <p className="mensajeError error-text">{error}</p>
+                <p className={`${styles.mensajeError} ${styles.errorText}`}>{error}</p>
             )}
         </div>
     );
 };
+
+// --- Componente Específico para Teléfono con Formato ---
+const PhoneInputField: React.FC<{
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    error: string | undefined;
+}> = ({ value, onChange, error }) => {
+
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const inputValue = e.target.value;
+        
+        // Limpiar el valor para validación y luego formatear para display/state
+        const cleanValue = cleanPhoneNumber(inputValue);
+        const formattedValue = formatPhoneNumber(cleanValue);
+        
+        // Crear un evento sintético con el valor formateado para que React lo maneje
+        const syntheticEvent = {
+            ...e,
+            target: {
+                ...e.target,
+                value: formattedValue, // Guardamos el valor formateado en el estado
+                id: 'telefono'
+            }
+        };
+        
+        onChange(syntheticEvent);
+    };
+
+    return (
+        <div className={styles.formGroupRegistro}>
+            <label htmlFor="telefono">Número Teléfono</label>
+            <input
+                id="telefono" 
+                // Usamos el valor del estado (que ya estará formateado) para el display
+                value={value} 
+                onChange={handlePhoneChange} 
+                type="tel"
+                className={`${styles.formControlRegistro} ${error ? styles.inputError : ''}`}
+                placeholder="9 1234 5678" 
+                required
+                // Se establece un maxLength más alto para permitir el espacio y el "9" inicial
+                maxLength={11} 
+                autoComplete="tel"
+            />
+            {error && (
+                <p className={`${styles.mensajeError} ${styles.errorText}`}>{error}</p>
+            )}
+        </div>
+    );
+};
+
 
 // --- Componente Registrarse Principal ---
 const Registrarse: React.FC = () => {
@@ -197,6 +262,7 @@ const Registrarse: React.FC = () => {
     const [errors, setErrors] = useState<Errors>({});
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const navigate = useNavigate();
 
     // 2. Manejo de Cambios (Centralizado)
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,6 +282,7 @@ const Registrarse: React.FC = () => {
                 if (targetId === 'contrasena' || targetId === 'confirmarContrasena') {
                     delete newErrors.confirmarContrasena;
                 }
+                 delete newErrors.general; 
                 return newErrors;
             });
         }
@@ -225,18 +292,18 @@ const Registrarse: React.FC = () => {
         }
     };
 
-    // 3. Lógica de Validación Principal
+    // 3. Lógica de Validación Principal 
     const validateForm = useCallback((): boolean => {
         const newErrors: Errors = {};
         let isValid = true;
-
-        // Limpiar y normalizar datos
+        
+        // Limpiar y normalizar datos (teléfono se limpia para validación)
         const cleanData = {
             rut: formData.rut.trim(),
             nombre: formData.nombre.trim(),
             correo: formData.correo.trim(),
             direccion: formData.direccion.trim(),
-            telefono: formData.telefono.trim(),
+            telefono: cleanPhoneNumber(formData.telefono), // Teléfono limpio para validación
             nombreUsuario: formData.nombreUsuario.trim(),
             contrasena: formData.contrasena,
             confirmarContrasena: formData.confirmarContrasena,
@@ -247,7 +314,7 @@ const Registrarse: React.FC = () => {
             newErrors.rut = "El RUT es obligatorio.";
             isValid = false;
         } else if (!validateRut(cleanData.rut)) {
-            newErrors.rut = "RUT inválido. Verifique el formato.";
+            newErrors.rut = "RUT inválido. Verifique el formato y dígito verificador.";
             isValid = false;
         }
 
@@ -282,16 +349,12 @@ const Registrarse: React.FC = () => {
             isValid = false;
         }
 
-        // Validación de Teléfono
-        const phoneRegex = /^[0-9]+$/;
+        // Validación de Teléfono (usando el valor limpio)
         if (!cleanData.telefono) {
             newErrors.telefono = "El teléfono es obligatorio.";
             isValid = false;
-        } else if (!phoneRegex.test(cleanData.telefono)) {
-            newErrors.telefono = "El teléfono solo puede contener números.";
-            isValid = false;
-        } else if (cleanData.telefono.length < 9 || cleanData.telefono.length > 10) {
-            newErrors.telefono = "El teléfono debe tener entre 9 y 10 dígitos.";
+        } else if (!/^[0-9]{9}$/.test(cleanData.telefono)) { // Validar exactamente 9 dígitos
+            newErrors.telefono = "El teléfono debe tener 9 dígitos (ej. 912345678).";
             isValid = false;
         }
 
@@ -338,7 +401,10 @@ const Registrarse: React.FC = () => {
         
         setTimeout(() => {
             try {
+                // Simulación de búsqueda en localStorage
                 const usuarios = JSON.parse(localStorage.getItem('usuariosRegistrados') || '[]') as UserType[];
+                
+                // Verificar si el correo o nombre de usuario ya existe
                 const usuarioExiste = usuarios.some(u => 
                     u.correo === user.correo || u.nombreUsuario === user.nombreUsuario
                 );
@@ -346,17 +412,19 @@ const Registrarse: React.FC = () => {
                 if (usuarioExiste) {
                     setErrors(prev => ({ 
                         ...prev, 
-                        correo: "El correo electrónico o nombre de usuario ya está registrado." 
+                        general: "El correo electrónico o nombre de usuario ya está registrado." 
                     }));
                     setIsSubmitting(false);
                     return;
                 }
 
+                // Simulación de guardar usuario
                 usuarios.push(user);
                 localStorage.setItem('usuariosRegistrados', JSON.stringify(usuarios));
 
                 setSuccessMessage(`¡Registro exitoso, ${user.nombre}! Ahora puedes iniciar sesión.`);
                 
+                // Limpiar el formulario
                 setFormData({
                     rut: "", 
                     nombre: "", 
@@ -384,6 +452,7 @@ const Registrarse: React.FC = () => {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setSuccessMessage(null);
+        setErrors({}); 
 
         if (validateForm()) {
             const newUser: UserType = {
@@ -391,7 +460,8 @@ const Registrarse: React.FC = () => {
                 nombre: formData.nombre,
                 correo: formData.correo,
                 direccion: formData.direccion,
-                telefono: formData.telefono,
+                // Limpiar el teléfono antes de enviarlo
+                telefono: cleanPhoneNumber(formData.telefono),
                 nombreUsuario: formData.nombreUsuario,
                 contrasena: formData.contrasena,
             };
@@ -401,161 +471,172 @@ const Registrarse: React.FC = () => {
 
     // --- Renderizado JSX ---
     return (
-        <div className="contenedor-principal">
-            <div className="seccion-formulario">
-                <div className="logo-formulario">
-                    <img
-                        src={Logo} 
-                        alt="SAFE Rescue Logo" 
-                        width="60" 
-                        height="60"
-                        className="d-inline-block align-text-top"
-                    />
+        // Nuevo contenedor para el centrado vertical (registroPageContainer)
+        <div className={styles.registroPageContainer}>
+            <div className={styles.contenedorPrincipal}>
+                <div className={styles.seccionFormulario}>
+                    <div className={styles.logoFormulario}>
+                        <img
+                            src={Logo} 
+                            alt="SAFE Rescue Logo" 
+                            width="70" 
+                            height="70"
+                            className="d-inline-block align-text-top"
+                        />
+                    </div>
+
+                    <h1 className={styles.tituloFormulario}>Crear una cuenta</h1>
+                    <p className={styles.subtituloFormulario}>Completa tus datos para unirte a nuestra comunidad</p>
+
+                    {successMessage && (
+                        <div className={styles.successMessageBox}>
+                            <span style={{ marginRight: '10px' }}>✅</span> 
+                            {successMessage}
+                        </div>
+                    )}
+                    
+                    {errors.general && (
+                        <div className={`${styles.successMessageBox} ${styles.inputError}`} style={{backgroundColor: 'rgba(255, 0, 0, 0.1)', color: 'var(--color-error)', borderColor: 'var(--color-error)'}}>
+                            <span style={{ marginRight: '10px' }}>❌</span> 
+                            {errors.general}
+                        </div>
+                    )}
+
+
+                    <form className={styles.form} id="form" onSubmit={handleSubmit} noValidate>
+                        {/* Fila 1: RUT y Nombre */}
+                        <div className={styles.formRow}>
+                            <div className={styles.formCol}>
+                                <InputField 
+                                    id="nombre" 
+                                    label="Nombre Completo" 
+                                    placeholder="Juan Pérez González" 
+                                    type="text"
+                                    value={formData.nombre} 
+                                    onChange={handleChange} 
+                                    error={errors.nombre} 
+                                />
+                            </div>
+                            <div className={styles.formCol}>
+                                <RutInputField 
+                                    value={formData.rut} 
+                                    onChange={handleChange} 
+                                    error={errors.rut} 
+                                />
+                            </div>
+                        </div>
+
+                        {/* Fila 2: Correo */}
+                        <InputField 
+                            id="correo" 
+                            label="Correo Electrónico" 
+                            placeholder="tu.correo@ejemplo.com" 
+                            type="email"
+                            value={formData.correo} 
+                            onChange={handleChange} 
+                            error={errors.correo} 
+                        />
+
+                        {/* Fila 3: Dirección y Teléfono */}
+                        <div className={styles.formRow}>
+                            <div className={styles.formCol}>
+                                <InputField 
+                                    id="direccion" 
+                                    label="Dirección" 
+                                    placeholder="Calle 123, Comuna" 
+                                    type="text"
+                                    value={formData.direccion} 
+                                    onChange={handleChange} 
+                                    error={errors.direccion} 
+                                />
+                            </div>
+                            <div className={styles.formCol}>
+                                <PhoneInputField 
+                                    value={formData.telefono} 
+                                    onChange={handleChange} 
+                                    error={errors.telefono} 
+                                />
+                            </div>
+                        </div>
+
+                        {/* Fila 4: Nombre de Usuario */}
+                        <InputField 
+                            id="nombreUsuario" 
+                            label="Nombre de Usuario" 
+                            placeholder="Elige un nombre de usuario" 
+                            type="text"
+                            value={formData.nombreUsuario} 
+                            onChange={handleChange} 
+                            error={errors.nombreUsuario} 
+                        />
+
+                        {/* Fila 5: Contraseña y Confirmar Contraseña */}
+                        <div className={styles.formRow}>
+                            <div className={styles.formCol}>
+                                <InputField 
+                                    id="contrasena" 
+                                    label="Contraseña" 
+                                    placeholder="Crea una contraseña segura" 
+                                    type="password"
+                                    value={formData.contrasena} 
+                                    onChange={handleChange} 
+                                    error={errors.contrasena} 
+                                />
+                            </div>
+                            <div className={styles.formCol}>
+                                <InputField 
+                                    id="confirmarContrasena" 
+                                    label="Confirmar Contraseña" 
+                                    placeholder="Repite tu contraseña" 
+                                    type="password"
+                                    value={formData.confirmarContrasena} 
+                                    onChange={handleChange} 
+                                    error={errors.confirmarContrasena} 
+                                />
+                            </div>
+                        </div>
+
+                        {/* Términos y Condiciones */}
+                        <div className={styles.checkboxContainer}>
+                            <input
+                                type="checkbox" 
+                                id="terminos" 
+                                name="terminos" 
+                                required
+                                checked={formData.terminos} 
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="terminos">Acepto los términos y condiciones del servicio</label>
+                            {errors.terminos && (
+                                <p className={`${styles.mensajeError} ${styles.errorText} ${styles.terminosErrorPosition}`}>{errors.terminos}</p>
+                            )}
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            className={styles.btnRegistro} 
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? 'Registrando...' : 'Crear Cuenta'}
+                        </button>
+                    </form>
                 </div>
 
-                <h1 className="titulo-formulario">Crear una cuenta</h1>
-                <p className="subtitulo-formulario">Completa tus datos para unirte a nuestra comunidad</p>
-
-                {successMessage && (
-                    <div className="success-message-box">
-                        <span style={{ marginRight: '10px' }}>✅</span> 
-                        {successMessage}
+                {/* SECCIÓN IMAGEN/INFORMACIÓN ADICIONAL - Restaurada y Estilizada */}
+                <div className={styles.seccionImagen}>
+                    <div className={styles.contenidoImagen}>
+                        <h2 className={styles.tituloImagen}>Únete a nuestra comunidad</h2>
+                        <p className={styles.textoImagen}>
+                            Tu registro nos ayuda a seguir protegiendo a la comunidad y a nuestros bomberos voluntarios.
+                        </p>
+                        <ul className={styles.beneficiosLista}>
+                            <li>Acceso a información en tiempo real</li>
+                            <li>Alertas personalizadas en tu zona</li>
+                            <li>Noticias exclusivas del cuerpo de bomberos</li>
+                            <li>Posibilidad de realizar donaciones</li>
+                            <li>Soporte prioritario</li>
+                        </ul>
                     </div>
-                )}
-
-                <form className="form" id="form" onSubmit={handleSubmit} noValidate>
-                    <div className="form-row">
-                        <div className="form-col">
-                            {/* Usamos el componente especial para RUT */}
-                            <RutInputField 
-                                value={formData.rut} 
-                                onChange={handleChange} 
-                                error={errors.rut} 
-                            />
-                        </div>
-                        <div className="form-col">
-                            <InputField 
-                                id="nombre" 
-                                label="Nombre Completo" 
-                                placeholder="Juan Pérez González" 
-                                type="text"
-                                value={formData.nombre} 
-                                onChange={handleChange} 
-                                error={errors.nombre} 
-                            />
-                        </div>
-                    </div>
-
-                    <InputField 
-                        id="correo" 
-                        label="Correo Electrónico" 
-                        placeholder="tu.correo@ejemplo.com" 
-                        type="email"
-                        value={formData.correo} 
-                        onChange={handleChange} 
-                        error={errors.correo} 
-                    />
-
-                    <div className="form-row">
-                        <div className="form-col">
-                            <InputField 
-                                id="direccion" 
-                                label="Dirección" 
-                                placeholder="Calle 123, Comuna" 
-                                type="text"
-                                value={formData.direccion} 
-                                onChange={handleChange} 
-                                error={errors.direccion} 
-                            />
-                        </div>
-                        <div className="form-col">
-                            <InputField 
-                                id="telefono" 
-                                label="Número Teléfono" 
-                                placeholder="912345678" 
-                                type="tel"
-                                value={formData.telefono} 
-                                onChange={handleChange} 
-                                error={errors.telefono} 
-                            />
-                        </div>
-                    </div>
-
-                    <InputField 
-                        id="nombreUsuario" 
-                        label="Nombre de Usuario" 
-                        placeholder="Elige un nombre de usuario" 
-                        type="text"
-                        value={formData.nombreUsuario} 
-                        onChange={handleChange} 
-                        error={errors.nombreUsuario} 
-                    />
-
-                    <div className="form-row">
-                        <div className="form-col">
-                            <InputField 
-                                id="contrasena" 
-                                label="Contraseña" 
-                                placeholder="Crea una contraseña segura" 
-                                type="password"
-                                value={formData.contrasena} 
-                                onChange={handleChange} 
-                                error={errors.contrasena} 
-                            />
-                        </div>
-                        <div className="form-col">
-                            <InputField 
-                                id="confirmarContrasena" 
-                                label="Confirmar Contraseña" 
-                                placeholder="Repite tu contraseña" 
-                                type="password"
-                                value={formData.confirmarContrasena} 
-                                onChange={handleChange} 
-                                error={errors.confirmarContrasena} 
-                            />
-                        </div>
-                    </div>
-
-                    {/* Términos y Condiciones */}
-                    <div className="checkbox-container">
-                        <input
-                            type="checkbox" 
-                            id="terminos" 
-                            name="terminos" 
-                            required
-                            checked={formData.terminos} 
-                            onChange={handleChange}
-                        />
-                        <label htmlFor="terminos">Acepto los términos y condiciones del servicio</label>
-                        {errors.terminos && (
-                            <p className="mensajeError error-text terminos-error-position">{errors.terminos}</p>
-                        )}
-                    </div>
-
-                    <button 
-                        type="submit" 
-                        className="btn-registro" 
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? 'Registrando...' : 'Crear Cuenta'}
-                    </button>
-                </form>
-            </div>
-
-            {/* SECCIÓN IMAGEN/INFORMACIÓN ADICIONAL */}
-            <div className="seccion-imagen">
-                <div className="contenido-imagen">
-                    <h2 className="titulo-imagen">Únete a nuestra comunidad</h2>
-                    <p className="texto-imagen">
-                        Tu registro nos ayuda a seguir protegiendo a la comunidad y a nuestros bomberos voluntarios.
-                    </p>
-                    <ul className="beneficios-lista">
-                        <li>Acceso a información en tiempo real</li>
-                        <li>Alertas personalizadas en tu zona</li>
-                        <li>Noticias exclusivas del cuerpo de bomberos</li>
-                        <li>Posibilidad de realizar donaciones</li>
-                        <li>Soporte prioritario</li>
-                    </ul>
                 </div>
             </div>
         </div>
