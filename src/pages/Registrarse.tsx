@@ -490,14 +490,14 @@ const Registrarse: React.FC = () => {
 
                     {successMessage && (
                         <div className={styles.successMessageBox}>
-                            <span style={{ marginRight: '10px' }}>✅</span> 
+                            <span style={{ marginRight: '10px' }}></span> 
                             {successMessage}
                         </div>
                     )}
                     
                     {errors.general && (
                         <div className={`${styles.successMessageBox} ${styles.inputError}`} style={{backgroundColor: 'rgba(255, 0, 0, 0.1)', color: 'var(--color-error)', borderColor: 'var(--color-error)'}}>
-                            <span style={{ marginRight: '10px' }}>❌</span> 
+                            <span style={{ marginRight: '10px' }}></span> 
                             {errors.general}
                         </div>
                     )}

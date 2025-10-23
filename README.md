@@ -12,19 +12,18 @@ SAFE Rescue es una aplicación diseñada para la gestión eficiente y rápida de
 
 ## Últimos cambios
 
-### ❚❙❘ VERSIÓN 1.0.5
+### ❚❙❘ VERSIÓN 1.0.6
 
-> ├─• Se implementó README con breve descripcion del proyecto y cambios de la ultima versión.
-> ├─• Se arregló versionado del proyecto en Vite.
-> ├─• El archivo Contactanos.css se renombró a Contactanos.module.css y se importo a la pagina contactanos.
-> ├─• Se ajustaron los estilos de la pagina de contactanos.
-> ├─• Se cambió el tipo de validadores para los formularios de la pagina contactanos.
-> ├─• El archivo Registrarse.css se renombró a Registrarse.module.css y se importo a la pagina registrarse.
-> ├─• Se ajustaron los estilos de la pagina de registro. 
-> ├─• Se modificó el archivo vite.config.ts para permitir que el servidor escuche en todas las interfaces de red (0.0.0.0).
-> ├─• Se ajustaron los estilos de la pagina de donaciones.
-> ├─• Se comenzó a trabajar en el nuevo estilo del navbar.
-> └─• Se modificó el dropdown para hacerlo mas ancho ademas de agregar un boton para ocultar/mostrar la contraseña.
+> <br>• Se creó la pagina Nosotros para contar brevemente la misión de SAFE Rescue.
+> <br>• Se agregó un carrusel de imagenes en la pagina de Nosotros.
+> <br>• Se agregó una pagina para que el usuario pueda recuperar su contraseña.
+> <br>• Se agregaron animaciones para reposicionar las paginas siempre al inicio al momento de usar un enlace.
+> <br>• Correcciones de diseño minimas.
+> <br> > > > Falta corregir validadores.
+> <br> > > > Falta corregir pagina de perfil.
+> <br> > > > Falta agregar las pruebas unitarias.
+> <br>
+
 
 ---
 

@@ -13,7 +13,8 @@ import Incidentes from "./pages/Incidentes";
 import Perfil from "./pages/Perfil";
 import Registrarse from "./pages/Registrarse";
 import Configuracion from "./pages/Configuracion";
-
+import Nosotros from "./pages/Nosotros";
+import RecuperarContrasena from "./pages/RecuperarContrasena";
 
 function App() {
   return (
@@ -34,6 +35,8 @@ function App() {
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/registrarse" element={<Registrarse />} />
           <Route path="/configuracion" element={<Configuracion />} />
+          <Route path="/nosotros" element={<Nosotros />} />
+          <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
         </Routes>
       </div>
 

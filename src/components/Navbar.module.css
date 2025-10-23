@@ -128,85 +128,6 @@
     box-shadow: 1px 1px 8px #0791E6;
 }
 
-/* Mantiene el botón de usuario "presionado" al abrir el dropdown */
-:global(.dropdown.show) .botonUsuario {
-    background: #BFE9FF; 
-    box-shadow: 1px 1px 8px #0791E6;
-}
-
-/* ---------------------------------------------------- */
-/* === AJUSTES DE ESTILO Y POSICIÓN DEL DROPDOWN (GLOBAL) === */
-/* ---------------------------------------------------- */
-
-/* Estilos para el contenedor de la lista del dropdown (.dropdown-menu) */
-:global(.navbar-nav .dropdown-menu) {
-    /* 1. POSICIONAMIENTO */
-    position: absolute !important;
-    right: 0 !important;
-    left: auto !important;
-    top: 100% !important;
-
-    /* 2. DESPLAZAMIENTO DE 20PX HACIA ABAJO */
-    --bs-dropdown-spacer: 20px; 
-    
-    /* 3. DISEÑO PROFESIONAL */
-    min-width: 280px;
-    padding: 0.5rem 0;
-    margin-top: 0.125rem;
-    background: var(--color-white);
-    border: 1px solid var(--color-light-gray);
-    border-radius: var(--border-radius-md); 
-    box-shadow: var(--shadow-heavy);
-    z-index: 1001;
-}
-
-/* ESTILOS DE LOS ITEMS DEL DROPDOWN */
-:global(.dropdown-item) {
-    padding: 0.75rem 1.5rem;
-    color: var(--color-secondary);
-    text-decoration: none;
-    display: block;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
-    transition: all 0.3s ease;
-    font-family: "Montserrat", sans-serif;
-    font-weight: 500;
-}
-
-:global(.dropdown-item:hover) {
-    background-color: var(--color-light);
-    color: var(--color-primary);
-}
-
-/* Eliminar cambio de borde/outline en foco/presión */
-:global(.dropdown-item:focus),
-:global(.dropdown-item:active) {
-    outline: none; 
-    background-color: var(--color-light); 
-    color: var(--color-primary);
-}
-
-/* Otros estilos globales de tu código */
-:global(.navbar-nav .dropdown-menu.show) {
-    display: block !important;
-}
-:global(.dropdown-toggle::after) {
-    display: none !important;
-}
-:global(.dropdown-header) {
-    padding: 0.75rem 1.5rem;
-    color: var(--color-gray);
-    font-size: 0.875rem;
-    font-weight: 600;
-    border-bottom: 1px solid var(--color-light-gray);
-}
-:global(.dropdown-divider) {
-    margin: 0.5rem 0;
-    border-top: 1px solid var(--color-light-gray);
-}
-
 /* Responsive dropdown */
 @media (max-width: 991.98px) {
     :global(.navbar-nav .dropdown-menu) {
@@ -231,4 +152,10 @@
         font-size: 28px;
         padding-left: 8px;
     }
+}
+
+/* 🛑 SOLUCIÓN PARA QUITAR EL BORDE A .btn 🛑 */
+/* Se usa :global() para que la regla afecte a la clase global .btn (usada por librerías como Bootstrap) */
+:global(.btn) {
+    border: none !important;
 }

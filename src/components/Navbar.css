@@ -46,7 +46,7 @@
     color: var(--color-primary);
     padding-left: 12px; /* Espacio entre el logo y el texto */
     /* Eliminamos 'display: flex' y 'align-items: center' de aquí
-       ya que están en .logo-brand */
+        ya que están en .logo-brand */
 }
 
 .navbar-brand .titulo:hover {
@@ -138,4 +138,10 @@
         font-size: 28px;
         padding-left: 8px;
     }
+}
+
+/* 🛑 SOLUCIÓN PARA QUITAR EL BORDE A .btn 🛑 */
+/* Se utiliza !important para anular cualquier borde base que venga de Bootstrap u otra librería */
+.btn {
+    border: none !important;
 }

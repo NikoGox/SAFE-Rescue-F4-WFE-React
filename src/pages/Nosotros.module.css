@@ -1,0 +1,303 @@
+/* src/pages/Nosotros.module.css */
+
+/* ========================================================================= */
+/* 1. LAYOUT PRINCIPAL Y CONTENEDORES */
+/* ========================================================================= */
+
+.nosotrosPageContainer {
+    background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
+    min-height: 100vh;
+    padding-top: 20px;
+}
+
+.nosotrosContent {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2.5rem;
+}
+
+.header {
+    margin-bottom: 2.5rem;
+    text-align: left; /* <-- ✨ AQUÍ ESTÁ LA CORRECCIÓN ORIGINAL ✨ */
+}
+
+.tituloPrincipal {
+    font-weight: 700;
+    font-size: 2.8rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========================================================================= */
+/* 2. TARJETA DE CONTENIDO PRINCIPAL (EL CUADRO BLANCO) */
+/* ========================================================================= */
+
+.contentCard {
+    background-color: var(--color-white, #ffffff);
+    border-radius: var(--border-radius-lg, 12px);
+    box-shadow: var(--shadow-heavy, 0 10px 30px rgba(0, 0, 0, 0.08));
+    padding: 3rem 3.5rem;
+    overflow: hidden;
+}
+
+.seccion {
+    margin-bottom: 2.5rem;
+}
+
+.seccion:last-child {
+    margin-bottom: 0;
+}
+
+.seccion h2 {
+    font-size: 1.75rem;
+    color: var(--color-secondary, #222);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--color-primary-light, #f0f0f0);
+    padding-bottom: 0.75rem;
+}
+
+.seccion p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--color-text-secondary, #444);
+    margin-bottom: 1rem;
+}
+
+/* ========================================================================= */
+/* 3. SECCIÓN MISIÓN (CON CARRUSEL PEQUEÑO) */
+/* ========================================================================= */
+
+/* Grid para alinear texto y carrusel */
+.misionGrid {
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    /* Columna de texto flexible y columna de carrusel fija */
+    gap: 2rem;
+    /* Espacio entre texto y carrusel */
+    align-items: flex-start;
+    /* Alinea los elementos arriba */
+}
+
+/* Contenedor del texto */
+.misionTexto {
+    flex: 1;
+}
+
+.misionTexto p:last-child {
+    margin-bottom: 0;
+    /* Ajuste para que el texto no genere espacio extra abajo */
+}
+
+/* Contenedor del carrusel */
+.misionCarruselWrapper {
+    width: 480px;
+    height: 300px;
+}
+
+/* --- Estilos del Carrusel (Simplificados) --- */
+.carouselContainer {
+    position: relative;
+    width: 480px;
+    height: 300px;
+    overflow: hidden;
+    border-radius: var(--border-radius-md, 8px);
+    /* Bordes redondeados */
+    box-shadow: var(--shadow-light, 0 4px 12px rgba(0, 0, 0, 0.08));
+}
+
+.carouselImage {
+    width: 100%;
+    height: 100%;
+    /* Esta es la propiedad clave que pidaste para reescalar y rellenar */
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* SE HAN ELIMINADO LAS CLASES .carouselButtonPrev, .carouselButtonNext, .carouselDots, .dot */
+/* --- Fin Estilos Carrusel --- */
+
+
+/* Separador entre secciones */
+.separador {
+    height: 2px;
+    background-color: var(--color-primary-light, #f0f0f0);
+    margin: 3rem 0;
+    border-radius: 2px;
+}
+
+/* ========================================================================= */
+/* 4. SECCIÓN FUNDADORES (TARJETAS) */
+/* ========================================================================= */
+
+.creadoresGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.creadorCard {
+    background-color: #fcfdff;
+    border: 1px solid var(--color-border-light, #eee);
+    border-radius: var(--border-radius-md, 8px);
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+
+.creadorCard:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-light, 0 6px 15px rgba(0, 0, 0, 0.06));
+}
+
+.creadorCard h3 {
+    font-size: 1.5rem;
+    color: var(--color-secondary, #111);
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    text-align: center;
+}
+
+.rolTitulo {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-secondary, #555);
+    text-align: center;
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+.rolDescripcion {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary, #444);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+.rolesLista {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 1rem;
+}
+
+.rolesLista li {
+    color: var(--color-text-secondary, #333);
+    padding-left: 1.75rem;
+    position: relative;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.rolesLista li::before {
+    content: '✓';
+    color: var(--color-primary, #007bff);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+
+/* ========================================================================= */
+/* 5. RESPONSIVE DESIGN */
+/* ========================================================================= */
+
+@media (max-width: 992px) {
+    .nosotrosContent {
+        padding: 2rem;
+    }
+
+    .contentCard {
+        padding: 2.5rem;
+    }
+
+    .creadoresGrid {
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .nosotrosContent {
+        padding: 1.5rem;
+    }
+
+    .tituloPrincipal {
+        font-size: 2.2rem;
+    }
+
+    .contentCard {
+        padding: 2rem;
+    }
+
+    /* Apilar tarjetas de fundador */
+    .creadoresGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .seccion h2 {
+        font-size: 1.6rem;
+    }
+
+    /* === AJUSTE RESPONSIVE MISIÓN === */
+    /* Apilar texto y carrusel de Misión en móvil */
+    .misionGrid {
+        grid-template-columns: 1fr;
+        /* Una sola columna */
+        gap: 1.5rem;
+        /* Espacio entre texto (arriba) y carrusel (abajo) */
+    } /* 💡 Se eliminó la palabra 'section' errónea */
+
+    .misionCarruselWrapper {
+        width: 100%;
+        /* El carrusel ocupa todo el ancho */
+        max-width: 300px;
+        /* Pero no más de 300px */
+        height: 300px;
+        /* Alto igual al ancho */
+        margin: 0 auto;
+        /* Centrar el carrusel */
+    }
+
+    .carouselContainer {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Ya no se necesitan los estilos responsive para los botones */
+}
+
+@media (max-width: 576px) {
+    .nosotrosPageContainer {
+        padding: 0;
+        padding-top: 70px;
+    }
+
+    .nosotrosContent {
+        padding: 0;
+    }
+
+    .contentCard {
+        padding: 1.5rem;
+        border-radius: 0;
+        /* 💡 Se eliminó la 'V' errónea antes de box-shadow */
+        box-shadow: none;
+        border-bottom: 1px solid #eee;
+    }
+
+    .header {
+        padding: 0 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* En móvil pequeño, el carrusel de misión */
+    .misionCarruselWrapper {
+        max-width: 100%;
+        height: 480px;
+    }
+}

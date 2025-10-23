@@ -2,6 +2,19 @@
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
 
+❚❙❘ VERSIÓN 1.0.6
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se creó la pagina Nosotros para contar brevemente la misión de SAFE Rescue.
+├─• Se agregó un carrusel de imagenes en la pagina de Nosotros.
+├─• Se agregó una pagina para que el usuario pueda recuperar su contraseña.
+├─• Se agregaron animaciones para reposicionar las paginas siempre al inicio al momento de usar un enlace.
+└─• Correcciones de diseño minimas.
+
+├─>>> Falta corregir validadores.
+└─>>> Falta corregir pagina de perfil.
+└─>>> Falta agregar las pruebas unitarias.
+ 
+
 ❚❙❘ VERSIÓN 1.0.5
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
 ├─• Se implementó README con breve descripcion del proyecto y cambios de la ultima versión.

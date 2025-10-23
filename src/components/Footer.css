@@ -12,8 +12,7 @@
 
 .custom-footer .nav-link,
 .custom-footer p {
-  color: var(--color-white) !important;
-  margin: 10px;
+  color: var(--color-white) !important; 
 }
 
 .custom-footer .nav-link:hover {
@@ -26,4 +25,10 @@
 
 .footer {
   margin-bottom: 20px;
+}
+
+/* ===== NUEVO ESTILO: Padding de 40px para la sección de enlaces ===== */
+.footer-nav-section {
+    padding-top: 30px;
+    padding-bottom: 10px;
 }

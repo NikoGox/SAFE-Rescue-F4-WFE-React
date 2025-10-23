@@ -1,0 +1,176 @@
+/* RecuperarContrasena.css (Archivo final consolidado) */
+
+/* ========================================================================= */
+/* 0. VARIABLES GLOBALES (Deben estar en App.css o index.css)
+/* ========================================================================= */
+/*
+:root {
+    --color-primary: #20a3d8; 
+    --color-primary-dark: #1e87a5;
+    --color-secondary: #34495e; 
+    --color-gray: #6c757d;
+    --color-light-gray: #ced4da;
+    --color-white: #ffffff;
+    --color-error: #dc3545; 
+    --border-radius-sm: 0.3rem;
+    --border-radius-lg: 1rem;
+    --shadow-medium: 0 4px 6px rgba(0, 0, 0, 0.15);
+    --shadow-heavy: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+*/
+
+/* ========================================================================= */
+/* 1. LAYOUT PRINCIPAL Y CONTENEDORES */
+/* ========================================================================= */
+
+.cuerpo {
+    /* Reemplaza la clase 'py-4' y 'bg-light' de Bootstrap */
+    background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
+    min-height: 100vh;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.titulo-principal {
+    font-weight: 700;
+    font-size: 2.9rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding-top: 25px;
+}
+
+.subtitulo {
+    color: var(--color-gray);
+    font-size: 1.1rem;
+    margin-bottom: 2rem; /* Aumenta el espacio antes del formulario */
+}
+
+/* ========================================================================= */
+/* 2. FORMULARIO Y ESTADOS DE ERROR */
+/* ========================================================================= */
+
+.form-group-registro {
+    /* Reemplaza 'mt-5' y 'mt-4' */
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    /* Ajuste para el primer form-group */
+        margin-top: 180px;
+}
+
+.form-group-registro:first-of-type {
+    margin-top: 88px;
+        margin-bottom: 84px;
+
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    color: var(--color-secondary);
+    margin-bottom: 0.5rem;
+    text-align: left;
+}
+
+.form-pass {
+    /* Reemplaza 'form-control' y 'form-control-registro' */
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--border-radius-sm);
+    box-sizing: border-box;
+    font-size: 1rem;
+    line-height: 1.2;
+    transition: all 0.3s ease;
+    background-color: var(--color-white);
+    color: var(--color-secondary);
+}
+
+.form-pass:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(32, 163, 216, 0.25);
+}
+
+.input-error {
+    border-color: var(--color-error) !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.mensajeError,
+.error-text {
+    color: var(--color-error);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    text-align: left;
+    display: block;
+}
+
+/* Mensajes de éxito/error general */
+.success-message-box, .error-message-box {
+    padding: 1rem;
+    border-radius: var(--border-radius-sm);
+    margin: 1.5rem auto;
+    max-width: 500px;
+    margin-top: 80px;
+    margin-bottom: 80px;
+}
+
+.success-message-box {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.error-message-box {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+
+/* ========================================================================= */
+/* 3. BOTÓN DE ENVIAR (¡AJUSTE CLAVE!) */
+/* ========================================================================= */
+
+.btn-centrado {
+    /* Contenedor que centra el botón */
+    max-width: 450px; /* Aumentado para un botón más ancho */
+    min-width: 250px;
+    margin: 2rem auto 0 auto; /* Margen superior mejorado */
+    display: block;
+}
+
+.btn-primario {
+    /* Estilo base, reemplaza 'submit-button' */
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: var(--color-white);
+    border: none;
+    /* 🚨 AUMENTO DE PADDING para mejor aspecto */
+    padding: 0.9rem 2rem; 
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-medium);
+    display: flex;
+    justify-content: center; /* Centrado horizontal del texto */
+    align-items: center;
+    width: 100%;
+    text-decoration: none; /* Para el Link de regreso */
+}
+
+.btn-primario:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+    background: linear-gradient(135deg, var(--color-primary-dark) 0%, #1a5276 100%);
+}
+
+.btn-primario:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
