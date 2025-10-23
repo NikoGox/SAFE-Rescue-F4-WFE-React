@@ -111,7 +111,13 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = () => {
         } finally {
             setIsLoading(false);
         }
+
+        
     };
+
+    const handleBlur = () => {
+            validateForm();
+        };
 
     return (
         <div className="cuerpo py-4">
@@ -128,71 +134,60 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = () => {
                 {/* Muestra mensaje de éxito o error GENERAL (Mantenemos estos) */}
 
                 {message && (
-                    <div className="success-message-box">
+                    <div className="success-message-box" data-testid="success-message">
                         <span style={{ marginRight: "10px" }}></span>
-
                         {message}
                     </div>
                 )}
 
                 {errors.general && (
-                    <div className="error-message-box">
+                    <div className="error-message-box" data-testid="error-message">
                         <span style={{ marginRight: "10px" }}></span>
-
                         {errors.general}
                     </div>
                 )}
 
                 {message ? (
-                    // OPCIÓN 1: ÉXITO (Mostrar solo el botón/enlace de Volver al Inicio)
-
                     <div className="form-group-registro mt-4">
                         <Link
                             to="/"
                             className="btn-centrado btn-primario submit-button text-decoration-none"
+                            data-testid="back-to-login"
                         >
                             Volver al Inicio de Sesión
                         </Link>
                     </div>
                 ) : (
-                    // OPCIÓN 2: NORMAL o ERROR (Mostrar el formulario de Correo y el botón de Enviar)
-
                     <form onSubmit={handleRecovery} className="recovery-form" noValidate>
-                        {/* Campo de Correo Electrónico (Solo visible si NO hay mensaje de éxito) */}
-
                         <div className="form-group-registro">
                             <label htmlFor="email">Correo Electrónico:</label>
-
                             <input
                                 className={`form-pass form-control form-control-registro ${errors.email ? "input-error" : ""
                                     }`}
                                 type="email"
                                 id="email"
+                                data-testid="recovery-email"
                                 value={email}
                                 onChange={handleChange}
+                                onBlur={handleBlur}
                                 required
                                 disabled={isLoading}
                                 placeholder="tu.correo@ejemplo.com"
                             />
-
                             {errors.email && (
-                                <p className="mensajeError error-text form-pass">
+                                <p className="mensajeError error-text form-pass" data-testid="email-error">
                                     {errors.email}
                                 </p>
                             )}
                         </div>
-
-                        {/* Botón de Enviar (Solo visible si NO hay mensaje de éxito) */}
-
                         <div className="form-group-registro mt-4">
                             <button
                                 type="submit"
                                 disabled={isLoading || !email}
                                 className="btn-centrado btn-primario submit-button"
+                                data-testid="submit-button"
                             >
-                                {isLoading
-                                    ? "Enviando..."
-                                    : "Enviar Enlace de Restablecimiento"}
+                                {isLoading ? "Enviando..." : "Enviar Enlace de Restablecimiento"}
                             </button>
                         </div>
                     </form>

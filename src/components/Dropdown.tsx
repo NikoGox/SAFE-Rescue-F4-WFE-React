@@ -12,7 +12,7 @@ interface AuthProps {
 }
 
 const Dropdown: React.FC<AuthProps> = ({ isLoggedIn, userName, onLogin, onLogout }) => {
-    // ... (todo el resto del código es idéntico)
+
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [pass, setPass] = useState("");
@@ -86,6 +86,7 @@ const loginContent = (
                 type="email"
                 className="form-control"
                 id="loginEmail"
+                data-testid="loginEmail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -99,6 +100,7 @@ const loginContent = (
                     type={showPassword ? "text" : "password"}
                     className="form-control"
                     id="loginPassword"
+                    data-testid="loginPassword"
                     value={pass}
                     onChange={(e) => setPass(e.target.value)}
                     required
@@ -119,7 +121,7 @@ const loginContent = (
                 <small>{loginError}</small>
             </div>
         )}
-        <button type="submit" className="btn btn-primary w-100">Iniciar Sesión</button>
+        <button type="submit" className="btn btn-primary w-100" data-testid="login-submit-button">Iniciar Sesión</button>
     </form>
 );
     const userOptionsContent = (
@@ -154,6 +156,7 @@ const loginContent = (
                 role="button"
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
+                data-testid="login-dropdown-toggle"
                 style={{ cursor: 'pointer', textDecoration: 'none' }}
             >
                 {isLoggedIn ? (

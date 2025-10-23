@@ -12,18 +12,17 @@ SAFE Rescue es una aplicación diseñada para la gestión eficiente y rápida de
 
 ## Últimos cambios
 
-### ❚❙❘ VERSIÓN 1.0.6
+### ❚❙❘ VERSIÓN 1.0.7
 
-> <br>• Se creó la pagina Nosotros para contar brevemente la misión de SAFE Rescue.
-> <br>• Se agregó un carrusel de imagenes en la pagina de Nosotros.
-> <br>• Se agregó una pagina para que el usuario pueda recuperar su contraseña.
-> <br>• Se agregaron animaciones para reposicionar las paginas siempre al inicio al momento de usar un enlace.
-> <br>• Correcciones de diseño minimas.
-> <br> > > > Falta corregir validadores.
+> <br>• Se empieza la pruebas unitarias
+> <br>• Se agregan etiquetas de data-testid en los formularios para identificar los componentes a testear
+> <br>• Se agrega validadores a pestaña de incidentes para funciones de crear y modificar incidente
+> <br>• Se realizan pruebas unitarias de incidentes, login, register y recuperar contraseña
+> <br> > > > Contrastar pruebas unitarias con plan de pruebas
 > <br> > > > Falta corregir pagina de perfil.
-> <br> > > > Falta agregar las pruebas unitarias.
+> <br> > > > Revisar formularios y mantener las validaciones similares en campos compartidos
+> <br> > > > Terminar pruebas unitarias de perfil, donar y contactanos
 > <br>
-
 
 ---
 

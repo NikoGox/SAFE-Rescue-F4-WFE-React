@@ -2,6 +2,19 @@
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
 
+❚❙❘ VERSIÓN 1.0.7
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se empieza la pruebas unitarias
+├─• Se agregan etiquetas de data-testid en los formularios para identificar los componentes a testear
+├─• Se agrega validadores a pestaña de incidentes para funciones de crear y modificar incidente
+├─• Se realizan pruebas unitarias de incidentes, login, register y recuperar contraseña
+└─• 
+
+├─>>> Contrastar pruebas unitarias con plan de pruebas
+└─>>> Revisar formularios y mantener las validaciones similares en campos compartidos
+└─>>> Terminar pruebas unitarias de perfil, donar y contactanos
+
+
 ❚❙❘ VERSIÓN 1.0.6
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
 ├─• Se creó la pagina Nosotros para contar brevemente la misión de SAFE Rescue.

@@ -22,7 +22,7 @@ function App() {
 
       {/* 🧭 NAVBAR (Se renderiza siempre, fuera de Routes) */}
       <div className="contenedor-principal">
-        <Navbar isLoggedIn={false} userName="Invitado" />
+        <Navbar />
       </div>
 
       {/* 🧩 CONTENIDO PRINCIPAL (Donde cambian las páginas) */}

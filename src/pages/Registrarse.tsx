@@ -125,6 +125,7 @@ const InputField: React.FC<{
             type={type}
             className={`${styles.formControlRegistro} ${error ? styles.inputError : ''}`}
             id={id}
+            data-testid={`register-${id}`}
             placeholder={placeholder}
             required
             value={value}
@@ -176,6 +177,7 @@ const RutInputField: React.FC<{
                 type="text"
                 className={`${styles.formControlRegistro} ${error ? styles.inputError : ''}`}
                 id="rut"
+                data-testid="register-rut"
                 placeholder="12.345.678-9"
                 required
                 value={displayValue} // Usamos el valor formateado para la visualización
@@ -222,6 +224,7 @@ const PhoneInputField: React.FC<{
             <label htmlFor="telefono">Número Teléfono</label>
             <input
                 id="telefono" 
+                data-testid="register-telefono"
                 // Usamos el valor del estado (que ya estará formateado) para el display
                 value={value} 
                 onChange={handlePhoneChange} 
@@ -509,6 +512,7 @@ const Registrarse: React.FC = () => {
                             <div className={styles.formCol}>
                                 <InputField 
                                     id="nombre" 
+                                    data-testid="register-nombre"
                                     label="Nombre Completo" 
                                     placeholder="Juan Pérez González" 
                                     type="text"
@@ -529,6 +533,7 @@ const Registrarse: React.FC = () => {
                         {/* Fila 2: Correo */}
                         <InputField 
                             id="correo" 
+                            data-testid="register-correo"
                             label="Correo Electrónico" 
                             placeholder="tu.correo@ejemplo.com" 
                             type="email"
@@ -542,6 +547,7 @@ const Registrarse: React.FC = () => {
                             <div className={styles.formCol}>
                                 <InputField 
                                     id="direccion" 
+                                    data-testid="register-direccion"
                                     label="Dirección" 
                                     placeholder="Calle 123, Comuna" 
                                     type="text"
@@ -562,6 +568,7 @@ const Registrarse: React.FC = () => {
                         {/* Fila 4: Nombre de Usuario */}
                         <InputField 
                             id="nombreUsuario" 
+                            data-testid="register-nombreUsuario"
                             label="Nombre de Usuario" 
                             placeholder="Elige un nombre de usuario" 
                             type="text"
@@ -575,6 +582,7 @@ const Registrarse: React.FC = () => {
                             <div className={styles.formCol}>
                                 <InputField 
                                     id="contrasena" 
+                                    data-testid="register-contrasena"
                                     label="Contraseña" 
                                     placeholder="Crea una contraseña segura" 
                                     type="password"
@@ -586,6 +594,7 @@ const Registrarse: React.FC = () => {
                             <div className={styles.formCol}>
                                 <InputField 
                                     id="confirmarContrasena" 
+                                    data-testid="register-confirmarContrasena"
                                     label="Confirmar Contraseña" 
                                     placeholder="Repite tu contraseña" 
                                     type="password"
@@ -601,6 +610,7 @@ const Registrarse: React.FC = () => {
                             <input
                                 type="checkbox" 
                                 id="terminos" 
+                                data-testid="register-terms"
                                 name="terminos" 
                                 required
                                 checked={formData.terminos} 
@@ -615,6 +625,7 @@ const Registrarse: React.FC = () => {
                         <button 
                             type="submit" 
                             className={styles.btnRegistro} 
+                            data-testid="register-submit"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Registrando...' : 'Crear Cuenta'}

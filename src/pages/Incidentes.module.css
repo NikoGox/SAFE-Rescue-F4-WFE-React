@@ -203,6 +203,12 @@
 /* 4. FORMULARIOS */
 /* ========================================================================= */
 
+.input-error {
+  border-color: red !important;
+  background-color: #fff8f8;
+}
+
+
 .overlay-form {
   position: fixed;
   top: 0;

@@ -159,11 +159,30 @@ const Incidentes: React.FC = () => {
         }
     };
 
+
+    const validateForm = (data: IncidentForm): boolean => {
+        if (!data.type || !data.description || !data.location) {
+            window.alert('Por favor, complete todos los campos requeridos');
+            return false;
+        }
+
+        if (data.type.length < 3 || data.description.length < 10 || data.location.length < 5) {
+            window.alert('Por favor, proporcione información más detallada');
+            return false;
+        }
+
+        return true;
+    };
+
     /**
      * Maneja el envío del formulario de nuevo incidente
      */
     const handleSubmitIncident = (e: React.FormEvent): void => {
         e.preventDefault();
+
+        if (!validateForm(newIncident)) {
+            return;
+        }
 
         const now = new Date();
         const dateTime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
@@ -220,7 +239,6 @@ const Incidentes: React.FC = () => {
         const incident = incidents.find(inc => inc.id === id);
         if (incident) {
             setEditingIncident(id);
-            // Asegurar que el formulario de edición se inicialice con los datos correctos
             setEditForm({
                 description: incident.description,
                 location: incident.location,
@@ -228,10 +246,7 @@ const Incidentes: React.FC = () => {
                 status: incident.status,
                 imageUrl: incident.imageUrl
             });
-            // Opcional: expandir la fila para ver el formulario si no está expandida
-            if (expandedIncident !== id) {
-                setExpandedIncident(id);
-            }
+            setExpandedIncident(id); // Asegurarse que la fila esté expandida
         }
     };
 
@@ -239,6 +254,10 @@ const Incidentes: React.FC = () => {
      * Guarda los cambios de un incidente editado
      */
     const handleSaveIncident = (id: number): void => {
+        if (!validateForm(editForm)) {
+            return;
+        }
+
         const updatedIncidents = incidents.map(incident => {
             if (incident.id === id) {
                 return {
@@ -247,7 +266,7 @@ const Incidentes: React.FC = () => {
                     location: editForm.location.trim(),
                     type: editForm.type.trim(),
                     status: editForm.status.trim(),
-                    imageUrl: editForm.imageUrl.trim()
+                    imageUrl: editForm.imageUrl.trim() || incident.imageUrl
                 };
             }
             return incident;
@@ -257,6 +276,7 @@ const Incidentes: React.FC = () => {
         saveIncidentsToLocalStorage(updatedIncidents);
         setEditingIncident(null);
         setExpandedIncident(null); // Opcional: cerrar los detalles al guardar
+
         setEditForm({
             description: "",
             location: "",
@@ -265,7 +285,7 @@ const Incidentes: React.FC = () => {
             imageUrl: ""
         });
 
-        alert("Incidente actualizado correctamente");
+        alert("✅ Incidente actualizado correctamente");
     };
 
     /**
@@ -283,10 +303,6 @@ const Incidentes: React.FC = () => {
 
 
     //iconos
-
-
-
-
     const getIncidentIcon = (type: string): string => {
         const iconMap: { [key: string]: string } = {
             'incendio': '🔥',
@@ -329,6 +345,7 @@ const Incidentes: React.FC = () => {
                     </div>
 
                     <button
+                        data-testid="btn-nuevo-incidente"
                         className={`${styles['btn-primario']} ${styles['btn-grande']}`}
                         onClick={() => setShowForm(true)}
                         disabled={showForm}
@@ -360,7 +377,7 @@ const Incidentes: React.FC = () => {
                                 </button>
                             </div>
 
-                            <form onSubmit={handleSubmitIncident} className={styles['formulario-incidente']}>
+                            <form role="form" onSubmit={handleSubmitIncident} className={styles['formulario-incidente']}>
                                 <div className={styles['grid-form']}>
                                     <div className={styles['form-group']}>
                                         <label htmlFor="type" className={styles['form-label']}>
@@ -369,6 +386,7 @@ const Incidentes: React.FC = () => {
                                         <input
                                             type="text"
                                             id="type"
+                                            datatype="'incident-type'"
                                             value={newIncident.type}
                                             onChange={(e) => handleInputChange(e, 'new')}
                                             placeholder="Ej: Incendio, Accidente, Fuga de gas..."
@@ -383,7 +401,7 @@ const Incidentes: React.FC = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            id="location"
+                                            data-testid="incident-location" id="location"
                                             value={newIncident.location}
                                             onChange={(e) => handleInputChange(e, 'new')}
                                             placeholder="Dirección exacta o referencia..."
@@ -398,6 +416,7 @@ const Incidentes: React.FC = () => {
                                         </label>
                                         <textarea
                                             id="description"
+                                            data-testid="incident-description"
                                             value={newIncident.description}
                                             onChange={(e) => handleInputChange(e, 'new')}
                                             placeholder="Describe el incidente con todos los detalles relevantes..."
@@ -426,7 +445,7 @@ const Incidentes: React.FC = () => {
                                 </div>
 
                                 <div className={styles['form-actions']}>
-                                    <button type="submit" className={styles['btn-primario']}>
+                                    <button data-testid="submit-incident" type="submit" className={styles['btn-primario']}>
                                         🚀 Enviar Reporte
                                     </button>
                                     <button
@@ -453,17 +472,17 @@ const Incidentes: React.FC = () => {
                 {/* Panel de estadísticas */}
                 <div className={styles['panel-estadisticas']}>
                     <div className={styles.estadistica}>
-                        <span className={styles['estadistica-numero']}>{incidents.length}</span>
-                        <span className={styles['estadistica-label']}>Total Incidentes</span>
+                        <span data-testid="estadistica-numero" className={styles['estadistica-numero']}>{incidents.length}</span>
+                        <span data-testid="estadistica-label" className={styles['estadistica-label']}>Total Incidentes</span>
                     </div>
                     <div className={styles.estadistica}>
-                        <span className={styles['estadistica-numero']}>
+                        <span data-testid="estadistica-numero" className={styles['estadistica-numero']}>
                             {incidents.filter(i => i.status === 'En progreso').length}
                         </span>
                         <span className={styles['estadistica-label']}>En Progreso</span>
                     </div>
                     <div className={styles.estadistica}>
-                        <span className={styles['estadistica-numero']}>
+                        <span data-testid="estadistica-numero" className={styles['estadistica-numero']}>
                             {incidents.filter(i => i.status === 'Cerrado').length}
                         </span>
                         <span className={styles['estadistica-label']}>Resueltos</span>
@@ -563,7 +582,7 @@ const Incidentes: React.FC = () => {
                                                             {editingIncident === incident.id ? (
                                                                 // Formulario de edición
                                                                 <div className={styles['formulario-edicion']}>
-                                                                    <h4>✏️ Editando Incidente #{incident.id}</h4>
+                                                                    <h4>{`✏️ Editando Incidente #${incident.id}`}</h4>
                                                                     <div className={styles['grid-form']}>
                                                                         {/* Tipo de Incidente */}
                                                                         <div className={styles['form-group']}>
@@ -571,6 +590,7 @@ const Incidentes: React.FC = () => {
                                                                             <input
                                                                                 type="text"
                                                                                 id="edit-type"
+                                                                                data-testid="incident-type"
                                                                                 value={editForm.type}
                                                                                 onChange={(e) => handleInputChange(e, 'edit')}
                                                                                 className={styles['form-input']}
@@ -584,6 +604,7 @@ const Incidentes: React.FC = () => {
                                                                             <input
                                                                                 type="text"
                                                                                 id="edit-location"
+                                                                                data-testid="incident-location"
                                                                                 value={editForm.location}
                                                                                 onChange={(e) => handleInputChange(e, 'edit')}
                                                                                 className={styles['form-input']}
@@ -608,9 +629,12 @@ const Incidentes: React.FC = () => {
 
                                                                         {/* Descripción */}
                                                                         <div className={`${styles['form-group']} ${styles['full-width']}`}>
-                                                                            <label htmlFor="edit-description" className={styles['form-label']}>📄 Descripción Detallada</label>
+                                                                            <label htmlFor="edit-description" className={styles['form-label']}>
+                                                                                📄 Descripción Detallada
+                                                                            </label>
                                                                             <textarea
                                                                                 id="edit-description"
+                                                                                data-testid="edit-description-textarea"
                                                                                 value={editForm.description}
                                                                                 onChange={(e) => handleInputChange(e, 'edit')}
                                                                                 className={styles['form-textarea']}
@@ -625,6 +649,7 @@ const Incidentes: React.FC = () => {
                                                                             <input
                                                                                 type="url"
                                                                                 id="edit-imageUrl"
+                                                                                data-testid="edit-imageUrl"
                                                                                 value={editForm.imageUrl}
                                                                                 onChange={(e) => handleInputChange(e, 'edit')}
                                                                                 className={styles['form-input']}
@@ -635,6 +660,7 @@ const Incidentes: React.FC = () => {
                                                                     </div>
                                                                     <div className={styles['acciones-edicion']}>
                                                                         <button
+                                                                            data-testid="save-changes"
                                                                             className={styles['btn-primario']}
                                                                             onClick={() => handleSaveIncident(incident.id)}
                                                                         >
@@ -654,7 +680,7 @@ const Incidentes: React.FC = () => {
                                                                     <div className={styles['detalles-contenido']}>
                                                                         <div className={styles['detalles-texto']}>
                                                                             <h4>Descripción Completa</h4>
-                                                                            <p>{incident.description}</p>
+                                                                            <p data-testid="incident-description-text">{incident.description}</p>
 
                                                                             <div className={styles['info-adicional']}>
                                                                                 <div className={styles['info-item']}>
@@ -705,8 +731,8 @@ const Incidentes: React.FC = () => {
                         )}
                     </div>
                 </div>
-            </section>
-        </div>
+            </section >
+        </div >
     );
 };
 
