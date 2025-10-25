@@ -86,7 +86,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = () => {
 
             // Simulación de llamada a API
 
-            await new Promise((resolve, reject) => {
+            await new Promise((resolve) => {
                 setTimeout(() => {
                     resolve(null);
                 }, 2000);

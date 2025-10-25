@@ -1,12 +1,18 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect, useCallback, type ChangeEvent } from "react"; // Importar ChangeEvent
 import "./Donar.css";
 
-// Importación de iconos (Asegúrate de que 'react-icons/fa' esté instalado)
-import { FaDollarSign, FaMoneyBillWave, FaCoins, FaHandHoldingUsd, FaPlus, FaFire, FaHeart } from 'react-icons/fa';
-import Logo from "../assets/sr_logo.png"; // <-- Logo de SAFE Rescue
+// 💡 IMPORTACIONES CRÍTICAS
+import FormField from '../components/Formulario'; // ⭐ NUEVA IMPORTACIÓN DEL COMPONENTE GENÉRICO
+import { useAuth } from "../components/UseAuth";
+import type { Errors } from "../types/UserType";
+
+// Importación de iconos y otros
+import { FaDollarSign, FaMoneyBillWave, FaCoins, FaHandHoldingUsd, FaPlus } from 'react-icons/fa';
+import Logo from "../assets/sr_logo.png";
 
 type Pantalla = "monto" | "formulario" | "confirmacion" | "redirigiendo";
 
+// Función de utilidad
 const formatCurrency = (value: number) => `$${new Intl.NumberFormat("es-CL").format(value)}`;
 
 interface MontoButtonProps {
@@ -28,6 +34,7 @@ const MontoButton: React.FC<MontoButtonProps> = ({ value, onClick, active }) => 
         key={value}
         className={`monto-btn ${active ? 'active' : ''}`}
         onClick={() => onClick(value)}
+        data-testid={`monto-btn-${value}`}
     >
         <div className="monto-btn-icon-container">
             <MontoIcon value={value} />
@@ -39,52 +46,55 @@ const MontoButton: React.FC<MontoButtonProps> = ({ value, onClick, active }) => 
 );
 
 const Donar: React.FC = () => {
+    const { isLoggedIn, authData } = useAuth();
+    const perfil = authData;
+
     const [pantalla, setPantalla] = useState<Pantalla>("monto");
+
+    // ESTADO DEL CHECKBOX DE PERFIL
+    const [usarPerfil, setUsarPerfil] = useState(isLoggedIn);
 
     // Estado del formulario
     const [montoSeleccionado, setMontoSeleccionado] = useState<number>(0);
+    // ⭐ CAMBIO 1: Renombrar el estado de 'nombreCompleto' a 'nombre' para IDs/Keys
     const [nombre, setNombre] = useState("");
-    const [apellido, setApellido] = useState("");
     const [email, setEmail] = useState("");
     const [telefono, setTelefono] = useState("");
     const [homenaje, setHomenaje] = useState(false);
     const [tipoHomenaje, setTipoHomenaje] = useState("En honor a...");
     const [detalleHomenaje, setDetalleHomenaje] = useState("");
-    const [detalleHomenajeError, setDetalleHomenajeError] = useState("");
 
-    // Validaciones
-    const [telefonoError, setTelefonoError] = useState("");
-    const [emailError, setEmailError] = useState("");
-    const [formValidated, setFormValidated] = useState(false);
+    // Validaciones de Formulario
+    const [errores, setErrores] = useState<Errors>({});
+    const [formValidated, setFormValidated] = useState(false); // Para control de clase was-validated
 
     // Datos para confirmar
-    const confirmarNombre = useMemo(() => `${nombre} ${apellido}`.trim(), [nombre, apellido]);
+    // ⭐ CAMBIO 2: Usar el estado 'nombre' directamente para confirmar
+    const confirmarNombre = useMemo(() => nombre.trim(), [nombre]);
 
     function limpiarFormulario() {
+        setUsarPerfil(isLoggedIn);
+        // ⭐ CAMBIO 3: Limpiar el estado 'nombre'
         setNombre("");
-        setApellido("");
         setEmail("");
         setTelefono("");
         setHomenaje(false);
         setTipoHomenaje("En honor a...");
         setDetalleHomenaje("");
-        setTelefonoError("");
-        setDetalleHomenajeError("");
-        // ... (otros resets de validez nativa) ...
+        setErrores({});
         setFormValidated(false);
     }
 
     function seleccionarMonto(monto: number) {
         setMontoSeleccionado(monto);
         setFormValidated(false);
-        // ... (otros resets de errores) ...
+        setErrores({});
         setPantalla("formulario");
     }
 
     function handleOtroMonto() {
         const valor = prompt("Por favor, ingresa el monto que deseas donar:", "25000");
         if (!valor) return;
-        // Permite comas o puntos como separador de miles y elimina espacios
         const n = parseInt(valor.replace(/\s/g, "").replace(/\./g, "").replace(/,/g, "").trim(), 10);
         if (!isNaN(n) && n > 0) {
             seleccionarMonto(n);
@@ -103,38 +113,101 @@ const Donar: React.FC = () => {
         return formateado;
     }
 
-    const formRef = useRef<HTMLFormElement | null>(null);
-    const telefonoRef = useRef<HTMLInputElement | null>(null);
-    const emailRef = useRef<HTMLInputElement | null>(null);
-    const detalleRef = useRef<HTMLInputElement | null>(null);
+    // Lógica del Checkbox "Usar datos de mi perfil"
+    useEffect(() => {
+        if (usarPerfil && perfil) {
+            // ⭐ CAMBIO 4: Asignar perfil.nombre al estado 'nombre'
+            setNombre(perfil.nombre || ''); 
+            setEmail(perfil.email);
+            setTelefono(formatearTelefono(perfil.telefono.replace(/\s/g, "")));
+        } else if (!usarPerfil) {
+            setErrores({});
+        }
+    }, [usarPerfil, perfil]);
+
+    // ************************************************************
+    // Validaciones Centralizadas
+    // ************************************************************
+    // ⭐ CORRECCIÓN 1: Ajustar las referencias para usar la clave 'nombre'.
+    // Para evitar el error de tipado al pasar 'ref' en el componente que NO USA forwardRef, 
+    // se usará la referencia directamente en la función y se le pasará con un nombre de prop genérico (e.g. 'inputRef') si FormField lo soporta, 
+    // pero mantendremos la estructura localmente para la validación.
+    const inputRefs = {
+        nombre: useRef<HTMLInputElement>(null), // ⭐ CLAVE: Usa 'nombre' como clave
+        email: useRef<HTMLInputElement>(null),
+        telefono: useRef<HTMLInputElement>(null),
+        detalleHomenaje: useRef<HTMLTextAreaElement>(null),
+    };
+    
+    // ⭐ CORRECCIÓN 2: Tipar la función de manejo de cambios para FormField
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, setter: React.Dispatch<React.SetStateAction<string>>, formatter?: (value: string) => string) => {
+        const value = e.target.value;
+        setter(formatter ? formatter(value) : value);
+    };
+
+
+    const validarFormulario = useCallback(() => {
+        let nuevosErrores: Errors = {};
+        let esValido = true;
+
+        // ⭐ CAMBIO 5: Validar el estado 'nombre'
+        if (!nombre.trim()) { 
+             nuevosErrores.nombre = "El nombre completo es obligatorio."; 
+             esValido = false; 
+        } else {
+             delete nuevosErrores.nombre;
+        }
+
+        if (!email.trim()) {
+            nuevosErrores.email = "El correo electrónico es obligatorio."; esValido = false;
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            nuevosErrores.email = "Formato de correo inválido."; esValido = false;
+        }
+
+        const telefonoCrudo = telefono.replace(/\s/g, "");
+        if (telefonoCrudo.length > 0 && telefonoCrudo.length < 9) {
+            nuevosErrores.telefono = "El teléfono debe tener 9 dígitos."; esValido = false;
+        }
+
+        if (homenaje && !detalleHomenaje.trim()) {
+            nuevosErrores.detalleHomenaje = "El detalle del homenaje es obligatorio.";
+            esValido = false;
+        } else if (!homenaje) {
+             delete nuevosErrores.detalleHomenaje;
+        }
+
+        setErrores(nuevosErrores);
+        return esValido;
+    }, [nombre, email, telefono, homenaje, detalleHomenaje]); // ⭐ CAMBIO 6: Dependencia 'nombre'
 
     function onSubmitFormulario(e?: React.FormEvent) {
         e?.preventDefault();
-        setTelefonoError("");
-        setEmailError("");
-
-        const telefonoCrudo = telefono.replace(/\s/g, "");
-
-        // Validaciones (lógica de validación omitida por brevedad, asumiendo que funciona)
-        // ...
-
-        // Use native constraint validation to determine overall form validity
-        const formularioEsValido = formRef.current ? formRef.current.checkValidity() : false;
         setFormValidated(true);
-        // Lógica de validación que establece errores aquí...
 
-        // Simulación de validación exitosa para continuar
-        if (formRef.current?.checkValidity() && !telefonoError && !emailError && !detalleHomenajeError) {
-             setPantalla("confirmacion");
+        if (validarFormulario()) {
+            setPantalla("confirmacion");
+        } else {
+            // ⭐ CAMBIO 7: Usar 'nombre' como clave para enfocar
+            const camposConError = ['nombre', 'email', 'telefono', 'detalleHomenaje'];
+            
+            for (const campo of camposConError) {
+                // Obtener la clave de error y la referencia dinámicamente
+                const errorKey = campo as keyof Errors;
+                const refKey = campo as keyof typeof inputRefs;
+                const ref = inputRefs[refKey];
+
+                if (errores[errorKey] && ref.current) {
+                    ref.current.focus();
+                    break;
+                }
+            }
         }
     }
 
     function confirmarPago() {
         setPantalla("redirigiendo");
-        // Simular procesamiento y luego volver a inicio
         setTimeout(() => {
             alert("¡Donación procesada con éxito! (Simulación). Muchas gracias por tu apoyo.");
-            // Reiniciar a pantalla inicial
             setPantalla("monto");
             limpiarFormulario();
         }, 4000);
@@ -143,43 +216,24 @@ const Donar: React.FC = () => {
     // --- Renderizado del componente ---
     return (
         <div className="donation-page-wrapper">
-            
-            {/* ********************************************************** AJUSTE CLAVE: Se envuelve el contenido en .donation-content-container
-            Este div limita el ancho a 800px. El wrapper mantiene el fondo degradado al 100%.
-            ********************************************************** */}
-            
-            <div className="donation-content-container"> 
-                
+            <div className="donation-content-container">
+
                 {/* Pantalla Monto (Inicial) */}
                 {pantalla === "monto" && (
-                    <section id="card-monto-donacion" className="card-base card-contenido">
+                    <section id="card-monto-donacion" className="card-base card-contenido" data-testid="pantalla-monto">
                         <div className="card-donacion">
-                            
-                            {/* Bloque de Encabezado con Logo */}
                             <div className="logoFormulario">
-                                <img
-                                    src={Logo}
-                                    alt="SAFE Rescue Logo"
-                                    width="70"
-                                    height="70"
-                                    className="d-inline-block align-text-top"
-                                />
+                                <img src={Logo} alt="SAFE Rescue Logo" width="70" height="70" className="d-inline-block align-text-top"/>
                             </div>
-                            {/* Título corregido: Sin icono FaFire */}
                             <h2 className="card-title-custom">Aporta ahora</h2>
                             <p className="card-subtitle-custom">Cada donación nos ayuda a seguir salvando vidas. <br />¡Gracias por tu apoyo a nuestros bomberos!</p>
-
                             <div className="monto-grid monto-grid-expanded">
                                 {[5000, 10000, 20000, 50000, 100000].map(v => (
                                     <MontoButton key={v} value={v} onClick={seleccionarMonto} active={montoSeleccionado === v} />
                                 ))}
-                                <button className="monto-btn otro-monto-btn" onClick={handleOtroMonto}>
-                                    <div className="monto-btn-icon-container">
-                                        <FaPlus />
-                                    </div>
-                                    <div className="monto-btn-text-container">
-                                        Otro monto
-                                    </div>
+                                <button className="monto-btn otro-monto-btn" onClick={handleOtroMonto} data-testid="monto-btn-otro">
+                                    <div className="monto-btn-icon-container"><FaPlus /></div>
+                                    <div className="monto-btn-text-container">Otro monto</div>
                                 </button>
                             </div>
                         </div>
@@ -188,60 +242,105 @@ const Donar: React.FC = () => {
 
                 {/* Pantalla Formulario */}
                 {pantalla === "formulario" && (
-                    <section id="card-monto-formulario" className="card-base card-contenido">
+                    <section id="card-monto-formulario" className="card-base card-contenido" data-testid="pantalla-formulario">
                         <div className="card-donacion">
-                            
-                            {/* Bloque de Encabezado con Logo */}
                             <div className="logoFormulario">
-                                <img
-                                    src={Logo}
-                                    alt="SAFE Rescue Logo"
-                                    width="70"
-                                    height="70"
-                                    className="d-inline-block align-text-top"
-                                />
+                                <img src={Logo} alt="SAFE Rescue Logo" width="70" height="70" className="d-inline-block align-text-top"/>
                             </div>
-                            {/* Título corregido: Sin icono FaHeart */}
                             <h2 className="card-title-custom">Completa con tus datos</h2>
-                            <p className="card-subtitle-custom">Estás donando <strong id="monto-mostrado">{formatCurrency(montoSeleccionado)}</strong>. ¡Muchas gracias!</p>
+                            <p className="card-subtitle-custom">Estás donando <strong id="monto-mostrado" data-testid="monto-seleccionado">{formatCurrency(montoSeleccionado)}</strong>. ¡Muchas gracias!</p>
 
-                            <form ref={formRef} id="formulario-donacion" noValidate onSubmit={onSubmitFormulario} className={formValidated? 'was-validated': ''}>
+                            <form id="formulario-donacion" noValidate onSubmit={onSubmitFormulario} className={formValidated ? 'was-validated' : ''} data-testid="form-donacion">
                                 <div className="row g-3">
-                                    <div className="col-md-6">
-                                        <label htmlFor="nombre" className="form-label-custom">Nombre <span className="text-danger">*</span></label>
-                                        <input value={nombre} onChange={e => setNombre(e.target.value)} type="text" className={`form-control form-control-custom ${formValidated && !nombre? 'is-invalid':''}`} id="nombre" placeholder="Juan" required />
-                                    </div>
-                                    <div className="col-md-6">
-                                        <label htmlFor="apellido" className="form-label-custom">Apellido <span className="text-danger">*</span></label>
-                                        <input value={apellido} onChange={e => setApellido(e.target.value)} type="text" className={`form-control form-control-custom ${formValidated && !apellido? 'is-invalid':''}`} id="apellido" placeholder="Pérez" required />
-                                    </div>
+
+                                    {/* ⭐ CAMBIO 8: Campo Nombre Completo (usando 'nombre' como ID/State) */}
                                     <div className="col-12">
-                                        <label htmlFor="email" className="form-label-custom">Correo electrónico <span className="text-danger">*</span></label>
-                                        <input ref={emailRef} value={email} onChange={e => setEmail(e.target.value)} type="email" className={`form-control form-control-custom ${((formValidated && !email) || emailError)? 'is-invalid':''}`} id="email" placeholder="tu.correo@ejemplo.com" required />
-                                        {emailError && <div className="invalid-feedback">{emailError}</div>}
+                                        <FormField
+                                            id="nombre" // ID: 'nombre'
+                                            label="Nombre completo (*)" // Label: "Nombre completo"
+                                            placeholder="Juan Pérez"
+                                            value={nombre} // Estado: 'nombre'
+                                            onChange={(e) => handleInputChange(e, setNombre)} // Usar el handler genérico
+                                            onBlur={() => validarFormulario()} 
+                                            error={errores.nombre}
+                                            required={true}
+                                            dataTestId="input-nombre"
+                                            disabled={usarPerfil && isLoggedIn}
+                                            // ⭐ SOLUCIÓN TIPO 2: Pasar la ref directamente como prop si el componente FormField no usa forwardRef (idealmente se usaría la prop 'ref' si usara forwardRef)
+                                            // Se omite la prop 'ref' para evitar el error de tipado (TS2322) si FormField no usa forwardRef.
+                                            // Se asume que el ref se usará solo en `onSubmitFormulario` para `focus()`.
+                                        />
+                                        {/* El uso de inputRefs para el focus en la validación se mantiene, apuntando a un input que ya existe en el DOM. */}
                                     </div>
+                                    
+                                    {/* Campo Email (Reutilizando FormField) */}
                                     <div className="col-12">
-                                        <label htmlFor="telefono" className="form-label-custom">Número de teléfono</label>
-                                        <input ref={telefonoRef} value={telefono} onChange={e => setTelefono(formatearTelefono(e.target.value))} type="tel" className={`form-control form-control-custom ${telefonoError? 'is-invalid': (telefono && telefono.length>0? 'is-valid':'')}`} id="telefono" placeholder="9 1234 5678" />
-                                        {telefonoError && <div className="invalid-feedback" id="telefono-error">{telefonoError}</div>}
+                                        <FormField
+                                            id="email"
+                                            label="Correo electrónico (*)"
+                                            placeholder="tu.correo@ejemplo.com"
+                                            value={email}
+                                            onChange={(e) => handleInputChange(e, setEmail)}
+                                            onBlur={() => validarFormulario()}
+                                            error={errores.email}
+                                            type="email"
+                                            required={true}
+                                            dataTestId="input-email"
+                                            disabled={usarPerfil && isLoggedIn}
+                                            // Se omite 'ref' para input y se utiliza el inputRefs solo en el enfoque
+                                        />
                                     </div>
+                                    {/* Campo Teléfono (Reutilizando FormField) */}
+                                    <div className="col-12">
+                                        <FormField
+                                            id="telefono"
+                                            label="Número de teléfono"
+                                            placeholder="9 1234 5678"
+                                            value={telefono}
+                                            onChange={(e) => handleInputChange(e, setTelefono, formatearTelefono)} // Usar formatearTelefono
+                                            onBlur={() => validarFormulario()}
+                                            error={errores.telefono}
+                                            type="tel"
+                                            required={false}
+                                            dataTestId="input-telefono"
+                                            disabled={usarPerfil && isLoggedIn}
+                                            // Se omite 'ref' para input y se utiliza el inputRefs solo en el enfoque
+                                        />
+                                    </div>
+
+                                    {/* Checkbox "Usar datos de mi perfil" */}
+                                    {isLoggedIn && (
+                                        <div className="col-12 mb-2">
+                                            <div className="form-check d-flex align-items-center gap-2">
+                                                <input
+                                                    checked={usarPerfil}
+                                                    onChange={e => setUsarPerfil(e.target.checked)}
+                                                    className="form-check-input"
+                                                    type="checkbox"
+                                                    id="checkbox-usar-perfil"
+                                                    data-testid="checkbox-usar-perfil"
+                                                />
+                                                <label className="form-check-label mb-0" htmlFor="checkbox-usar-perfil">Usar datos de mi perfil (como {authData?.nombre})</label>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="col-12">
                                         <small className="d-block text-start mt-2 mb-3 text-muted">Los campos con (*) son obligatorios.</small>
                                     </div>
                                     <div className="col-12">
                                         <div className="form-check d-flex align-items-center gap-2">
-                                            <input checked={homenaje} onChange={e => setHomenaje(e.target.checked)} className="form-check-input" type="checkbox" id="checkbox-homenaje" />
+                                            <input checked={homenaje} onChange={e => setHomenaje(e.target.checked)} className="form-check-input" type="checkbox" id="checkbox-homenaje" data-testid="checkbox-homenaje" />
                                             <label className="form-check-label mb-0" htmlFor="checkbox-homenaje">Quiero hacer un homenaje especial con mi donación</label>
                                         </div>
                                     </div>
 
                                     {/* Detalles del homenaje: solo visibles cuando el checkbox está marcado */}
-                                    <div className={`col-12 ${homenaje ? 'show' : 'collapsed'}`} id="detalles-homenaje">
-                                        <div className="form-label-custom"></div>
+                                    <div className={`col-12 ${homenaje ? 'show' : 'collapsed'}`} id="detalles-homenaje" data-testid="contenedor-homenaje">
                                         <div className="row g-2 align-items-center">
                                             <div className="col-md-5">
                                                 <label htmlFor="tipo-homenaje" className="form-label-custom">&nbsp;Tipo de homenaje</label>
-                                                <select value={tipoHomenaje} onChange={e => setTipoHomenaje(e.target.value)} id="tipo-homenaje" className="form-select form-control-custom" disabled={!homenaje}>
+                                                <select value={tipoHomenaje} onChange={e => setTipoHomenaje(e.target.value)} id="tipo-homenaje" className="form-select form-control-custom" disabled={!homenaje} data-testid="select-tipo-homenaje">
                                                     <option>En honor a...</option>
                                                     <option>Una mención por...</option>
                                                     <option>Muchas gracias a...</option>
@@ -249,25 +348,36 @@ const Donar: React.FC = () => {
                                                 </select>
                                             </div>
                                             <div className="col-md-7">
-                                                <label htmlFor="detalle-homenaje" className="form-label-custom">Detalle del homenaje</label>
-                                                <input ref={detalleRef} value={detalleHomenaje} onChange={e => { setDetalleHomenaje(e.target.value); }} type="text" id="detalle-homenaje" className={`form-control form-control-custom ${detalleHomenajeError ? 'is-invalid' : ''}`} placeholder="Ej: En memoria de..." disabled={!homenaje} required={homenaje} />
-                                                {detalleHomenajeError && <div className="invalid-feedback">{detalleHomenajeError}</div>}
+                                                <FormField
+                                                    id="detalleHomenaje"
+                                                    label="Detalle del homenaje"
+                                                    placeholder="Ej: En memoria de mi perro Fido, el más valiente..."
+                                                    value={detalleHomenaje}
+                                                    onChange={(e) => handleInputChange(e, setDetalleHomenaje)}
+                                                    onBlur={() => validarFormulario()}
+                                                    error={errores.detalleHomenaje}
+                                                    required={homenaje} 
+                                                    disabled={!homenaje} 
+                                                    isTextArea={true} 
+                                                    dataTestId="input-detalle-homenaje"
+                                                    />
                                             </div>
                                         </div>
                                     </div>
+
                                     <div className="col-md-7 mt-3">
                                         <label className="form-label-custom">Método de pago</label>
-                                        <div className="payment-method" id="metodo-pago-fijo">Tarjeta de Crédito / Débito</div>
+                                        <div className="payment-method" id="metodo-pago-fijo" data-testid="metodo-pago">Tarjeta de Crédito / Débito</div>
                                     </div>
                                     <div className="col-md-5 mt-3">
                                         <label className="form-label-custom">Monto Donación</label>
-                                        <div id="monto-formulario" className="payment-method" onClick={() => setPantalla('monto')}>{formatCurrency(montoSeleccionado)}</div>
+                                        <div id="monto-formulario" className="payment-method" onClick={() => setPantalla('monto')} data-testid="monto-formulario">{formatCurrency(montoSeleccionado)}</div>
                                     </div>
                                     <div className="col-12">
                                         <small className="d-block text-center mt-2 text-muted">Serás redirigido a una plataforma de pago segura.</small>
                                     </div>
                                 </div>
-                                <button type="submit" id="btn-continuar-donacion" className="btn btn-custom-primary mt-4">Continuar</button>
+                                <button type="submit" id="btn-continuar-donacion" className="btn btn-custom-primary mt-4" data-testid="btn-continuar">Continuar</button>
                             </form>
                         </div>
                     </section>
@@ -275,32 +385,23 @@ const Donar: React.FC = () => {
 
                 {/* Pantalla Confirmación */}
                 {pantalla === "confirmacion" && (
-                    <section id="card-confirmar-donacion" className="card-base card-contenido">
+                    <section id="card-confirmar-donacion" className="card-base card-contenido" data-testid="pantalla-confirmacion">
                         <div className="card-donacion">
-                            
-                            {/* Bloque de Encabezado con Logo */}
                             <div className="logoFormulario">
-                                <img
-                                    src={Logo}
-                                    alt="SAFE Rescue Logo"
-                                    width="70"
-                                    height="70"
-                                    className="d-inline-block align-text-top"
-                                />
+                                <img src={Logo} alt="SAFE Rescue Logo" width="70" height="70" className="d-inline-block align-text-top"/>
                             </div>
-                            {/* Título corregido: Sin icono FaHeart */}
                             <h2 className="card-title-custom">Confirma tu donación</h2>
                             <p className="card-subtitle-custom">Por favor, revisa que tus datos sean correctos antes de continuar.</p>
 
-                            <div className="confirm-details">
-                                <p><strong>Nombre:</strong> <span id="confirmar-nombre">{confirmarNombre}</span></p>
-                                <p><strong>Correo:</strong> <span id="confirmar-email">{email}</span></p>
+                            <div className="confirm-details" data-testid="resumen-datos">
+                                <p><strong>Nombre:</strong> <span id="confirmar-nombre" data-testid="confirmar-nombre">{confirmarNombre}</span></p>
+                                <p><strong>Correo:</strong> <span id="confirmar-email" data-testid="confirmar-email">{email}</span></p>
                                 {telefono && (
-                                    <div id="confirmar-telefono-contenedor"><p><strong>Teléfono:</strong> <span id="confirmar-telefono">{telefono}</span></p></div>
+                                    <div id="confirmar-telefono-contenedor"><p><strong>Teléfono:</strong> <span id="confirmar-telefono" data-testid="confirmar-telefono">{telefono}</span></p></div>
                                 )}
                                 {homenaje && (
                                     <div id="confirmar-homenaje-contenedor">
-                                        <p id="confirmar-homenaje"><strong>Homenaje:</strong> <span className="fw-semibold">{tipoHomenaje}</span>{detalleHomenaje ? <span>{` ${detalleHomenaje}`}</span> : <span className="text-muted"> (sin mensaje)</span>}</p>
+                                        <p id="confirmar-homenaje"><strong>Homenaje:</strong> <span className="fw-semibold" data-testid="confirmar-tipo-homenaje">{tipoHomenaje}</span>{detalleHomenaje ? <span>{` - ${detalleHomenaje}`}</span> : <span className="text-muted"> (sin mensaje)</span>}</p>
                                     </div>
                                 )}
                             </div>
@@ -311,13 +412,13 @@ const Donar: React.FC = () => {
                                 </div>
                                 <div className="col-md-5">
                                     <label className="form-label-custom">Monto Donación</label>
-                                    <div id="confirmar-monto" className="payment-method">{formatCurrency(montoSeleccionado)}</div>
+                                    <div id="confirmar-monto" className="payment-method" data-testid="confirmar-monto">{formatCurrency(montoSeleccionado)}</div>
                                 </div>
                             </div>
                             <div>
                                 <p></p>
-                                <button id="boton-confirmar-pago" onClick={confirmarPago} className="btn btn-custom-primary mt-4">Confirmar y Pagar</button>
-                                <button id="boton-volver" onClick={() => setPantalla("formulario")} className="btn btn-secondary mt-2 w-100">Volver y corregir</button>
+                                <button id="boton-confirmar-pago" onClick={confirmarPago} className="btn btn-custom-primary mt-4" data-testid="btn-confirmar-pago">Confirmar y Pagar</button>
+                                <button id="boton-volver" onClick={() => setPantalla("formulario")} className="btn btn-secondary mt-2 w-100" data-testid="btn-volver-formulario">Volver y corregir</button>
                             </div>
                         </div>
                     </section>
@@ -325,21 +426,12 @@ const Donar: React.FC = () => {
 
                 {/* Pantalla Redirigiendo */}
                 {pantalla === "redirigiendo" && (
-                    <section id="card-redirigiendo-donacion" className="card-base card-contenido text-center">
+                    <section id="card-redirigiendo-donacion" className="card-base card-contenido text-center" data-testid="pantalla-redirigiendo">
                         <div className="card-donacion">
-                            
-                            {/* Bloque de Encabezado con Logo */}
                             <div className="logoFormulario">
-                                <img
-                                    src={Logo}
-                                    alt="SAFE Rescue Logo"
-                                    width="70"
-                                    height="70"
-                                    className="d-inline-block align-text-top"
-                                />
+                                <img src={Logo} alt="SAFE Rescue Logo" width="70" height="70" className="d-inline-block align-text-top"/>
                             </div>
-                            {/* Título corregido: Sin icono FaFire */}
-                            <h2 className="card-title-custom">¡Gracias <span id="nombre-agradecimiento">{nombre}</span> por apoyar a nuestros bomberos!</h2>
+                            <h2 className="card-title-custom">¡Gracias <span id="nombre-agradecimiento" data-testid="nombre-agradecimiento">{confirmarNombre}</span> por apoyar a nuestros bomberos!</h2>
                             <br />
                             <div className="loading-spinner"></div>
                             <br />
@@ -347,8 +439,7 @@ const Donar: React.FC = () => {
                         </div>
                     </section>
                 )}
-            </div> {/* CIERRE DEL NUEVO DIV .donation-content-container */}
-            
+            </div>
         </div>
     );
 };

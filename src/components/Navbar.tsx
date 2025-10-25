@@ -1,13 +1,15 @@
-// src/components/Navbar/Navbar.tsx (Código Modificado para Scroll Directo)
+// src/components/Navbar/Navbar.tsx (Código Corregido)
 import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
-import Dropdown from "./Dropdown";
+import Dropdown from "./Dropdown"; // Asegúrate de que esta ruta sea correcta
 import styles from "./Navbar.module.css"; 
 import Logo from "../assets/sr_logo.png";
-import { useAuth } from "./UseAuth";
+import { useAuth } from "./UseAuth"; 
 
 const Navbar: React.FC = () => {
-    const { isLoggedIn, userName, login, logout, loading } = useAuth();
+
+    // 🛑 MODIFICACIÓN 1: Desestructuramos solo lo que necesitamos para el Navbar o la lógica de carga
+    const { loading } = useAuth(); // Ya no necesitamos isLoggedIn, userName, etc. aquí, ya que Dropdown los usa directamente.
 
     // FUNCIÓN CLAVE: Desplaza la ventana a la parte superior con un efecto suave.
     const scrollToTop = useCallback(() => {
@@ -78,14 +80,9 @@ const Navbar: React.FC = () => {
                             <Link className={`${styles.textANavbar} nav-link`} to="/donar" onClick={scrollToTop}>Donar</Link>
                         </li>
                         
-                        {/* Contenedor del Dropdown/Botón de Login */}
-                        <li className={styles['boton-login']}> 
-                        <Dropdown
-                            isLoggedIn={isLoggedIn}
-                            userName={userName}
-                            onLogin={login}
-                            onLogout={logout}
-                        />
+                        {/* 🛑 MODIFICACIÓN 2: Envolver el Dropdown en <li> y ELIMINAR PROPS de autenticación */}
+                        <li className={`${styles['boton-login']} nav-item`}> 
+                            <Dropdown />
                         </li>
                     </ul>
                 </div>

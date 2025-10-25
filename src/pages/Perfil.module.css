@@ -1,0 +1,167 @@
+/* ========================================================================= */
+/* ESTILOS ESPECÍFICOS PARA EL COMPONENTE PERFIL (Perfil.module.css) */
+/* ========================================================================= */
+
+.pagina-perfil {
+    /* Utiliza el estilo de fondo definido en tu CSS (clase .cuerpo) */
+    background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
+    min-height: 100vh;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.titulo-perfil {
+    /* Alineación con .titulo-principal */
+    font-weight: 700;
+    font-size: 2.5rem; /* Ajuste para un título de sección */
+    margin-bottom: 2rem;
+    color: var(--color-secondary); /* Color secundario, ya que no es el principal de la app */
+    text-align: center;
+}
+
+/* Estilo de la tarjeta que envuelve el perfil */
+.card-perfil {
+    background-color: var(--color-white);
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--border-radius-lg); /* Bordes redondeados más suaves */
+    box-shadow: var(--shadow-medium);
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+
+.card-header-perfil {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 1.5rem;
+}
+
+/* --- CONTENEDOR DE LA IMAGEN --- */
+.profile-image-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.foto-perfil {
+    width: 120px; /* Reducido para mejor armonía en el card */
+    height: 120px;
+    object-fit: cover;
+    border: 3px solid var(--color-primary); /* Borde primario para destacar */
+    padding: 2px; /* Espacio entre el borde y la imagen */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* --- BOTÓN DE EDICIÓN EN LA IMAGEN (✏️) --- */
+.btn-edit-image {
+    position: absolute;
+    bottom: 5px; /* Ajuste fino */
+    right: 5px; /* Ajuste fino */
+    padding: 0.3rem;
+    width: 30px;
+    height: 30px;
+    line-height: 1;
+    font-size: 0.9rem;
+    color: var(--color-white);
+    background-color: var(--color-primary);
+    border: 2px solid var(--color-white); /* Borde blanco para separarlo de la imagen */
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: var(--shadow-medium);
+    transition: background-color 0.3s, transform 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-edit-image:hover {
+    background-color: var(--color-primary-dark);
+    transform: scale(1.1);
+}
+
+/* --- ESTILOS PARA LOS CAMPOS EN MODO NO EDICIÓN --- */
+.lista-datos-perfil .form-pass:disabled {
+    background-color: #f8f9fa; /* Fondo gris claro cuando está deshabilitado */
+    border-color: #e9ecef;
+    color: var(--color-secondary);
+    cursor: default;
+}
+
+/* --- BOTONES DE ACCIÓN PRINCIPALES (Editar/Guardar/Cancelar) --- */
+.botones-perfil button {
+    font-weight: 600;
+    padding: 0.75rem 1.5rem; /* Ajuste de padding */
+    border-radius: var(--border-radius-sm);
+    transition: all 0.3s ease;
+}
+
+.btn-editar-perfil {
+    /* Estilo del botón primario */
+    background: var(--color-primary);
+    border: none;
+    box-shadow: var(--shadow-medium);
+    color: var(--color-white);
+}
+
+.btn-editar-perfil:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.btn-guardar-perfil {
+    /* Estilo para botón de Guardar (Success) */
+    background-color: #28a745; /* Bootstrap Success */
+    border: none;
+    color: var(--color-white);
+    box-shadow: var(--shadow-medium);
+}
+
+.btn-guardar-perfil:hover {
+    background-color: #1e7e34;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.btn-cancelar-perfil {
+    /* Estilo para botón de Cancelar (Secondary) */
+    background-color: var(--color-gray);
+    border: none;
+    color: var(--color-white);
+}
+
+.btn-cancelar-perfil:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+.logoFormulario {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.logoFormulario img {
+    height: 70px;
+    /* --- CORRECCIÓN CLAVE: EVITAR ESTIRAMIENTO --- */
+    width: auto;
+    object-fit: contain; /* Asegura que la imagen mantenga proporciones y no se corte */
+    /* ------------------------------------------- */
+}
+
+.tituloFormulario {
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    /* Efecto de texto degradado */
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtituloFormulario {
+    color: var(--color-gray);
+    margin-bottom: 1.25rem;
+    text-align: center;
+    font-size: 1.1rem;
+}

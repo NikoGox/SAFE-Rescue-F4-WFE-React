@@ -15,7 +15,8 @@
     padding: 3rem 1rem;
     display: flex;
     justify-content: center;
-    align-items: center; /* Diferente a Registro, usa align-items: center */
+    align-items: center;
+    /* Diferente a Registro, usa align-items: center */
 }
 
 .contenedorPrincipal {
@@ -27,7 +28,8 @@
     overflow: hidden;
     box-shadow: var(--shadow-heavy);
     background-color: var(--color-white);
-    max-width: 700px; /* Ancho menor, sin columna de imagen */
+    max-width: 700px;
+    /* Ancho menor, sin columna de imagen */
     min-height: auto;
 }
 
@@ -58,7 +60,8 @@
     height: 70px;
     /* --- CORRECCIÓN CLAVE: EVITAR ESTIRAMIENTO --- */
     width: auto;
-    object-fit: contain; /* Asegura que la imagen mantenga proporciones y no se corte */
+    object-fit: contain;
+    /* Asegura que la imagen mantenga proporciones y no se corte */
     /* ------------------------------------------- */
 }
 
@@ -102,13 +105,22 @@
 input.formControlRegistro::placeholder,
 textarea.formControlRegistro::placeholder {
     color: var(--color-light-gray);
-    opacity: 1; /* asegurar visibilidad consistente */
+    opacity: 1;
+    /* asegurar visibilidad consistente */
 }
 
 /* Prefijos para navegadores antiguos */
-.formControlRegistro::-webkit-input-placeholder { color: var(--color-light-gray); }
-.formControlRegistro:-ms-input-placeholder { color: var(--color-light-gray); }
-.formControlRegistro::-ms-input-placeholder { color: var(--color-light-gray); }
+.formControlRegistro::-webkit-input-placeholder {
+    color: var(--color-light-gray);
+}
+
+.formControlRegistro:-ms-input-placeholder {
+    color: var(--color-light-gray);
+}
+
+.formControlRegistro::-ms-input-placeholder {
+    color: var(--color-light-gray);
+}
 
 /* ========================================================================= */
 /* 5. RESPONSIVE DESIGN (Espaciado reducido en móvil/tablet) */
@@ -121,7 +133,7 @@ textarea.formControlRegistro::placeholder {
 
     .seccionFormulario {
         /* Padding en tablet: armonzado a 2.5rem como Registro para ser coherente */
-        padding: 2.5rem; 
+        padding: 2.5rem;
     }
 
     /* .formCol y .tituloFormulario se dejan aquí por si su valor de media query difiere de otros */
@@ -183,5 +195,79 @@ textarea.formControlRegistro::placeholder {
     .btnRegistro,
     .checkboxContainer {
         margin-top: 0.5rem;
+    }
+
+    /* src/pages/Contactanos/Contactanos.module.css (MÓDULO CSS) */
+
+    /*
+ * NOTA: Los estilos de .formGroupRegistro, .formControlRegistro, .btnRegistro etc.,
+ * han sido movidos a App.css para unificación.
+ */
+
+    /* ========================================================================= */
+    /* 1. LAYOUT PRINCIPAL Y CONTENEDORES (ESPECÍFICO) */
+    /* ========================================================================= */
+
+    /* ... (El resto de tus estilos, sin cambios) ... */
+
+    /* ========================================================================= */
+    /* 6. ESTILOS AÑADIDOS PARA EL AUTOCOMPLETADO Y AUTENTICACIÓN 🆕 */
+    /* ========================================================================= */
+
+    .checkboxContainer {
+        /* Usamos flex para alinear el input, el label y, potencialmente, un mensaje pequeño */
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        /* Espacio entre el checkbox y el texto */
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+        color: var(--color-dark-gray);
+        flex-wrap: wrap;
+        /* Para que el mensaje de error ocupe otra línea si es largo */
+    }
+
+    .checkboxContainer label {
+        margin-bottom: 0;
+        /* Asegura que el label esté alineado */
+        cursor: pointer;
+    }
+
+    .checkboxContainer input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--color-primary);
+        /* Color del check al marcar */
+    }
+
+    /* Estilo para el mensaje de error de autenticación (cuando el usuario no está logueado) */
+    .authError {
+        /* Debe ser más visible que un error de validación de campo */
+        color: var(--color-error);
+        /* Usa tu color de error */
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid var(--color-error);
+        border-radius: var(--border-radius-sm);
+        background-color: var(--color-error-light);
+        /* Fondo suave para destacarlo */
+        margin-top: 5px;
+        /* Pequeño margen superior */
+        width: 100%;
+        /* Ocupa todo el ancho disponible */
+    }
+
+    /* Estilo para los mensajes generales (Success/Error) */
+    /* Asumo que ya tienes estilos para .successMessageBox y .error en App.css */
+
+    /* RESPONSIVE AJUSTE para checkboxContainer */
+    @media (max-width: 576px) {
+        .checkboxContainer {
+            /* Aumentar el margen en móvil */
+            margin-top: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
     }
 }

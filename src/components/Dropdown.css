@@ -113,3 +113,19 @@
         border: none;
     }
 }
+
+.dropdown-menu .user-info-header {
+    padding: 1rem 1rem 0.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.dropdown-menu .user-info-header img {
+    /* Mismos estilos que el botón, pero más grande */
+    width: 60px !important;
+    height: 60px !important;
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
+
