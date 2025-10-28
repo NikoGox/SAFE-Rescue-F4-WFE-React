@@ -1,10 +1,4 @@
-/*
- * Archivo: src/components/Navbar/Navbar.module.css
- * -----------------------------------------------
- * Contiene: Estilos de la barra de navegación y elementos de usuario.
- */
 
-/* ===== LAYOUT BASE DEL NAVBAR ===== */
 .custom-shadow {
     box-shadow: 0 10px 30px rgba(0, 255, 17, 0.5);
 }
@@ -30,7 +24,6 @@
     align-items: center;
 }
 
-/* ===== LOGO Y TÍTULO (navbar-brand) ===== */
 .logoBrand { 
     display: flex;
     align-items: center;
@@ -50,7 +43,6 @@
     color: #43bbeb;
 }
 
-/* ===== LINKS DE NAVEGACIÓN Y SEPARADORES ===== */
 .textANavbar {
     font-family: "Montserrat", sans-serif;
     font-weight: 500 !important;
@@ -65,11 +57,6 @@
     color: var(--color-d8eaff); 
 }
 
-/* ---------------------------------------------------- */
-/* === ESTILOS DEL BOTÓN DE INICIAR SESIÓN (GRADIENTE) === */
-/* ---------------------------------------------------- */
-
-/* Estilo por defecto (no presionado) */
 .btn-custom-primary {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     color: var(--color-white) !important;
@@ -93,21 +80,12 @@
     transform: translateY(-1px);
 }
 
-.botonIniciarSesion {
-    composes: btn-custom-primary; 
-}
 
-/* 🔥 ESTILO CLAVE: Mantiene el botón de gradiente "presionado" al abrir el dropdown */
 :global(.dropdown.show) .botonIniciarSesion {
-    /* Gradiente con la misma orientación (135deg) pero con colores MÁS OSCUROS */
-    background: linear-gradient(135deg, var(--color-primary-darker) 0%, var(--color-primary-dark) 100%); /* AJUSTADO */
-    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.4); /* Sombra más sutil y de 'presión' */
-    transform: none; /* Evita que se mueva */
+    background: linear-gradient(135deg, var(--color-primary-darker) 0%, var(--color-primary-dark) 100%); 
+    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
+    transform: none; 
 }
-
-/* ---------------------------------------------------- */
-/* === BOTONES DE AUTENTICACIÓN (Usuario Logueado) === */
-/* ---------------------------------------------------- */
 
 .botonUsuario {
     display: flex;
@@ -128,7 +106,6 @@
     box-shadow: 1px 1px 8px #0791E6;
 }
 
-/* Responsive dropdown */
 @media (max-width: 991.98px) {
     :global(.navbar-nav .dropdown-menu) {
         position: static !important;
@@ -139,7 +116,6 @@
     }
 }
 
-/* ===== BUSCADOR Y RESPONSIVE (Mantenido) ===== */
 .buscadorNavbar {
     width: 600px;
 }
@@ -154,8 +130,6 @@
     }
 }
 
-/* 🛑 SOLUCIÓN PARA QUITAR EL BORDE A .btn 🛑 */
-/* Se usa :global() para que la regla afecte a la clase global .btn (usada por librerías como Bootstrap) */
 :global(.btn) {
     border: none !important;
 }

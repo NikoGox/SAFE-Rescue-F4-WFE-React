@@ -1,11 +1,3 @@
-/*
- * formulario.module.css
- * Estilos unificados y condensados para FormField.
- */
-
-/* ===================================================
-   VARIABLES DE TEMA (Base Bootstrap y Tema)
-   =================================================== */
 :root {
     --color-primary: #20a3d8;
     --color-error: #dc3545;
@@ -25,10 +17,7 @@
     --input-height: 48px;
 }
 
-
-/* ===== 1. GRUPO DE FORMULARIO (.formGroupRegistro) ===== */
 .formGroupRegistro {
-    margin-bottom: 1rem;
     position: relative;
     width: 100%;
 }
@@ -46,8 +35,6 @@
     margin-left: 0.25rem;
 }
 
-
-/* ===== 2. CAMPO DE ENTRADA (.formControlRegistro) ===== */
 .formControlRegistro {
     width: 100%;
     padding: var(--padding-y) var(--padding-x);
@@ -82,7 +69,6 @@
     opacity: 1;
 }
 
-/* ===== 3. MANEJO DE ERRORES ===== */
 .inputError {
     border-color: var(--bs-danger) !important;
 }
@@ -103,7 +89,6 @@
 }
 
 
-/* ===== 4. RESPONSIVE (Evita zoom de iOS) ===== */
 @media (max-width: 768px) {
     .formControlRegistro {
         font-size: 16px;

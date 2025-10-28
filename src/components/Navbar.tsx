@@ -1,4 +1,3 @@
-// src/components/Navbar/Navbar.tsx (Código Corregido)
 import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
 import Dropdown from "./Dropdown"; // Asegúrate de que esta ruta sea correcta
@@ -8,14 +7,11 @@ import { useAuth } from "./UseAuth";
 
 const Navbar: React.FC = () => {
 
-    // 🛑 MODIFICACIÓN 1: Desestructuramos solo lo que necesitamos para el Navbar o la lógica de carga
-    const { loading } = useAuth(); // Ya no necesitamos isLoggedIn, userName, etc. aquí, ya que Dropdown los usa directamente.
-
-    // FUNCIÓN CLAVE: Desplaza la ventana a la parte superior con un efecto suave.
+    const { loading } = useAuth(); 
     const scrollToTop = useCallback(() => {
         window.scrollTo({
             top: 0,
-            behavior: 'smooth' // Scroll suave
+            behavior: 'smooth'
         });
     }, []);
 
@@ -38,7 +34,6 @@ const Navbar: React.FC = () => {
         <nav className={`${styles.navbarWrapper} navbar navbar-expand-lg navbar-light bg-light fixed-top shadow`}>
             <div className={`${styles.container} container-fluid`}>
                 
-                {/* Logo y marca - APLICACIÓN DEL SCROLL AL TOP */}
                 <Link className={`${styles.logoBrand} navbar-brand`} to="/" onClick={scrollToTop}>
                     <img
                         src={Logo}
@@ -50,7 +45,6 @@ const Navbar: React.FC = () => {
                     <span className={styles.titulo}>SAFE Rescue</span>
                 </Link>
 
-                {/* Botón toggler */}
                 <button
                     className="navbar-toggler"
                     type="button"
@@ -63,11 +57,9 @@ const Navbar: React.FC = () => {
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
-                {/* Contenido colapsable */}
                 <div className="collapse navbar-collapse" id="navbarMainContent">
                     <ul className={`${styles.navbarNav} navbar-nav ms-auto align-items-center`}>
                         
-                        {/* Links de navegación - APLICACIÓN DEL SCROLL AL TOP */}
                         <li className="nav-item">
                             <Link className={`${styles.textANavbar} nav-link`} to="/incidentes" onClick={scrollToTop}>Incidentes</Link>
                         </li>
@@ -80,7 +72,6 @@ const Navbar: React.FC = () => {
                             <Link className={`${styles.textANavbar} nav-link`} to="/donar" onClick={scrollToTop}>Donar</Link>
                         </li>
                         
-                        {/* 🛑 MODIFICACIÓN 2: Envolver el Dropdown en <li> y ELIMINAR PROPS de autenticación */}
                         <li className={`${styles['boton-login']} nav-item`}> 
                             <Dropdown />
                         </li>

@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/sr_logo.png";
@@ -13,7 +14,26 @@ import {
     validateNameLettersOnly,
     validateIsRequired
 } from '../utils/Validaciones';
-import type { FormDataType, Errors} from '../types/UserType';
+import type { FormDataType, Errors } from '../types/UserType';
+
+// Tipo de elemento general del formulario (Input o Textarea)
+type FormElement = HTMLInputElement | HTMLTextAreaElement;
+
+// 🛑 MAPEO DE VALIDACIONES PARA SIMPLIFICAR EL SWITCH EN handleBlur
+const validationMap: Record<keyof FormDataType, ((value: any) => string | null) | null> = {
+    rut: validateChileanRUT,
+    nombre: validateNameLettersOnly,
+    email: validateEmail,
+    telefono: validatePhoneNumber,
+    // Pasamos el argumento adicional para validateIsRequired
+    direccion: (value: string) => validateIsRequired(value, "La dirección"), 
+    nombreUsuario: (value: string) => validateIsRequired(value, "El nombre de usuario"),
+    contrasena: validateStrongPassword,
+    // Se manejan aparte en handleBlur por su lógica de dependencia/checkbox
+    confirmarContrasena: null,
+    terminos: null, 
+};
+
 
 const Registrarse: React.FC = () => {
     const navigate = useNavigate();
@@ -34,7 +54,7 @@ const Registrarse: React.FC = () => {
 
     const [errors, setErrors] = useState<Errors>({});
 
-    // 2. FUNCIÓN DE VALIDACIÓN COMPLETA (solo para el envío)
+    // 2. FUNCIÓN DE VALIDACIÓN COMPLETA (solo para el envío) - CORRECTO
     const validateForm = useCallback((): boolean => {
         const newErrors: Errors = {};
 
@@ -61,14 +81,20 @@ const Registrarse: React.FC = () => {
         return Object.keys(finalErrors).length === 0;
     }, [formData]);
 
-    // 3. MANEJO DE CAMBIOS (simplificado, sin limpiar errores complejos)
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { id, value, type, checked } = e.target;
-        const targetId = id as keyof typeof formData;
+    // 3. MANEJO DE CAMBIOS - CORRECTO
+    const handleChange = (e: React.ChangeEvent<FormElement>) => {
+        const target = e.target;
+        const targetId = target.id as keyof FormDataType;
 
+        // Si es checkbox, usamos 'checked', si no, usamos 'value'
+        const value = (target.type === 'checkbox')
+            ? (target as HTMLInputElement).checked
+            : target.value;
+
+        // El 'value' debe ser any aquí para ser compatible con FormDataType[targetId]
         setFormData(prev => ({
             ...prev,
-            [targetId]: type === 'checkbox' ? checked : value
+            [targetId]: value
         }));
 
         if (successMessage) {
@@ -76,42 +102,24 @@ const Registrarse: React.FC = () => {
         }
     };
 
-    // 4. NUEVO MANEJADOR DE BLUR (Validación en tiempo real)
-    const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // 4. MANEJADOR DE BLUR (OPTIMIZADO)
+    const handleBlur = (e: React.FocusEvent<FormElement>) => {
         const { id, value } = e.target;
-        const targetId = id as keyof typeof formData;
+        const targetId = id as keyof FormDataType;
         let error: string | null = null;
 
-        // Aplica el validador específico para el campo
-        switch (targetId) {
-            case 'nombre':
-                error = validateNameLettersOnly(value);
-                break;
-            case 'rut':
-                error = validateChileanRUT(value);
-                break;
-            case 'email':
-                error = validateEmail(value);
-                break;
-            case 'direccion':
-                error = validateIsRequired(value, "La dirección");
-                break;
-            case 'telefono':
-                error = validatePhoneNumber(value);
-                break;
-            case 'nombreUsuario':
-                error = validateIsRequired(value, "El nombre de usuario");
-                break;
-            case 'contrasena':
-                error = validateStrongPassword(value);
-                break;
-            case 'confirmarContrasena':
-                error = validateConfirmPassword(formData.contrasena, value);
-                break;
-            case 'terminos':
-                // Nota: formData.terminos ya se actualizó en el handleChange
-                error = formData.terminos ? null : "Debe aceptar los términos y condiciones";
-                break;
+        // 🛑 Lógica usando el mapa de validación
+        const validator = validationMap[targetId];
+
+        if (validator) {
+            error = validator(value);
+        } else if (targetId === 'confirmarContrasena') {
+            // Nota: usamos el valor actualizado de la contraseña principal del estado
+            error = validateConfirmPassword(formData.contrasena, value);
+        } else if (targetId === 'terminos') {
+            // Como handleChange ya actualizó formData.terminos, usamos su valor negado
+            const isChecked = (e.target as HTMLInputElement).checked; 
+            error = isChecked ? null : "Debe aceptar los términos y condiciones";
         }
 
         setErrors(prev => {
@@ -131,6 +139,7 @@ const Registrarse: React.FC = () => {
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
+        // ... (La lógica de handleSubmit es correcta y no requiere cambios)
         e.preventDefault();
         setSuccessMessage(null);
 
@@ -155,9 +164,9 @@ const Registrarse: React.FC = () => {
                     return;
                 }
 
-                // 3. Crear el nuevo objeto de usuario (quitando la confirmación de contraseña)
+                // 3. Crear el nuevo objeto de usuario (quitando la confirmación de contraseña y terminos)
                 const { confirmarContrasena, terminos, ...newUser } = formData;
-                
+
                 // 4. Añadir el nuevo usuario a la lista
                 const updatedUsuarios = [...usuarios, newUser];
 
@@ -165,7 +174,7 @@ const Registrarse: React.FC = () => {
                 localStorage.setItem('usuariosRegistrados', JSON.stringify(updatedUsuarios));
 
                 setSuccessMessage("¡Registro exitoso! Serás redirigido para iniciar sesión.");
-                
+
                 // 6. Redirigir después del mensaje de éxito
                 setTimeout(() => navigate('/'), 4000);
 
@@ -220,13 +229,13 @@ const Registrarse: React.FC = () => {
                             <div className={styles.formCol}>
                                 <FormField
                                     id="nombre"
+                                    dataTestId="register-nombre"
                                     label="Nombre Completo"
                                     placeholder="Juan Pérez González"
                                     value={formData.nombre}
                                     onChange={handleChange}
                                     onBlur={handleBlur}
                                     error={errors.nombre}
-                                    data-testid="register-nombre"
                                 />
                             </div>
                             <div className={styles.formCol}>
@@ -242,7 +251,7 @@ const Registrarse: React.FC = () => {
                         {/* Fila 2: Correo */}
                         <FormField
                             id="email"
-                            data-testid="register-email"
+                            dataTestId="register-email"
                             label="Correo Electrónico"
                             placeholder="tu.correo@ejemplo.com"
                             type="email"
@@ -257,7 +266,7 @@ const Registrarse: React.FC = () => {
                             <div className={styles.formCol}>
                                 <FormField
                                     id="direccion"
-                                    data-testid="register-direccion"
+                                    dataTestId="register-direccion"
                                     label="Dirección"
                                     placeholder="Calle 123, Comuna"
                                     type="text"
@@ -280,7 +289,7 @@ const Registrarse: React.FC = () => {
                         {/* Fila 4: Nombre de Usuario */}
                         <FormField
                             id="nombreUsuario"
-                            data-testid="register-nombreUsuario"
+                            dataTestId="register-nombreUsuario"
                             label="Nombre de Usuario"
                             placeholder="Elige un nombre de usuario"
                             type="text"
@@ -295,7 +304,7 @@ const Registrarse: React.FC = () => {
                             <div className={styles.formCol}>
                                 <FormField
                                     id="contrasena"
-                                    data-testid="register-contrasena"
+                                    dataTestId="register-contrasena"
                                     label="Contraseña"
                                     placeholder="Crea una contraseña segura"
                                     type="password"
@@ -308,7 +317,7 @@ const Registrarse: React.FC = () => {
                             <div className={styles.formCol}>
                                 <FormField
                                     id="confirmarContrasena"
-                                    data-testid="register-confirmarContrasena"
+                                    dataTestId="register-confirmarContrasena"
                                     label="Confirmar Contraseña"
                                     placeholder="Repite tu contraseña"
                                     type="password"

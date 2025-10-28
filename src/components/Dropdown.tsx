@@ -2,24 +2,19 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 
-// 🛑 MODIFICACIÓN 1: Importar el hook de autenticación
 import { useAuth } from '../components/UseAuth';
 
-// Importar tipos y recursos
 import type { UserType, UserData } from "../types/UserType"; 
 import PerfilDefault from "../assets/perfil-default.png";
 import "./Dropdown.css"; 
 
-// Función de validación simple
 const isValidEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 };
 
-// 🛑 MODIFICACIÓN 2: Ya no acepta props de autenticación
 const Dropdown: React.FC = () => {
 
-    // 🛑 MODIFICACIÓN 3: Uso del hook useAuth
     const { isLoggedIn, authData, login, logout } = useAuth();
 
     const navigate = useNavigate();
@@ -31,15 +26,12 @@ const Dropdown: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     
-    // 🛑 MODIFICACIÓN 4: Cambio el tipo de useRef a HTMLDivElement (soluciona error <li> dentro de <li>)
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Lógica para cerrar el dropdown al hacer clic afuera
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
-                // Limpiar errores si se cierra sin iniciar sesión
                 setEmailError("");
                 setPassError("");
                 setLoginError("");
@@ -63,14 +55,12 @@ const Dropdown: React.FC = () => {
     const handleLoginSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
-        // 1. Limpiar errores previos
         setLoginError("");
         setEmailError("");
         setPassError("");
 
         let hasError = false;
 
-        // 2. Validación de formato simple
         if (!isValidEmail(email)) {
             setEmailError("Formato de correo inválido.");
             hasError = true;
@@ -82,28 +72,23 @@ const Dropdown: React.FC = () => {
         }
 
         if (hasError) {
-            return; // Detener si hay errores de validación
+            return; 
         }
 
-        // 3. Lógica de inicio de sesión
         try {
             const usuarios: UserType[] = JSON.parse(localStorage.getItem('usuariosRegistrados') || '[]');
             
-            // Búsqueda por 'email' y 'contrasena'
             const usuarioEncontrado = usuarios.find(
                 (u: UserType) => u.email === email && u.contrasena === pass
             );
 
             if (usuarioEncontrado) {
                 
-                // Desestructurar para obtener datos seguros (sin contraseña)
                 const { contrasena, ...userDataSafe }: UserType = usuarioEncontrado; 
                 const userDataForStorage: UserData = userDataSafe; 
 
-                // 🛑 USAMOS LA FUNCIÓN LOGIN DEL HOOK
                 login(userDataForStorage); 
                 
-                // Limpiar estados y cerrar
                 setEmail("");
                 setPass("");
                 closeDropdown();
@@ -118,7 +103,6 @@ const Dropdown: React.FC = () => {
     };
 
     const handleLogout = () => {
-        // 🛑 USAMOS LA FUNCIÓN LOGOUT DEL HOOK
         logout();
         closeDropdown();
         navigate('/');
@@ -130,7 +114,6 @@ const Dropdown: React.FC = () => {
         setShowPassword(prev => !prev);
     };
 
-    // 🛑 OBTENCIÓN DE DATOS DE useAuth PARA RENDERIZADO
     const userName = authData?.nombreUsuario || authData?.nombre || "Usuario";
     const profileImage = authData?.profileImage;
 
@@ -193,10 +176,9 @@ const Dropdown: React.FC = () => {
     
     const userOptionsContent = (
         <>
-            {/* Encabezado con foto de perfil más grande */}
             <div className="dropdown-header text-center user-info-header">
                 <img
-                    src={profileImage || PerfilDefault} // Usa el profileImage del estado global
+                    src={profileImage || PerfilDefault}
                     alt="Foto de perfil"
                     className="rounded-circle mb-2"
                     style={{ width: '60px', height: '60px', objectFit: 'cover' }}
@@ -207,9 +189,7 @@ const Dropdown: React.FC = () => {
             <Link className="dropdown-item" to="/perfil" onClick={closeDropdown}>
                 <i className="bi bi-person me-2"></i>Mi Perfil
             </Link>
-            <Link className="dropdown-item" to="/configuracion" onClick={closeDropdown}>
-                <i className="bi bi-gear me-2"></i>Configuración
-            </Link>
+
             <div className="dropdown-divider"></div>
             <button className="dropdown-item text-danger" onClick={handleLogout}>
                 <i className="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
@@ -218,7 +198,6 @@ const Dropdown: React.FC = () => {
     );
 
     return (
-        // 🛑 MODIFICACIÓN 5: Cambiar <li> por <div> para evitar el error de anidación
         <div className={`nav-item dropdown ${isOpen ? 'show' : ''}`} ref={dropdownRef}>
             <a
                 className={
@@ -236,9 +215,8 @@ const Dropdown: React.FC = () => {
                 {isLoggedIn ? (
                     <div className="d-flex align-items-center text-dark">
                         <span className="me-2">{userName}</span>
-                        {/* INTEGRACIÓN DE LA IMAGEN EN EL BOTÓN PRINCIPAL */}
                         <img
-                            src={profileImage || PerfilDefault} // Usa el profileImage del estado global
+                            src={profileImage || PerfilDefault} 
                             alt="Perfil de usuario"
                             className="rounded-circle"
                             style={{ width: '32px', height: '32px', objectFit: 'cover' }}

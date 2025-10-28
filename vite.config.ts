@@ -8,11 +8,20 @@ export default defineConfig({
   // @ts-ignore
   test: {
     globals: true,
+    css: true,
     environment: 'jsdom',
     setupFiles: './src/setupTest.ts',
     include: [
       'src/**/*.{test,spec,Testing,Test}.{js,jsx,ts,tsx}',
       'test/**/*.{test,spec,Testing,Test}.{js,jsx,ts,tsx}'
     ],
+  },
+
+  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.svg'],
+
+  // configuración para poder abrir desde toda la red
+  server: {
+    host: '0.0.0.0',
+    port: 5173, // puedes cambiar el puerto si quieres
   },
 });

@@ -1,9 +1,3 @@
-/* src/pages/Incidentes.css - CSS REORGANIZADO Y MEJORADO */
-
-/* ========================================================================= */
-/* 1. LAYOUT PRINCIPAL Y CONTENEDORES */
-/* ========================================================================= */
-
 .cuerpo {
   background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
   min-height: 100vh;
@@ -15,7 +9,6 @@
   padding: 2rem;
 }
 
-/* Header principal */
 .header-incidentes {
   display: flex;
   justify-content: space-between;
@@ -45,10 +38,6 @@
   margin: 0;
   line-height: 1.5;
 }
-
-/* ========================================================================= */
-/* 2. BOTONES Y CONTROLES */
-/* ========================================================================= */
 
 .btn-primario {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
@@ -116,7 +105,6 @@
   color: var(--color-error);
 }
 
-/* Botones de acción en tabla */
 .contenedor-acciones {
   display: flex;
   gap: 0.5rem;
@@ -152,14 +140,21 @@
   color: var(--color-white);
 }
 
+.btn-peligro {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: var(--color-white);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
 .btn-accion:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-light);
 }
-
-/* ========================================================================= */
-/* 3. PANEL DE ESTADÍSTICAS */
-/* ========================================================================= */
 
 .panel-estadisticas {
   display: grid;
@@ -199,10 +194,6 @@
   letter-spacing: 0.5px;
 }
 
-/* ========================================================================= */
-/* 4. FORMULARIOS */
-/* ========================================================================= */
-
 .input-error {
   border-color: red !important;
   background-color: #fff8f8;
@@ -211,7 +202,7 @@
 
 .overlay-form {
   position: fixed;
-  top: 0;
+  margin-top: 100px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -315,10 +306,6 @@
   border-top: 1px solid var(--color-light-gray);
 }
 
-/* ========================================================================= */
-/* 5. TABLA DE INCIDENTES */
-/* ========================================================================= */
-
 .contenedor-tabla {
   background: var(--color-white);
   border-radius: var(--border-radius-lg);
@@ -417,10 +404,6 @@
   white-space: nowrap;
 }
 
-/* ========================================================================= */
-/* 6. ESTADOS Y BADGES */
-/* ========================================================================= */
-
 .badge-estado {
   padding: 0.5rem 1rem;
   border-radius: 25px;
@@ -454,10 +437,6 @@
   color: #383d41;
   border: 1px solid #d6d8db;
 }
-
-/* ========================================================================= */
-/* 7. DETALLES Y EDICIÓN */
-/* ========================================================================= */
 
 .fila-detalles {
   background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
@@ -543,16 +522,21 @@
 
 .imagen-incidente {
   width: 100%;
-  max-width: 300px;
+  max-width: 200px;
   height: auto;
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-medium);
   border: 3px solid var(--color-white);
 }
 
-/* ========================================================================= */
-/* 8. ESTADOS ESPECIALES */
-/* ========================================================================= */
+.image-preview {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-medium);
+  border: 3px solid var(--color-white);
+}
 
 .loading-container {
   display: flex;
@@ -601,10 +585,6 @@
 .estado-vacio p {
   margin: 0;
 }
-
-/* ========================================================================= */
-/* 9. RESPONSIVE DESIGN */
-/* ========================================================================= */
 
 @media (max-width: 1024px) {
   .contenedor-incidentes {
@@ -699,7 +679,6 @@
   }
 }
 
-/* Scroll personalizado */
 .tabla-responsive::-webkit-scrollbar {
   height: 8px;
 }

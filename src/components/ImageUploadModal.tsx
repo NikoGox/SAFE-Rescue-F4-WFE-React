@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import './ImageUploadModal.css'; // Asegúrate de crear este archivo CSS para el estilo
-import PerfilDefault from "../assets/perfil-default.png"; // Importa la imagen por defecto
+import './ImageUploadModal.css'; 
+import PerfilDefault from "../assets/perfil-default.png"; 
 
 interface ImageUploadModalProps {
     isOpen: boolean;
     onClose: () => void;
-    // La imagen puede ser un string (Data URL) o undefined
     currentImage?: string; 
-    // La función onImageSave recibe la nueva imagen (Data URL) o undefined para indicar eliminación
     onImageSave: (newImage: string | undefined) => void;
 }
 
@@ -16,16 +14,12 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onClose, on
     const [previewUrl, setPreviewUrl] = useState<string | undefined>(currentImage);
     const [error, setError] = useState<string | null>(null);
 
-    /**
-     * Sincroniza previewUrl con currentImage cuando el modal se abre.
-     * 💡 MEJORA: Resetea 'selectedFile' y 'error' al abrir para evitar estados residuales.
-     */
+
     useEffect(() => {
         if (isOpen) {
-            // Usa la imagen actual como previsualización
             setPreviewUrl(currentImage);
-            setSelectedFile(null); // Limpiar archivo seleccionado
-            setError(null); // Limpiar errores
+            setSelectedFile(null); 
+            setError(null); 
         }
     }, [isOpen, currentImage]);
 
@@ -41,16 +35,15 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onClose, on
             if (!file.type.startsWith('image/')) {
                 setError('⚠️ El archivo debe ser una imagen (JPG, PNG, GIF).');
                 setSelectedFile(null);
-                setPreviewUrl(currentImage); // Vuelve a la imagen actual
+                setPreviewUrl(currentImage);
                 return;
             }
 
-            // Validación de tamaño (ej: máximo 5MB)
-            const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+            const MAX_SIZE = 5 * 1024 * 1024; 
             if (file.size > MAX_SIZE) {
                 setError(`⚠️ La imagen es demasiado grande (Máx. ${MAX_SIZE / 1024 / 1024} MB).`);
                 setSelectedFile(null);
-                setPreviewUrl(currentImage); // Vuelve a la imagen actual
+                setPreviewUrl(currentImage); 
                 return;
             }
 
@@ -59,18 +52,14 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onClose, on
         }
     };
 
-    /**
-     * Centraliza la lógica de guardar la nueva imagen o confirmar la eliminación.
-     */
     const handleSave = () => {
-        if (error) return; // No guardar si hay errores
+        if (error) return;
 
         if (selectedFile) {
-            // Caso 1: Se ha seleccionado un nuevo archivo. Convertir a Data URL y guardar.
             const reader = new FileReader();
             reader.onloadend = () => {
                 if (typeof reader.result === 'string') {
-                    onImageSave(reader.result); // Guarda el Data URL
+                    onImageSave(reader.result); 
                     handleClose();
                 }
             };
@@ -78,35 +67,25 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onClose, on
             return;
         } 
         
-        // Caso 2: Se presionó 'Eliminar Imagen' (previewUrl es undefined, pero currentImage existía).
         if (previewUrl === undefined && currentImage !== undefined) {
-             onImageSave(undefined); // Guarda undefined (eliminar)
+             onImageSave(undefined); 
              handleClose();
              return;
         }
 
-        // Caso 3: No hay cambios o no hay imagen que guardar/eliminar (solo cerramos)
         handleClose();
     };
 
-    /**
-     * Limpia la previsualización para indicar una intención de eliminación.
-     */
     const handleDelete = () => {
         setPreviewUrl(undefined); 
         setSelectedFile(null); 
         setError(null);
     };
 
-    /**
-     * Cierra el modal y limpia el estado.
-     */
     const handleClose = () => {
-        // Al cerrar, el useEffect se encargará de limpiar el estado 'selectedFile' y 'error'
         onClose();
     };
 
-    // 💡 MEJORA: Definimos el estado del botón
     const hasError = !!error;
     const hasSelectedFile = !!selectedFile;
     const isReadyToDelete = previewUrl === undefined && currentImage !== undefined;
@@ -114,16 +93,12 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onClose, on
 
 
     return (
-        // Usamos un div para el overlay que permite cerrar al hacer clic afuera
         <div className="modal-overlay" onClick={handleClose}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <h3 className="mb-3">Cambiar Imagen de Perfil</h3>
+                <h3 className="mb-3">Cambiar imagen</h3>
                 
-                {/* Visualización de la Imagen Actual/Previa */}
                 <div className="image-preview-container mb-3 text-center">
-                    <p className="small text-muted">Imagen Actual/Previa:</p>
                     <img 
-                        // Muestra la previsualización o la imagen por defecto
                         src={previewUrl || PerfilDefault} 
                         alt="Previsualización" 
                         className="img-fluid image-preview rounded-circle" 
@@ -135,7 +110,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onClose, on
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
-                    // Limpia el input si se selecciona el mismo archivo
                     onClick={(e) => (e.currentTarget.value = '')} 
                     className="form-control mb-3"
                     data-testid="image-input"
@@ -143,7 +117,6 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onClose, on
 
                 {error && <div className="alert alert-danger small" data-testid="image-error">{error}</div>}
                 
-                {/* Botón de eliminar (solo si existe una imagen actual y no se ha eliminado en la previsualización) */}
                 {currentImage && previewUrl !== undefined && (
                     <button
                         type="button"
@@ -151,7 +124,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, onClose, on
                         onClick={handleDelete}
                         data-testid="image-delete-button"
                     >
-                        🗑️ Eliminar Imagen Actual
+                        Eliminar Imagen Actual
                     </button>
                 )}
 

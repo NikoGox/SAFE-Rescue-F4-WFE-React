@@ -1,32 +1,42 @@
 ╔══════════════════════════════════════════════╗
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
+❚❙❘ VERSIÓN 1.0.9
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se corrigen pruebas unitarias.
+├─• Se agregan pruebas unitarias para donar y contáctanos.
+├─• Se corrigen errores errores en los estilos.
+└─• Se implementa imageuploadmodel a la pantalla de incidentes para cargar imagenes desde el computador.
+
+>>> Corregir navbar en modo responsive.
+
+
 ❚❙❘ VERSIÓN 1.0.8
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
-├─• Se corrige el diseño y  los formularios de perfil, contactanos,donar,registrarse,recuperar contraseña
-├─• Se añade una función y componente para poder agregar fotos desde el computador
-├─• Se corrige navbar, y dropdown para que tomen correctamente la logica de useAuth
-├─• Se crea types/UserType, util/validaciones, y componentes para estandarizar los formularios
-├─• Se empieza a la creación de los compontentes que ayudaran a incidentes a estandarizar formularios
+├─• Se corrige el diseño y  los formularios de perfil, contactanos,donar,registrarse,recuperar contraseña.
+├─• Se añade una función y componente para poder agregar fotos desde el computador.
+├─• Se corrige navbar, y dropdown para que tomen correctamente la logica de useAuth.
+├─• Se crea types/UserType, util/validaciones, y componentes para estandarizar los formularios.
+└─• Se empieza a la creación de los compontentes que ayudaran a incidentes a estandarizar formularios.
 
-├─>>> Terminar la estandarización de los formularios de incidentes
-├─>>> Implementar el componente ImageUploadModal en incidentes
-└─>>> Corregir pruebas unitarias existentes e implementar las nuevas
-└─>>> Arreglar el responsive de toda la app, en especial de navbar
-└─>>> Revisar diseños que no hayan sufrido cambios significativos   
-└─>>> Corregir el video del carrusel de home
+>>> Terminar la estandarización de los formularios de incidentes.
+>>> Implementar el componente ImageUploadModal en incidentes.
+>>> Corregir pruebas unitarias existentes e implementar las nuevas.
+>>> Arreglar el responsive de toda la app, en especial de navbar.
+>>> Revisar diseños que no hayan sufrido cambios significativos.  
+>>> Corregir el video del carrusel de home.
 
 
 ❚❙❘ VERSIÓN 1.0.7
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
 ├─• Se empieza la pruebas unitarias
-├─• Se agregan etiquetas de data-testid en los formularios para identificar los componentes a testear
-├─• Se agrega validadores a pestaña de incidentes para funciones de crear y modificar incidente
-├─• Se realizan pruebas unitarias de incidentes, login, register y recuperar contraseña
+├─• Se agregan etiquetas de data-testid en los formularios para identificar los componentes a testear.
+├─• Se agrega validadores a pestaña de incidentes para funciones de crear y modificar incidente.
+└─• Se realizan pruebas unitarias de incidentes, login, register y recuperar contraseña.
 
-├─>>> Contrastar pruebas unitarias con plan de pruebas
-└─>>> Revisar formularios y mantener las validaciones similares en campos compartidos
-└─>>> Terminar pruebas unitarias de perfil, donar y contactanos
+>>> Contrastar pruebas unitarias con plan de pruebas.
+>>> Revisar formularios y mantener las validaciones similares en campos compartidos.
+>>> Terminar pruebas unitarias de perfil, donar y contactanos.
 
 
 ❚❙❘ VERSIÓN 1.0.6
@@ -37,9 +47,9 @@
 ├─• Se agregaron animaciones para reposicionar las paginas siempre al inicio al momento de usar un enlace.
 └─• Correcciones de diseño minimas.
 
-├─>>> Falta corregir validadores.
-└─>>> Falta corregir pagina de perfil.
-└─>>> Falta agregar las pruebas unitarias.
+>>> Falta corregir validadores.
+>>> Falta corregir pagina de perfil.
+>>> Falta agregar las pruebas unitarias.
  
 
 ❚❙❘ VERSIÓN 1.0.5

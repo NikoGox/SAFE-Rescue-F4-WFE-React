@@ -1,19 +1,12 @@
-/*
- * Archivo: src/index.css (Estilos Globales)
- * ----------------------------------------
- * Contiene: Fuentes, Variables, Resets y Estilos Base.
- */
 
-/* ===== FUENTES ===== */
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:opsz,wght@9..144,100..900&display=swap");
 
 @font-face {
   font-family: 'Montserrat';
-  src: url('montserrat.woff2') format('woff2'); /* Asegúrate de que esta ruta sea correcta */
+  src: url('montserrat.woff2') format('woff2'); 
   font-display: optional;
 }
 
-/* ===== VARIABLES ===== */
 :root {
   --color-primary: #20a3d8;
   --color-primary-dark: #2a66b0;
@@ -23,7 +16,7 @@
   --color-white: #ffffff;
   --color-black: #000000;
   --color-gray: #616f7f;
-  --color-light-gray: #cccccc; /* <-- Color de Borde para Formularios */
+  --color-light-gray: #cccccc; 
   --color-d8eaff: #d8eaff;
   --color-245264: #245264;
   --color-20d2d8: #20d2d8;
@@ -40,7 +33,6 @@
   --border-radius-lg: 40px;
 }
 
-/* ===== ESTILOS GENERALES Y BASE (BODY) ===== */
 html {
   overflow-y: scroll;
 }
@@ -50,13 +42,11 @@ html {
   background: transparent;
 }
 
-/* Estilo que aplicaría al body o al contenedor principal de App.js */
 .cuerpo {
   background-color: var(--color-light);
   font-family: "Montserrat", sans-serif;
 }
 
-/* Estilos de botones genéricos */
 button:hover {
   background-color: var(--color-primary-dark);
 }
@@ -66,7 +56,6 @@ button:active {
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
 }
 
-/* ===== TIPOGRAFÍAS UTILITARIAS ===== */
 .text-p-XS {
   font-family: "Montserrat", sans-serif;
   font-weight: normal;
@@ -77,7 +66,7 @@ button:active {
 .text-p-S {
   font-family: "Montserrat", sans-serif;
   font-size: 15px;
-  font-weight: 600; /* semi-bold */
+  font-weight: 600;
   color: var(--color-black);
 }
 
@@ -95,7 +84,7 @@ button:active {
 
 .text-p-L_Negrita {
   font-family: "Montserrat", sans-serif;
-  font-weight: 500; /* semi-medium */
+  font-weight: 500;
   font-size: 17px;
   color: var(--color-black);
 }
@@ -110,11 +99,10 @@ button:active {
 .titulo-L_Negrita {
   font-family: "Montserrat", sans-serif;
   font-size: 40px;
-  font-weight: 600; /* semi-bold */
+  font-weight: 600; 
   color: var(--color-secondary);
 }
 
-/* ===== COLORES UTILITARIOS ===== */
 .color-3- {
   color: var(--color-20d2d8);
 }
@@ -139,7 +127,6 @@ button:active {
   color: var(--color-perfil-navbar);
 }
 
-/* ===== UTILIDADES ===== */
 .espaciador {
   width: 20px;
 }
@@ -161,10 +148,6 @@ button:active {
   min-height: 100%;
 }
 
-/* ========================================================================= */
-/* ===== ESTILOS BASE DE FORMULARIO (UNIFICADOS) ===== */
-/* ========================================================================= */
-
 .formGroupRegistro {
     margin-bottom: 0.75rem;
 }
@@ -178,8 +161,7 @@ button:active {
 }
 
 .formControlRegistro {
-    /* UNIFICADO: propiedades exactas requeridas por la empresa */
-    border: 1px solid var(--color-light-gray); /* ✅ Borde Light Gray CONFIRMADO */
+    border: 1px solid var(--color-light-gray);
     border-radius: var(--border-radius-sm);
     padding: 0.75rem 1rem;
     width: 100%;
@@ -195,7 +177,6 @@ button:active {
 input.formControlRegistro:focus,
 textarea.formControlRegistro:focus,
 .formControlRegistro:focus-visible {
-    /* UNIFICADO: mismo borde y brillo al enfocarse */
     border-color: var(--color-primary);
     outline: none;
     box-shadow: 0 0 0 0.2rem rgba(32, 163, 216, 0.25);
@@ -215,7 +196,6 @@ textarea.formControlRegistro:focus,
 
 textarea.formControlRegistro {
     line-height: 1.5;
-    /* AJUSTE CLAVE: Armonizado a 100px de altura mínima */
     min-height: 100px;
     height: auto;
     resize: vertical;
@@ -227,9 +207,7 @@ textarea.formControlRegistro {
     margin-top: 0.25rem;
 }
 
-/* Estilos de Botones */
 .btnRegistro {
-    /* Estilo de botón degradado */
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     color: var(--color-white);
     border: none;
@@ -244,13 +222,11 @@ textarea.formControlRegistro {
 }
 
 .btnRegistro:hover {
-    /* Efecto hover */
     transform: translateY(-2px);
     box-shadow: var(--shadow-heavy);
     background: linear-gradient(135deg, var(--color-primary-dark) 0%, #1a5276 100%);
 }
 
-/* Estilos de Checkbox */
 .checkboxContainer {
     display: flex;
     align-items: center;
@@ -274,13 +250,12 @@ textarea.formControlRegistro {
     margin-top: 0.5rem;
 }
 
-/* Clases de Éxito/Error */
 .inputError {
     border-color: var(--color-error) !important;
 }
 
 .errorText {
-    color: var(--color-error); /* Añadido color explícito */
+    color: var(--color-error);
     font-weight: 500;
 }
 

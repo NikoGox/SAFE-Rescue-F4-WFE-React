@@ -1,18 +1,13 @@
-// src/context/AuthContext.tsx
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useAuth } from '../components/UseAuth'; // 🛑 AJUSTA LA RUTA a donde está tu hook useAuth
-import type { AuthContextType } from '../types/UserType'; // 🛑 Importa el tipo AuthContextType
+import { useAuth } from '../components/UseAuth'; 
+import type { AuthContextType } from '../types/UserType'; 
 
-// 1. Crear el Contexto con un valor inicial indefinido
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// 2. Componente Proveedor (Provider)
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    // 🛑 Llama a tu hook useAuth (el que me proporcionaste)
     const auth = useAuth();
 
-    // Mientras los datos se cargan del localStorage, puedes mostrar un loader
     if (auth.loading) {
         return <div>Cargando sesión...</div>; 
     }
@@ -24,7 +19,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
 };
 
-// 3. Hook Personalizado para Consumir el Contexto (el que usarás)
 export const useAuthContext = (): AuthContextType => {
     const context = useContext(AuthContext);
 
@@ -35,5 +29,4 @@ export const useAuthContext = (): AuthContextType => {
     return context;
 };
 
-// 💡 Alias para que puedas usarlo como 'useAuth' en tus componentes
 export { useAuthContext as useAuth };

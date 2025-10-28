@@ -1,7 +1,7 @@
 // src/Test/Register.Test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { MemoryRouter} from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import Registrarse from "../pages/Registrarse";
 
 // MOCKS ESENCIALES
@@ -92,10 +92,9 @@ describe("Componente Registrarse", () => {
 
         await waitFor(() => {
             // Utilizamos el texto /es obligatorio/i o /requerido/i (depende de tu componente)
-            // Ya que el error anterior se debía a que no llenaste los campos en la prueba 2
             const errors = screen.queryAllByText(/obligatorio|requerido/i);
 
-            // Esperamos que haya al menos 7 errores (todos los campos excepto el RUT, si no es obligatorio)
+            // Esperamos que haya al menos 5 errores (varía según tu componente)
             expect(errors.length).toBeGreaterThanOrEqual(5);
 
             // Verificamos un mensaje específico de error de 'Términos' si es requerido
@@ -117,9 +116,9 @@ describe("Componente Registrarse", () => {
             expect(errors.length).toBe(0);
         });
 
-        // 2. Verificar que se muestra el mensaje de éxito (si tu componente lo muestra)
+        // 2. Verificar que se muestra el mensaje de éxito
         await waitFor(() => {
-            expect(screen.getByText("Registro exitoso!")).toBeInTheDocument();
+            expect(screen.getByText("¡Registro exitoso! Serás redirigido para iniciar sesión.")).toBeInTheDocument();
         });
 
 
@@ -132,20 +131,21 @@ describe("Componente Registrarse", () => {
         // 4. Verificar que el usuario fue guardado en localStorage
         const storedUsers = JSON.parse(localStorage.getItem('usuariosRegistrados') || '[]');
         expect(storedUsers.length).toBe(1);
-        // Verificamos que se guardaron los datos esenciales, sin la confirmación de contraseña
-        expect(storedUsers[0].correo).toBe(validFormData.email);
+        // CORRECCIÓN: Se usa 'email' en lugar de 'correo' para la aserción
+        expect(storedUsers[0].email).toBe(validFormData.email);
         expect(storedUsers[0].nombreUsuario).toBe(validFormData.nombreUsuario);
     });
 
     // --- Pruebas de Lógica de Negocio (Usuario ya existe) ---
 
     it("4. Muestra error cuando el usuario ya existe (correo o nombre de usuario)", async () => {
-        localStorage.clear();
+
+        // La limpieza de localStorage.clear() ya la hace beforeEach.
 
         const existingUser = {
             nombre: "Usuario Existente",
             rut: "99.999.999-9",
-            // Aquí usamos un correo para forzar el conflicto
+            // Usamos un correo que será el punto de conflicto
             email: validFormData.email,
             direccion: "Otra Calle",
             telefono: "900000000",
@@ -153,19 +153,16 @@ describe("Componente Registrarse", () => {
             contrasena: "password2024",
         };
 
-        // 1. Pre-carga del usuario existente ANTES del renderizado
+        // 1. Pre-carga del usuario existente en localStorage
         localStorage.setItem('usuariosRegistrados', JSON.stringify([
-            // Se simulan los datos completos de un usuario previamente registrado
-            { ...existingUser, correo: existingUser.email, confirmarContrasena: existingUser.contrasena, terminos: true }
+            // Se simulan los datos de un usuario previamente registrado
+            { ...existingUser, email: existingUser.email, confirmarContrasena: existingUser.contrasena, terminos: true }
         ]));
 
-        render(
-            <MemoryRouter>
-                <Registrarse />
-            </MemoryRouter>
-        );
+        // 🛑 CORRECCIÓN CLAVE: ELIMINAMOS EL BLOQUE DE 'render' DUPLICADO.
+        // Usamos la instancia de <Registrarse /> ya renderizada en beforeEach.
 
-        // 3. Llenamos el formulario con un NUEVO usuario que usa el CORREO existente
+        // 2. Llenamos el formulario con un NUEVO usuario que usa el CORREO existente
         const dataWithExistingEmail = {
             ...validFormData,
             email: existingUser.email, // <-- Correo que ya está en localStorage
@@ -177,13 +174,13 @@ describe("Componente Registrarse", () => {
         const submitButton = screen.getByTestId('register-submit');
         fireEvent.click(submitButton);
 
-        // 4. Esperar y verificar el mensaje de error de conflicto (asíncrono)
+        // 3. Esperar y verificar el mensaje de error de conflicto (asíncrono)
         await waitFor(() => {
-            // Usamos el mensaje de error EXACTO de tu componente
-            const errorMessage = screen.getByText("El correo electrónico o nombre de usuario ya está registrado.");
+            // CORRECCIÓN: Usamos el mensaje de error preciso para el conflicto de email
+            const errorMessage = screen.getByText("El correo electrónico ya está registrado.");
             expect(errorMessage).toBeInTheDocument();
 
-            // 5. Aseguramos que NO hubo redirección
+            // 4. Aseguramos que NO hubo redirección
             expect(mockNavigate).not.toHaveBeenCalled();
         }, { timeout: 2000 });
     });

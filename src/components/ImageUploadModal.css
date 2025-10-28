@@ -1,14 +1,9 @@
-/* ========================================================================= */
-/* ESTILOS PARA EL COMPONENTE ImageUploadModal */
-/* ========================================================================= */
-
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    /* Oscurecimiento con ligera transparencia */
     background: rgba(0, 0, 0, 0.6); 
     display: flex;
     justify-content: center;
@@ -18,12 +13,12 @@
 
 .modal-content {
     background: var(--color-white) !important;
-    padding: 2rem; /* Más padding para que se vea mejor */
-    border-radius: var(--border-radius-lg); /* Bordes redondeados grandes */
-    box-shadow: var(--shadow-heavy); /* Sombra pesada para destacar como modal */
+    padding: 2rem;
+    border-radius: var(--border-radius-lg); 
+    box-shadow: var(--shadow-heavy); 
     max-width: 90%;
-    width: 450px; /* Ancho cómodo */
-    max-height: 80vh;
+    width: 450px; 
+    max-height: 100vh;
     animation: fadeIn 0.3s ease-out;
 }
 
@@ -32,7 +27,6 @@
     to { opacity: 1; transform: scale(1); }
 }
 
-/* Título del Modal */
 .modal-content h3 {
     color: var(--color-secondary);
     font-weight: 700;
@@ -41,7 +35,6 @@
     margin-bottom: 1.5rem;
 }
 
-/* Input de Archivo */
 .modal-content .form-control {
     border: 1px solid var(--color-light-gray);
     border-radius: var(--border-radius-sm);
@@ -49,7 +42,6 @@
     cursor: pointer;
 }
 
-/* Vista Previa de la Imagen */
 .image-preview-container {
     text-align: center;
     margin: 1.5rem 0;
@@ -58,15 +50,13 @@
 .image-preview {
     max-width: 100%;
     height: auto;
-    max-height: 180px; /* Un poco más grande la previsualización */
+    max-height: 180px;
     object-fit: contain;
-    /* Borde estilizado */
     border: 2px dashed var(--color-gray);
     padding: 5px;
     border-radius: var(--border-radius-sm);
 }
 
-/* Mensajes de error dentro del modal */
 .modal-content .alert-danger {
     background-color: #f8d7da;
     color: #721c24;
@@ -74,7 +64,6 @@
     font-size: 0.9rem;
 }
 
-/* Botones dentro del Modal */
 .modal-actions button {
     font-weight: 600;
     padding: 0.7rem 1.25rem;
@@ -82,7 +71,6 @@
     transition: all 0.3s ease;
 }
 
-/* Botón Guardar Imagen (Primario) */
 .modal-actions .btn-primary {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     border: none;
@@ -103,7 +91,6 @@
     box-shadow: none;
 }
 
-/* Botón Cancelar (Secundario) */
 .modal-actions .btn-secondary {
     background-color: var(--color-gray);
     border: none;

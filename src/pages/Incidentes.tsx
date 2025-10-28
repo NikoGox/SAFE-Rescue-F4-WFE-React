@@ -10,7 +10,6 @@ import Accidente from "../assets/accidente.png";
 import DerrameQuimico from "../assets/derrame-quimico.png";
 import FugaGas from "../assets/fuga-gas.png";
 
-// Importacion de iconos
 import { RiEditFill } from "react-icons/ri";
 import { BsTrashFill } from "react-icons/bs";
 import { TiArrowSortedUp } from "react-icons/ti";
@@ -18,40 +17,22 @@ import { TiArrowSortedDown } from "react-icons/ti";
 import { TbRefresh } from "react-icons/tb";
 import { TiPlus } from "react-icons/ti";
 
-interface Incident {
-    id: number;
-    type: string;
-    description: string;
-    location: string;
-    dateTime: string;
-    status: string;
-    imageUrl: string;
-}
+import ImageUploadModal from "../components/ImageUploadModal";
 
-interface IncidentForm {
-    type: string;
-    description: string;
-    location: string;
-    imageUrl: string;
-}
-
-interface EditForm {
-    description: string;
-    location: string;
-    type: string;
-    status: string;
-    imageUrl: string;
-}
+import type { Incident , IncidentForm , EditForm   } from "../types/IncidentType";
 
 const Incidentes: React.FC = () => {
-    // Estados del componente
     const [incidents, setIncidents] = useState<Incident[]>([]);
     const [showForm, setShowForm] = useState<boolean>(false);
     const [expandedIncident, setExpandedIncident] = useState<number | null>(null);
     const [editingIncident, setEditingIncident] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    // Estados de formularios
+    const [isImageModalOpen, setIsImageModalOpen] = useState<boolean>(false);
+    const [currentImageUrl, setCurrentImageUrl] = useState<string>("");
+    const [imageUploadContext, setImageUploadContext] = useState<'new' | 'edit'>('new');
+    const [tempImageUrl, setTempImageUrl] = useState<string>("");
+
     const [editForm, setEditForm] = useState<EditForm>({
         description: "",
         location: "",
@@ -67,11 +48,7 @@ const Incidentes: React.FC = () => {
         imageUrl: ""
     });
 
-    // Datos iniciales de incidentes
-    // Datos iniciales de incidentes
-
     const initialIncidentsData: Incident[] = [
-
         { id: 1, type: 'Incendio', description: 'Incendio en una casa', location: 'Renca, El Montijo 2212', dateTime: '03/09/2024 22:50', status: 'En progreso', imageUrl: Incendio },
         { id: 2, type: 'Explosión', description: 'Explosión de transformador', location: 'Renca, El Montijo 2212', dateTime: '03/09/2024 14:20', status: 'Cerrado', imageUrl: DefaultIncidente },
         { id: 3, type: 'Accidente', description: 'Atropellamiento', location: 'Av. Vicuña Mackenna 6100', dateTime: '03/09/2024 13:15', status: 'Cerrado', imageUrl: Accidente },
@@ -88,21 +65,16 @@ const Incidentes: React.FC = () => {
         { id: 14, type: 'Explosión', description: 'Explosión de horno industrial', location: 'Av. Manquehue Norte 1400, Santiago', dateTime: '03/09/2024 08:22', status: 'Cerrado', imageUrl: DefaultIncidente },
         { id: 15, type: 'Desplome', description: 'Árbol caído', location: 'Av. Irarrazaval 5200, Ñuñoa', dateTime: '03/09/2024 06:52', status: 'En progreso', imageUrl: DefaultIncidente },
         { id: 16, type: 'Explosión', description: 'Explosión de tuberías', location: 'Av. Los Leones 2200, Providencia', dateTime: '03/09/2024 05:40', status: 'Cerrado', imageUrl: DefaultIncidente },
-
     ];
 
-    // Efecto para cargar incidentes al montar el componente
     useEffect(() => {
         loadIncidents();
     }, []);
 
-    /**
-     * Carga los incidentes desde localStorage o inicializa con datos por defecto
-     */
     const loadIncidents = useCallback(async (): Promise<void> => {
         setIsLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 500)); // Simular carga
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             const storedIncidents = localStorage.getItem('incidentes');
             if (storedIncidents) {
@@ -116,15 +88,11 @@ const Incidentes: React.FC = () => {
             }
         } catch (error) {
             console.error(' Error al cargar incidentes:', error);
-            // Podrías agregar un toast de error aquí
         } finally {
             setIsLoading(false);
         }
     }, []);
 
-    /**
-     * Guarda los incidentes en localStorage
-     */
     const saveIncidentsToLocalStorage = (data: Incident[]): void => {
         try {
             localStorage.setItem('incidentes', JSON.stringify(data));
@@ -133,18 +101,12 @@ const Incidentes: React.FC = () => {
         }
     };
 
-    /**
-     * Genera un nuevo ID para un incidente
-     */
     const generateIncidentId = (): number => {
         const incidents = JSON.parse(localStorage.getItem('incidentes') || '[]');
         const maxId = incidents.reduce((max: number, inc: Incident) => Math.max(max, inc.id), 0);
         return maxId + 1;
     };
 
-    /**
-     * Maneja el cambio en los campos del formulario
-     */
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
         formType: 'new' | 'edit'
@@ -154,11 +116,30 @@ const Incidentes: React.FC = () => {
         if (formType === 'new') {
             setNewIncident(prev => ({ ...prev, [id]: value }));
         } else {
-            // El ID de los campos de edición comienza con 'edit-'
             setEditForm(prev => ({ ...prev, [id.replace('edit-', '')]: value }));
         }
     };
 
+    const handleImageSave = (newImage: string | undefined): void => {
+        if (imageUploadContext === 'new') {
+            setNewIncident(prev => ({ 
+                ...prev, 
+                imageUrl: newImage || "" 
+            }));
+        } else {
+            setEditForm(prev => ({ 
+                ...prev, 
+                imageUrl: newImage || "" 
+            }));
+        }
+        setIsImageModalOpen(false);
+    };
+
+    const openImageModal = (context: 'new' | 'edit', currentImage: string = ""): void => {
+        setImageUploadContext(context);
+        setCurrentImageUrl(currentImage);
+        setIsImageModalOpen(true);
+    };
 
     const validateForm = (data: IncidentForm): boolean => {
         if (!data.type || !data.description || !data.location) {
@@ -174,9 +155,6 @@ const Incidentes: React.FC = () => {
         return true;
     };
 
-    /**
-     * Maneja el envío del formulario de nuevo incidente
-     */
     const handleSubmitIncident = (e: React.FormEvent): void => {
         e.preventDefault();
 
@@ -203,7 +181,6 @@ const Incidentes: React.FC = () => {
         setIncidents(sortedIncidents);
         saveIncidentsToLocalStorage(updatedIncidents);
 
-        // Resetear formulario
         setShowForm(false);
         setNewIncident({
             type: "",
@@ -212,13 +189,9 @@ const Incidentes: React.FC = () => {
             imageUrl: ""
         });
 
-        // Mostrar feedback al usuario
-        alert("✅ ¡Incidente añadido correctamente!");
+        alert("¡Incidente añadido correctamente!");
     };
 
-    /**
-     * Maneja la eliminación de un incidente
-     */
     const handleDeleteIncident = (id: number): void => {
         if (window.confirm("¿Estás seguro de que quieres eliminar este incidente?")) {
             const updatedIncidents = incidents.filter(incident => incident.id !== id);
@@ -246,7 +219,7 @@ const Incidentes: React.FC = () => {
                 status: incident.status,
                 imageUrl: incident.imageUrl
             });
-            setExpandedIncident(id); // Asegurarse que la fila esté expandida
+            setExpandedIncident(id);
         }
     };
 
@@ -275,7 +248,7 @@ const Incidentes: React.FC = () => {
         setIncidents(updatedIncidents);
         saveIncidentsToLocalStorage(updatedIncidents);
         setEditingIncident(null);
-        setExpandedIncident(null); // Opcional: cerrar los detalles al guardar
+        setExpandedIncident(null);
 
         setEditForm({
             description: "",
@@ -285,12 +258,9 @@ const Incidentes: React.FC = () => {
             imageUrl: ""
         });
 
-        alert("✅ Incidente actualizado correctamente");
+        alert("Incidente actualizado correctamente");
     };
 
-    /**
-     * Obtiene la clase CSS para el estado del incidente
-     */
     const getStatusClass = (status: string): string => {
         const statusMap: { [key: string]: string } = {
             'en progreso': 'estado-progreso',
@@ -301,8 +271,6 @@ const Incidentes: React.FC = () => {
         return statusMap[status.toLowerCase()] || 'estado-default';
     };
 
-
-    //iconos
     const getIncidentIcon = (type: string): string => {
         const iconMap: { [key: string]: string } = {
             'incendio': '🔥',
@@ -317,7 +285,6 @@ const Incidentes: React.FC = () => {
         return iconMap[type.toLowerCase()] || '📋';
     };
 
-    // Renderizado condicional para loading
     if (isLoading) {
         return (
             <div className={styles.cuerpo}>
@@ -333,7 +300,6 @@ const Incidentes: React.FC = () => {
     return (
         <div className={styles.cuerpo}>
             <section className={styles['contenedor-incidentes']}>
-                {/* Header de la página */}
                 <header className={styles['header-incidentes']}>
                     <div className={styles['titulo-container']}>
                         <h1 className={styles['titulo-principal']}>
@@ -351,11 +317,9 @@ const Incidentes: React.FC = () => {
                         disabled={showForm}
                     >
                         Reportar Nuevo Incidente<TiPlus />
-
                     </button>
                 </header>
 
-                {/* Formulario de nuevo incidente */}
                 {showForm && (
                     <div className={`${styles['overlay-form']} ${styles['mt-5']}`}>
                         <div className={`${styles['formulario-container']} ${styles['mt-3']}`}>
@@ -381,7 +345,7 @@ const Incidentes: React.FC = () => {
                                 <div className={styles['grid-form']}>
                                     <div className={styles['form-group']}>
                                         <label htmlFor="type" className={styles['form-label']}>
-                                            🔧 Tipo de Incidente
+                                            Tipo de Incidente
                                         </label>
                                         <input
                                             type="text"
@@ -397,11 +361,12 @@ const Incidentes: React.FC = () => {
 
                                     <div className={styles['form-group']}>
                                         <label htmlFor="location" className={styles['form-label']}>
-                                            📍 Ubicación
+                                            Ubicación
                                         </label>
                                         <input
                                             type="text"
-                                            data-testid="incident-location" id="location"
+                                            data-testid="incident-location" 
+                                            id="location"
                                             value={newIncident.location}
                                             onChange={(e) => handleInputChange(e, 'new')}
                                             placeholder="Dirección exacta o referencia..."
@@ -427,26 +392,53 @@ const Incidentes: React.FC = () => {
                                     </div>
 
                                     <div className={`${styles['form-group']} ${styles['full-width']}`}>
-                                        <label htmlFor="imageUrl" className={styles['form-label']}>
-                                            URL de Imagen (Opcional)
+                                        <label className={styles['form-label']}>
+                                            Imagen del Incidente
                                         </label>
-                                        <input
-                                            type="url"
-                                            id="imageUrl"
-                                            value={newIncident.imageUrl}
-                                            onChange={(e) => handleInputChange(e, 'new')}
-                                            placeholder="https://ejemplo.com/imagen.jpg"
-                                            className={styles['form-input']}
-                                        />
+                                        <div className={styles['image-upload-section']}>
+                                            {newIncident.imageUrl ? (
+                                                <div className={styles['image-preview-container']}>
+                                                    <img 
+                                                        src={newIncident.imageUrl} 
+                                                        alt="Vista previa" 
+                                                        className={styles['image-preview']}
+                                                    />
+                                                    <div className={styles['image-actions']}>
+                                                        <button
+                                                            type="button"
+                                                            className={styles['btn-secundario']}
+                                                            onClick={() => openImageModal('new', newIncident.imageUrl)}
+                                                        >
+                                                            Cambiar Imagen
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className={styles['btn-peligro']}
+                                                            onClick={() => setNewIncident(prev => ({ ...prev, imageUrl: "" }))}
+                                                        >
+                                                            Eliminar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    className={styles['btn-subir-imagen']}
+                                                    onClick={() => openImageModal('new')}
+                                                >
+                                                    Subir Imagen
+                                                </button>
+                                            )}
+                                        </div>
                                         <small className={styles['form-help']}>
-                                            Proporciona una URL de imagen para mejor identificación del incidente
+                                            Agrega una imagen para mejor identificación del incidente
                                         </small>
                                     </div>
                                 </div>
 
                                 <div className={styles['form-actions']}>
                                     <button data-testid="submit-incident" type="submit" className={styles['btn-primario']}>
-                                        🚀 Enviar Reporte
+                                        Enviar Reporte
                                     </button>
                                     <button
                                         type="button"
@@ -461,7 +453,7 @@ const Incidentes: React.FC = () => {
                                             });
                                         }}
                                     >
-                                        ↩️ Cancelar
+                                        Cancelar
                                     </button>
                                 </div>
                             </form>
@@ -469,7 +461,6 @@ const Incidentes: React.FC = () => {
                     </div>
                 )}
 
-                {/* Panel de estadísticas */}
                 <div className={styles['panel-estadisticas']}>
                     <div className={styles.estadistica}>
                         <span data-testid="estadistica-numero" className={styles['estadistica-numero']}>{incidents.length}</span>
@@ -489,7 +480,6 @@ const Incidentes: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Tabla de incidentes */}
                 <div className={styles['contenedor-tabla']}>
                     <div className={styles['tabla-header']}>
                         <h2>Lista de Incidentes Activos</h2>
@@ -559,7 +549,6 @@ const Incidentes: React.FC = () => {
                                                         >
                                                             Editar
                                                             <RiEditFill />
-
                                                         </button>
                                                         <button
                                                             className={`${styles['btn-accion']} ${styles['btn-danger']}`}
@@ -568,13 +557,11 @@ const Incidentes: React.FC = () => {
                                                         >
                                                             Eliminar
                                                             <BsTrashFill />
-
                                                         </button>
                                                     </div>
                                                 </td>
                                             </tr>
 
-                                            {/* Fila expandida con detalles */}
                                             {expandedIncident === incident.id && (
                                                 <tr className={styles['fila-detalles']}>
                                                     <td colSpan={6}>
@@ -582,11 +569,11 @@ const Incidentes: React.FC = () => {
                                                             {editingIncident === incident.id ? (
                                                                 // Formulario de edición
                                                                 <div className={styles['formulario-edicion']}>
-                                                                    <h4>{`✏️ Editando Incidente #${incident.id}`}</h4>
+                                                                    <h4>{`✏️Editando Incidente #${incident.id}`}</h4>
                                                                     <div className={styles['grid-form']}>
                                                                         {/* Tipo de Incidente */}
                                                                         <div className={styles['form-group']}>
-                                                                            <label htmlFor="edit-type" className={styles['form-label']}>🔧 Tipo de Incidente</label>
+                                                                            <label htmlFor="edit-type" className={styles['form-label']}>Tipo de Incidente</label>
                                                                             <input
                                                                                 type="text"
                                                                                 id="edit-type"
@@ -598,9 +585,8 @@ const Incidentes: React.FC = () => {
                                                                             />
                                                                         </div>
 
-                                                                        {/* Ubicación */}
                                                                         <div className={styles['form-group']}>
-                                                                            <label htmlFor="edit-location" className={styles['form-label']}>📍 Ubicación</label>
+                                                                            <label htmlFor="edit-location" className={styles['form-label']}>Ubicación</label>
                                                                             <input
                                                                                 type="text"
                                                                                 id="edit-location"
@@ -612,9 +598,8 @@ const Incidentes: React.FC = () => {
                                                                             />
                                                                         </div>
 
-                                                                        {/* Estado */}
                                                                         <div className={styles['form-group']}>
-                                                                            <label htmlFor="edit-status" className={styles['form-label']}>📊 Estado</label>
+                                                                            <label htmlFor="edit-status" className={styles['form-label']}>Estado</label>
                                                                             <select
                                                                                 id="edit-status"
                                                                                 value={editForm.status}
@@ -627,10 +612,9 @@ const Incidentes: React.FC = () => {
                                                                             </select>
                                                                         </div>
 
-                                                                        {/* Descripción */}
                                                                         <div className={`${styles['form-group']} ${styles['full-width']}`}>
                                                                             <label htmlFor="edit-description" className={styles['form-label']}>
-                                                                                📄 Descripción Detallada
+                                                                                Descripción Detallada
                                                                             </label>
                                                                             <textarea
                                                                                 id="edit-description"
@@ -643,20 +627,46 @@ const Incidentes: React.FC = () => {
                                                                             />
                                                                         </div>
 
-                                                                        {/* URL de Imagen */}
                                                                         <div className={`${styles['form-group']} ${styles['full-width']}`}>
-                                                                            <label htmlFor="edit-imageUrl" className={styles['form-label']}>🖼️ URL de Imagen (Opcional)</label>
-                                                                            <input
-                                                                                type="url"
-                                                                                id="edit-imageUrl"
-                                                                                data-testid="edit-imageUrl"
-                                                                                value={editForm.imageUrl}
-                                                                                onChange={(e) => handleInputChange(e, 'edit')}
-                                                                                className={styles['form-input']}
-                                                                                placeholder="https://ejemplo.com/imagen.jpg"
-                                                                            />
+                                                                            <label className={styles['form-label']}>
+                                                                                Imagen del Incidente
+                                                                            </label>
+                                                                            <div className={styles['image-upload-section']}>
+                                                                                {editForm.imageUrl ? (
+                                                                                    <div className={styles['image-preview-container']}>
+                                                                                        <img 
+                                                                                            src={editForm.imageUrl} 
+                                                                                            alt="Vista previa" 
+                                                                                            className={styles['image-preview']}
+                                                                                        />
+                                                                                        <div className={styles['image-actions']}>
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                className={styles['btn-secundario']}
+                                                                                                onClick={() => openImageModal('edit', editForm.imageUrl)}
+                                                                                            >
+                                                                                                Cambiar Imagen
+                                                                                            </button>
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                className={styles['btn-peligro']}
+                                                                                                onClick={() => setEditForm(prev => ({ ...prev, imageUrl: "" }))}
+                                                                                            >
+                                                                                                Eliminar
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        className={styles['btn-subir-imagen']}
+                                                                                        onClick={() => openImageModal('edit')}
+                                                                                    >
+                                                                                        Subir Imagen
+                                                                                    </button>
+                                                                                )}
+                                                                            </div>
                                                                         </div>
-
                                                                     </div>
                                                                     <div className={styles['acciones-edicion']}>
                                                                         <button
@@ -664,18 +674,17 @@ const Incidentes: React.FC = () => {
                                                                             className={styles['btn-primario']}
                                                                             onClick={() => handleSaveIncident(incident.id)}
                                                                         >
-                                                                            💾 Guardar Cambios
+                                                                            Guardar Cambios
                                                                         </button>
                                                                         <button
                                                                             className={styles['btn-secundario']}
                                                                             onClick={() => setEditingIncident(null)}
                                                                         >
-                                                                            ↩️ Cancelar
+                                                                            Cancelar
                                                                         </button>
                                                                     </div>
                                                                 </div>
                                                             ) : (
-                                                                // Vista de detalles
                                                                 <div className={styles['vista-detalles']}>
                                                                     <div className={styles['detalles-contenido']}>
                                                                         <div className={styles['detalles-texto']}>
@@ -704,7 +713,7 @@ const Incidentes: React.FC = () => {
                                                                             </div>
                                                                         </div>
 
-                                                                        {incident.imageUrl && incident.imageUrl !== '../assets/default_incident.png' && (
+                                                                        {incident.imageUrl && incident.imageUrl !== DefaultIncidente && (
                                                                             <div className={styles['detalles-imagen']}>
                                                                                 <h4>Evidencia Visual</h4>
                                                                                 <img
@@ -712,7 +721,7 @@ const Incidentes: React.FC = () => {
                                                                                     alt={`Imagen del incidente ${incident.id}`}
                                                                                     className={styles['imagen-incidente']}
                                                                                     onError={(e) => {
-                                                                                        (e.target as HTMLImageElement).src = '../assets/default_incident.png';
+                                                                                        (e.target as HTMLImageElement).src = DefaultIncidente;
                                                                                     }}
                                                                                 />
                                                                             </div>
@@ -731,8 +740,15 @@ const Incidentes: React.FC = () => {
                         )}
                     </div>
                 </div>
-            </section >
-        </div >
+            </section>
+
+            <ImageUploadModal
+                isOpen={isImageModalOpen}
+                onClose={() => setIsImageModalOpen(false)}
+                onImageSave={handleImageSave}
+                currentImage={currentImageUrl}
+            />
+        </div>
     );
 };
 

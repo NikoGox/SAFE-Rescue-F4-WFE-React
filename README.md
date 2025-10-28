@@ -12,19 +12,12 @@ SAFE Rescue es una aplicación diseñada para la gestión eficiente y rápida de
 
 ## Últimos cambios
 
-### ❚❙❘ VERSIÓN 1.0.8
+### ❚❙❘ VERSIÓN 1.0.9
 
-> <br>• Se corrige el diseño y  los formularios de perfil, contactanos,donar,registrarse,recuperar contraseña
-> <br>• Se añade una función y componente para poder agregar fotos desde el computador
-> <br>• Se corrige navbar, y dropdown para que tomen correctamente la logica de useAuth
-> <br>• Se crea types/UserType, util/validaciones, y componentes para estandarizar los formularios
-> <br>• Se empieza a la creación de los compontentes que ayudaran a incidentes a estandarizar formularios
-> <br> > > > Terminar la estandarización de los formularios de incidentes
-> <br> > > > Implementar el componente ImageUploadModal en incidentes
-> <br> > > > Corregir pruebas unitarias existentes e implementar las nuevas
-> <br> > > > Arreglar el responsive de toda la app, en especial de navbar
-> <br> > > > Revisar diseños que no hayan sufrido cambios significativos   
-> <br> > > > Corregir el video del carrusel de home
+> <br>• Se corrigen pruebas unitarias
+> <br>• Se agregan pruebas unitarias para donar y contactanos
+> <br>• Se implementa imageuploadmodel a la pantalla de incidentes
+> <br> > > > Corregir navbar en modo responsive
 > <br>
 
 ---

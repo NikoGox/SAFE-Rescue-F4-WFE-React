@@ -4,26 +4,25 @@ export type IncidentCategory = 'Desaparición' | 'Robo' | 'Daño' | 'Otro';
 
 export interface Incident {
     id: number;
-    title: string;
+    type: string;
     description: string;
     location: string;
     dateTime: string;
-    type: IncidentCategory;
-    status: IncidentStatus;
+    status: string;
     imageUrl: string;
 }
 
 export interface IncidentForm {
-    title: string;
+    type: string;
     description: string;
     location: string;
-    dateTime: string;
-    type: IncidentCategory;
-    status: IncidentStatus;
     imageUrl: string;
 }
 
-export interface ImageUploadModel {
-    file: File | null;
-    previewUrl: string | null;
+export interface EditForm {
+    description: string;
+    location: string;
+    type: string;
+    status: string;
+    imageUrl: string;
 }

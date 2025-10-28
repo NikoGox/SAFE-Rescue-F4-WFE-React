@@ -1,72 +1,33 @@
-/*
- * Archivo: src/pages/Donaciones/Donar.css (CORREGIDO Y COMPLETO - SOLUCIÓN DEFINITIVA)
- * -------------------------------------------
- * Contiene: Estilos del formulario de donaciones, con mejoras de diseño
- */
-
-/* ===== 0. CONTENEDOR PRINCIPAL (Fondo en el 100% del ancho) ===== */
-
 .donation-page-wrapper {
-  /* AJUSTE CLAVE: El fondo degradado se queda aquí y el wrapper ocupa el 100% del ancho. */
   background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
   width: 100%;
-  /*     **AJUSTE SOLICITADO:** Altura mínima y máxima de 1000px. 
-    Se añade overflow para que el contenido sea accesible si se excede la altura. 
-  */
-
   overflow-y: auto;
-
-  /* **AJUSTE SOLICITADO (1/3):** Añade padding superior e inferior de 3rem para margen visual constante en desktop. */
   padding: 3rem 0;
-
-  /* Flexbox para centrar el contenido (el nuevo .donation-content-container) */
   display: flex;
   justify-content: center;
-  /* Centra horizontalmente */
-
-  /* **AJUSTE SOLICITADO (2/3):** Alinea al inicio para respetar el padding-top (no centrado verticalmente por defecto). */
   align-items: flex-start;
 
 }
 
-/* NUEVO: Contenedor para el contenido del formulario que limitará el ancho */
 .donation-content-container {
   max-width: 700px;
-  /* Aquí se limita el ancho a 800px */
   width: 100%;
-  /* Ocupa el 100% del max-width de 800px (o menos en pantallas pequeñas) */
   margin: 0 auto;
-  /* Centra este contenedor dentro del wrapper */
   padding: 0;
-  /* Asegura que no tenga padding adicional */
-  /* **AJUSTE SOLICITADO:** Altura mínima y máxima de 1000px. */
 
 }
 
 .card-donacion {
-  /* Se eliminan los márgenes auto porque el .donation-content-container ya lo centra */
   margin-left: 0;
-  /* Ajuste para que no interfiera */
   margin-right: 0;
-  /* Ajuste para que no interfiera */
-  /* Centrado horizontal */
   margin: 0 auto;
-  /* ANCHO AJUSTADO: Ahora usa el 100% del ancho de su padre (.donation-content-container de 800px) */
   max-width: 95%;
-  /* Ocupa todo el ancho disponible del content-container */
   width: 100%;
-  /* Asegura que se expanda */
-
-  /* AJUSTE SOLICITADO: Se elimina la sombra de la tarjeta. */
   box-shadow: none;
   border-radius: var(--border-radius-lg);
   padding: 2rem;
   padding-top: 5px !important;
   background-color: var(--color-white);
-  /* SOLO la tarjeta es blanca */
-
-  /* **AJUSTE SOLICITADO:** Altura mínima y máxima de 1000px. */
-
   overflow-y: auto;
 }
 
@@ -74,29 +35,20 @@
   padding-left: 20px;
   padding-right: 20px;
   box-shadow: var(--shadow-heavy);
-  /* **AJUSTE SOLICITADO (3/3):** Eliminamos el margin-top de 5px, ya que el wrapper maneja el espacio superior. */
   margin-top: 0;
   padding-bottom: 10px;
   min-height: 880px;
 }
 
-
-
-
-
-/* Mantener altura estable para evitar 'salto' del contenedor */
 @media (min-width: 768px) {
   .card-donacion {
-    /* Se mantiene el flex-direction para la estructura interna del formulario */
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     padding-top: 2rem;
-    /* Se eliminó el min-height de 700px para usar el 1000px de la clase principal */
   }
 }
 
-/* ===== 1. CABECERA DEL FORMULARIO (TÍTULO Y LOGO AJUSTADOS) ===== */
 
 .logoFormulario {
   text-align: center;
@@ -138,8 +90,6 @@
   color: var(--color-primary);
 }
 
-
-/* ===== 2. CAMPOS DE FORMULARIO (SE MANTIENE) ===== */
 
 .form-label-custom {
   font-weight: 600;
@@ -211,8 +161,6 @@
   display: block;
 }
 
-
-/* ===== 3. BOTONES Y MONTO (SE MANTIENE) ===== */
 
 .btn-custom-primary {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
@@ -331,8 +279,6 @@
   transform: translateY(-2px);
 }
 
-/* ===== 4. DETALLES DE HOMENAJE Y OTROS (SE MANTIENE) ===== */
-
 #detalles-homenaje {
   overflow: hidden;
   max-height: 0;
@@ -401,11 +347,9 @@
   }
 }
 
-/* ===== 5. RESPONSIVE DESIGN (AJUSTADO) ===== */
 
 @media (max-width: 768px) {
 
-  /* Ajuste el tamaño del título para móvil/tablet */
   .card-title-custom {
     font-size: 2rem;
   }
@@ -413,7 +357,6 @@
 
 @media (max-width: 576px) {
 
-  /* AJUSTE DE PADDING: En móvil, el wrapper NO limita el ancho, el content-container sí */
   .donation-page-wrapper {
     padding: 0;
     width: 100%;
@@ -422,20 +365,14 @@
 
   .donation-content-container {
     max-width: 100%;
-    /* En móvil, el contenido puede ocupar el 100% */
-    /* **AJUSTE SOLICITADO:** Añade padding superior e inferior en móvil para mantener el margen visible. */
     padding: 1.5rem 1rem;
   }
 
-  /* AJUSTE DE CONTENEDOR: Se elimina el borde en móvil al igual que Contactanos */
   .card-donacion {
     border-radius: 0;
     box-shadow: none;
-    /* Se mantiene sin sombra en móvil */
     padding: 1.5rem;
-    /* Usamos el mismo padding de la secciónFormulario en Contactanos para móvil */
     max-width: 100%;
-    /* Se eliminaron las restricciones de altura aquí, ya que se aplican en la clase principal */
 
   }
 

@@ -1,17 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-// Importar el hook de autenticación central
 import { useAuth } from '../components/UseAuth';
 import Logo from "../assets/sr_logo.png";
 
-// Importar tipos (Asegúrate que la ruta sea correcta)
 import type { Errors, UserData, UserType } from '../types/UserType';
 
-// Importar componentes y utilidades (Asegúrate que las rutas sean correctas)
 import FormField from '../components/Formulario';
 import { RutInputField, PhoneInputField } from '../components/SpecializedFields';
 import ImageUploadModal from '../components/ImageUploadModal'; // Componente de Modal
 
-// Utilidades de Validación (Asegúrate que la ruta sea correcta)
 import {
     validateChileanRUT,
     validateEmail,
@@ -20,12 +16,10 @@ import {
     validateIsRequired
 } from '../utils/Validaciones';
 
-// Importa una imagen por defecto (Asegúrate que la ruta sea correcta)
 import PerfilDefault from "../assets/perfil-default.png";
 
 import styles from "../pages/Perfil.module.css";
 
-// Definición de datos iniciales
 const defaultUserData: UserData = {
     nombre: "",
     email: "",
@@ -33,11 +27,10 @@ const defaultUserData: UserData = {
     direccion: "",
     rut: "",
     nombreUsuario: "",
-    profileImage: undefined // Aseguramos que está en UserData
+    profileImage: undefined
 };
 
 const Perfil: React.FC = () => {
-    // OBTENER ESTADO Y FUNCIONES DE AUTENTICACIÓN GLOBAL
     const { authData, login, loading, isLoggedIn } = useAuth();
 
     const [userData, setUserData] = useState<UserData>(defaultUserData);
@@ -47,18 +40,12 @@ const Perfil: React.FC = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-    // 💡 CORRECCIÓN/ADICIÓN: Necesitas el estado para controlar el modal
     const [isModalOpen, setIsModalOpen] = useState(false); 
 
-
-    /**
-     * Sincroniza el estado local del formulario con el estado global (authData).
-     */
     useEffect(() => {
         if (loading) return;
 
         if (isLoggedIn && authData) {
-            // Sincronizar userData y originalData solo si NO se está editando
             if (!isEditing) {
                 setUserData(authData);
                 setOriginalData(authData);
@@ -69,9 +56,7 @@ const Perfil: React.FC = () => {
     }, [authData, isLoggedIn, loading, isEditing]);
 
 
-    /**
-     * Valida todo el formulario (useCallback es correcto aquí).
-     */
+ 
     const validateForm = useCallback((): boolean => {
         const newErrors: Errors = {};
         newErrors.nombre = validateNameLettersOnly(userData.nombre);
@@ -214,39 +199,31 @@ const Perfil: React.FC = () => {
 
                 // 5. SINCRONIZAR ESTADO GLOBAL y estados locales
                 login(safeUserData); // Actualiza authData
-                setOriginalData(safeUserData); // Actualiza el respaldo con los nuevos datos
+                setOriginalData(safeUserData); 
                 setIsEditing(false);
-                setMessage({ type: 'success', text: '✅ Cambios guardados exitosamente. Tu sesión se ha actualizado.' });
+                setMessage({ type: 'success', text: 'Cambios guardados exitosamente. Tu sesión se ha actualizado.' });
 
             } catch (error) {
                 console.error("Error al guardar:", error);
-                setMessage({ type: 'error', text: '⚠️ Error al guardar los cambios en el perfil.' });
+                setMessage({ type: 'error', text: 'Error al guardar los cambios en el perfil.' });
             } finally {
                 setIsSaving(false);
             }
         } else {
-            setMessage({ type: 'error', text: '⚠️ Por favor, corrige los errores en el formulario para guardar.' });
+            setMessage({ type: 'error', text: 'Por favor, corrige los errores en el formulario para guardar.' });
         }
     };
 
-    /**
-     * Maneja la imagen guardada o eliminada desde el modal.
-     * @param newImage El Data URL de la nueva imagen o `undefined` si se eliminó.
-     */
     const handleImageSave = (newImage: string | undefined) => {
-        // Actualiza el campo de la imagen en userData
         setUserData(prev => ({ ...prev, profileImage: newImage }));
         setIsModalOpen(false);
 
-        // Si NO está editando el formulario principal, guarda la imagen inmediatamente.
         if (!isEditing && isLoggedIn && authData) {
             
-            // Simular guardado inmediato de la imagen.
             const usuariosRegistrados: UserType[] = JSON.parse(localStorage.getItem('usuariosRegistrados') || '[]');
             const oldUser = usuariosRegistrados.find(u => u.email === authData.email);
 
             if (oldUser) {
-                // Mantenemos los datos actuales y solo actualizamos profileImage
                 const updatedFullData: UserType = { ...oldUser, profileImage: newImage };
 
                 const updatedUsers = usuariosRegistrados.map(u =>
@@ -255,25 +232,22 @@ const Perfil: React.FC = () => {
                 localStorage.setItem('usuariosRegistrados', JSON.stringify(updatedUsers));
 
                 const { contrasena, ...safeUserData }: UserType = updatedFullData;
-                login(safeUserData); // Actualiza authData
-                setOriginalData(safeUserData); // Actualiza el respaldo
+                login(safeUserData); 
+                setOriginalData(safeUserData);
 
                 const messageText = newImage
-                    ? '🖼️ Imagen de perfil actualizada con éxito.'
-                    : '🗑️ Imagen de perfil eliminada con éxito.';
+                    ? 'Imagen de perfil actualizada con éxito.'
+                    : 'Imagen de perfil eliminada con éxito.';
                 setMessage({ type: 'success', text: messageText });
             }
         } else if (isEditing) {
-            // Si está editando, solo actualiza el estado local de userData.
             const action = newImage ? 'seleccionada' : 'eliminada (en previsualización)';
-            setMessage({ type: 'success', text: `🖼️ Imagen ${action}. Presiona "Guardar Cambios" para confirmar y finalizar la edición.` });
+            setMessage({ type: 'success', text: `Imagen ${action}. Presiona "Guardar Cambios" para confirmar y finalizar la edición.` });
         }
     }
 
     const isFormActiveForEditing = isEditing;
 
-
-    // --- RENDERIZADO CONDICIONAL ---
 
     if (loading) {
         return (
@@ -310,13 +284,7 @@ const Perfil: React.FC = () => {
                             <div className={`${styles['card-header-perfil']} text-center`}>
 
                                 <div className={styles.logoFormulario}>
-                                    <img
-                                        src={Logo}
-                                        alt="SAFE Rescue Logo"
-                                        width="60"
-                                        height="60"
-                                        className="d-inline-block align-text-top"
-                                    />
+
                                 </div>
 
                                 <h2 className={styles.tituloFormulario}>Mi Perfil</h2>
@@ -330,12 +298,12 @@ const Perfil: React.FC = () => {
                                         data-testid="profile-image"
                                     />
                                     <button
-                                        className={`${styles['btn-edit-image']} btn btn-sm btn-light`}
-                                        onClick={() => setIsModalOpen(true)} // Abre el modal
+                                        className={`${styles['btn-edit-image']} btn-sm btn-light`}
+                                        onClick={() => setIsModalOpen(true)} 
                                         aria-label="Cambiar imagen de perfil"
                                         data-testid="edit-image-button"
                                     >
-                                        ✏️
+                                        <i className="bi bi-pencil-fill">+ </i>
                                     </button>
                                 </div>
 
@@ -343,14 +311,12 @@ const Perfil: React.FC = () => {
                             </div>
 
                             <div className="card-body">
-                                {/* Mensaje de éxito/error */}
                                 {message && (
                                     <div className={`alert alert-${message.type === 'success' ? 'success' : 'danger'}`} role="alert" data-testid="perfil-message">
                                         {message.text}
                                     </div>
                                 )}
 
-                                {/* Formulario de edición de datos */}
                                 <form onSubmit={handleSave} noValidate>
                                     <div className={styles['lista-datos-perfil']}>
                                         <FormField
@@ -383,7 +349,6 @@ const Perfil: React.FC = () => {
                                             disabled={!isFormActiveForEditing}
                                             dataTestId='perfil-rut'
                                         />
-                                        {/* Email siempre deshabilitado */}
                                         <FormField
                                             id="email"
                                             label="Correo Electrónico"
@@ -419,7 +384,6 @@ const Perfil: React.FC = () => {
 
                                     </div>
 
-                                    {/* Botones de acción controlados por isFormActiveForEditing */}
                                     <div className={`${styles['botones-perfil']} text-center mt-4`}>
                                         {!isFormActiveForEditing ? (
                                             <button
@@ -435,7 +399,6 @@ const Perfil: React.FC = () => {
                                                 <button
                                                     type="submit"
                                                     className={`${styles['btn-guardar-perfil']} btn btn-success me-2`}
-                                                    // Deshabilitado si está guardando O si hay errores O si NO HAY CAMBIOS
                                                     disabled={isSaving || Object.values(errors).some(e => e) || !isDataChanged}
                                                     data-testid="perfil-save-button"
                                                 >
@@ -460,7 +423,6 @@ const Perfil: React.FC = () => {
                 </div>
             </div>
 
-            {/* Componente Modal para subir/cambiar la imagen */}
             <ImageUploadModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
