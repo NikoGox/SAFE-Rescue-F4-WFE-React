@@ -19,7 +19,7 @@ import { TiPlus } from "react-icons/ti";
 
 import ImageUploadModal from "../components/ImageUploadModal";
 
-import type { Incident , IncidentForm , EditForm   } from "../types/IncidentType";
+import type { Incident , IncidentForm , EditForm   } from "../types/IncidenteType";
 
 const Incidentes: React.FC = () => {
     const [incidents, setIncidents] = useState<Incident[]>([]);

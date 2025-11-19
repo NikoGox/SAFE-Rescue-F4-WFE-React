@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useAuth } from '../components/UseAuth';
+import { useAuth } from '../hook/UseAuth';
 import Logo from "../assets/sr_logo.png";
 
-import type { Errors, UserData, UserType } from '../types/UserType';
+import type { Errors, UserData, UserType } from '../types/PerfilesType';
 
 import FormField from '../components/Formulario';
 import { RutInputField, PhoneInputField } from '../components/SpecializedFields';

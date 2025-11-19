@@ -2,11 +2,11 @@ import React, { useState, useCallback } from "react";
 import Logo from "../assets/sr_logo.png";
 import styles from './Contactanos.module.css';
 
-import type { Errors, ContactData, AuthContextType, UserData } from '../types/UserType';
+import type { Errors, ContactData, AuthContextType, UserData } from '../types/PerfilesType';
 
 import FormField from '../components/Formulario'; 
 
-import { useAuth } from '../components/UseAuth'; // 💡
+import { useAuth } from '../hook/UseAuth'; // 💡
 
 import {
     validateEmail,

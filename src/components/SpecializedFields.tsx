@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './formulario.module.css';
 import { formatRut, formatPhoneNumber } from '../utils/Validaciones';
-import type { SpecializedFieldProps as BaseSpecializedFieldProps } from '../types/UserType';
+import type { SpecializedFieldProps as BaseSpecializedFieldProps } from '../types/PerfilesType';
 
 interface SpecializedFieldProps extends BaseSpecializedFieldProps {
     disabled?: boolean;

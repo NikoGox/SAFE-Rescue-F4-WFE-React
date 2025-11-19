@@ -1,6 +1,16 @@
 ╔══════════════════════════════════════════════╗
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
+
+❚❙❘ VERSIÓN 1.0.10
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se empieza la implementación de conección con backend
+├─• Se crean los client que reciben la información usando axiom
+├─• Se crean types para los datos recibidos desde el backend
+└─• Se crean los service para el manejo de las funciones
+
+>>> Se necesita implementar los service en los formularios y paginas
+
 ❚❙❘ VERSIÓN 1.0.9
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
 ├─• Se corrigen pruebas unitarias.

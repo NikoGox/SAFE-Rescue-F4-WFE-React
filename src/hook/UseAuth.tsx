@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { UserData } from '../types/UserType'; 
+import type { UserData } from '../types/PerfilesType'; 
 
 export const useAuth = () => {
     const [authData, setAuthData] = useState<UserData | null>(null);

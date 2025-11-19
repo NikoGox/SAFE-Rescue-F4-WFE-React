@@ -14,7 +14,7 @@ import {
     validateNameLettersOnly,
     validateIsRequired
 } from '../utils/Validaciones';
-import type { FormDataType, Errors } from '../types/UserType';
+import type { FormDataType, Errors } from '../types/PerfilesType';
 
 // Tipo de elemento general del formulario (Input o Textarea)
 type FormElement = HTMLInputElement | HTMLTextAreaElement;
