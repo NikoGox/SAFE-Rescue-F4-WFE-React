@@ -1,88 +1,171 @@
-// src/services/ParticipanteConvService.ts
+import type { 
+  ParticipanteConvResponse,
+  ParticipanteConvCreationDTO,
+  ParticipanteConvSimplificado
+} from '../../../types/ComunicacionType'; 
+import { comunicacionesClient, buildApiUrlPathComunicaciones, ComunicacionesEndpoints } from '../../clients/ComunicacionClient';
 
-import axios, { type AxiosResponse } from 'axios';
-import { type ParticipanteConvResponse, type ParticipanteConvCreationDTO } from '../../../types/ComunicacionType'; 
-// Usamos el cliente configurado para el microservicio de Comunicación
-import { comunicacionesClient } from '../../clients/ComunicacionClient'; 
-
-const API_BASE = '/api/v1'; 
-// El endpoint base apunta a las conversaciones, y luego a sus participantes
-const ENDPOINT_CONVERSACIONES = `${API_BASE}/conversaciones`; 
-
-/**
- * Gestiona la lista de participantes dentro de una conversación específica.
- */
-export const ParticipanteConvService = {
-
-    /**
-     * Obtiene todos los participantes activos de una conversación.
-     * Endpoint asumido: GET /api/v1/conversaciones/{idConversacion}/participantes
-     *
-     * @param idConversacion El ID de la conversación/hilo.
-     * @returns Promesa que resuelve con una lista de ParticipanteConvResponse.
-     */
-    getParticipantesByConvId: async (idConversacion: number): Promise<ParticipanteConvResponse[]> => {
-        const path = `${ENDPOINT_CONVERSACIONES}/${idConversacion}/participantes`;
-        
-        try {
-            const response: AxiosResponse<ParticipanteConvResponse[]> = await comunicacionesClient.get(path);
-            
-            console.log(`Participantes cargados para la conversación ID ${idConversacion}.`);
-            return response.data;
-            
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error(`[ParticipanteConvService] Error al obtener participantes para conv ID ${idConversacion}: ${error.message}`, error.response?.data);
-            }
-            throw error; // Propagar el error
-        }
-    },
-    
-    /**
-     * Agrega un nuevo usuario a la conversación como participante.
-     * Endpoint asumido: POST /api/v1/conversaciones/{idConversacion}/participantes
-     *
-     * @param idConversacion El ID de la conversación.
-     * @param participanteData El DTO con el ID del usuario a agregar.
-     * @returns Promesa que resuelve con el registro de ParticipanteConvResponse creado.
-     */
-    addParticipante: async (idConversacion: number, participanteData: ParticipanteConvCreationDTO): Promise<ParticipanteConvResponse> => {
-        const path = `${ENDPOINT_CONVERSACIONES}/${idConversacion}/participantes`;
-        
-        try {
-            const response: AxiosResponse<ParticipanteConvResponse> = await comunicacionesClient.post(path, participanteData);
-            
-            console.log(`Usuario ${participanteData.idUsuario} añadido a la conversación ${idConversacion}.`);
-            return response.data;
-            
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error(`[ParticipanteConvService] Error al añadir participante: ${error.message}`, error.response?.data);
-            }
-            throw error;
-        }
-    },
-    
-    /**
-     * Elimina (o marca como inactivo) un participante de la conversación.
-     * Endpoint asumido: DELETE /api/v1/conversaciones/{idConversacion}/participantes/{idUsuario}
-     *
-     * @param idConversacion El ID de la conversación.
-     * @param idUsuario El ID del usuario a eliminar.
-     * @returns Promesa que se resuelve al completar la acción.
-     */
-    removeParticipante: async (idConversacion: number, idUsuario: number): Promise<void> => {
-        // Nota: Depende de la implementación del backend si esto hace un DELETE o un PATCH (marcar estaActivo=false)
-        const path = `${ENDPOINT_CONVERSACIONES}/${idConversacion}/participantes/${idUsuario}`;
-        
-        try {
-            await comunicacionesClient.delete(path);
-            console.log(`Usuario ${idUsuario} eliminado de la conversación ${idConversacion}.`);
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error(`[ParticipanteConvService] Error al eliminar participante: ${error.message}`, error.response?.data);
-            }
-            throw error;
-        }
+class ParticipanteConvService {
+  /**
+   * Unir participante a conversación
+   */
+  async unirParticipante(idConversacion: number, idUsuario: number): Promise<ParticipanteConvResponse> {
+    try {
+      const response = await comunicacionesClient.post<ParticipanteConvResponse>(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.PARTICIPANTECONV, `/${idConversacion}/usuario/${idUsuario}`)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Conversación o usuario no encontrado');
+      }
+      if (error.response?.status === 409) {
+        throw new Error('El usuario ya es participante de esta conversación');
+      }
+      if (error.response?.status === 400) {
+        throw new Error('Solicitud inválida: ID de usuario no válido');
+      }
+      this.handleError(error);
+      throw error;
     }
-};
+  }
+
+  /**
+   * Obtener participantes por conversación
+   */
+  async obtenerParticipantesPorConversacion(idConversacion: number): Promise<ParticipanteConvResponse[]> {
+    try {
+      const response = await comunicacionesClient.get<ParticipanteConvResponse[]>(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.PARTICIPANTECONV, `/conversacion/${idConversacion}`)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 204) {
+        return []; // Retorna array vacío si no hay participantes
+      }
+      if (error.response?.status === 404) {
+        throw new Error('Conversación no encontrada');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener conversaciones por usuario
+   */
+  async obtenerConversacionesPorUsuario(idUsuario: number): Promise<ParticipanteConvResponse[]> {
+    try {
+      const response = await comunicacionesClient.get<ParticipanteConvResponse[]>(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.PARTICIPANTECONV, `/usuario/${idUsuario}`)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 204) {
+        return []; // Retorna array vacío si no hay conversaciones
+      }
+      if (error.response?.status === 404) {
+        throw new Error('Usuario no encontrado');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Eliminar participante de conversación
+   */
+  async eliminarParticipante(idConversacion: number, idUsuario: number): Promise<void> {
+    try {
+      await comunicacionesClient.delete(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.PARTICIPANTECONV, `/${idConversacion}/usuario/${idUsuario}`)
+      );
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Conversación o usuario no encontrado');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener participantes simplificados por conversación
+   */
+  async obtenerParticipantesSimplificados(idConversacion: number): Promise<ParticipanteConvSimplificado[]> {
+    try {
+      const participantes = await this.obtenerParticipantesPorConversacion(idConversacion);
+      
+      // Transformar a formato simplificado
+      return participantes.map(participante => ({
+        idParticipanteConv: participante.idParticipanteConv,
+        idUsuario: participante.idUsuario,
+        idConversacion: participante.conversacion.idConversacion,
+        fechaUnion: participante.fechaUnion,
+        nombreUsuario: `Usuario ${participante.idUsuario}` // Esto se puede mejorar con datos reales del usuario
+      }));
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Verificar si usuario es participante de conversación
+   */
+  async esParticipante(idConversacion: number, idUsuario: number): Promise<boolean> {
+    try {
+      const participantes = await this.obtenerParticipantesPorConversacion(idConversacion);
+      return participantes.some(participante => participante.idUsuario === idUsuario);
+    } catch (error) {
+      // Si hay error al obtener participantes, asumimos que no es participante
+      return false;
+    }
+  }
+
+  /**
+ * Agregar múltiples participantes a conversación
+ */
+async agregarMultiplesParticipantes(idConversacion: number, idsUsuarios: number[]): Promise<ParticipanteConvResponse[]> {
+  try {
+    const resultados: ParticipanteConvResponse[] = [];
+    
+    for (const idUsuario of idsUsuarios) {
+      try {
+        const participante = await this.unirParticipante(idConversacion, idUsuario);
+        resultados.push(participante);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+        console.warn(`No se pudo agregar usuario ${idUsuario} a la conversación:`, errorMessage);
+        // Continuar con los siguientes usuarios
+      }
+    }
+    
+    return resultados;
+  } catch (error: any) {
+    throw error;
+  }
+}
+
+  /**
+   * Manejo centralizado de errores
+   */
+  private handleError(error: any): void {
+    if (error.response) {
+      const status = error.response.status;
+      const message = error.response.data?.message || error.response.data || error.message;
+
+      switch (status) {
+        case 500:
+          throw new Error('Error interno del servidor');
+        default:
+          throw new Error(`Error ${status}: ${message}`);
+      }
+    } else if (error.request) {
+      throw new Error('Error de conexión: No se pudo contactar al servidor');
+    } else {
+      throw new Error('Error: ' + error.message);
+    }
+  }
+}
+
+export default new ParticipanteConvService();

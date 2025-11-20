@@ -1,87 +1,130 @@
-// src/services/CiudadanoService.ts 
+import type { CiudadanoData } from '../../../types/PerfilesType';
+import { perfilesClient, buildApiUrlPathPerfiles, PerfilesEndpoints } from '../../../service/clients/PerfilesClient';
 
-import axios, { type AxiosResponse } from 'axios';
-import {
-  type UserRegistroType,
-  type UserData,
-  type TipoUsuario,
-  type LoginRequest, // Requerida para la función de login si la incluyes aquí
-} from '../../../types/PerfilesType.ts';  // ⭐ Usamos los tipos de tu archivo PerfilesType
+class CiudadanoService {
+  /**
+   * Crear un nuevo ciudadano
+   */
+  async crearCiudadano(ciudadano: Omit<CiudadanoData, 'idUsuario'>): Promise<CiudadanoData> {
+    try {
+      const response = await perfilesClient.post<CiudadanoData>(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.CIUDADANOS),
+        ciudadano
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 400) {
+        const errorMessage = this.getValidationErrorMessage(error.response.data);
+        throw new Error(errorMessage);
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
 
-// La URL base y las utilidades de construcción del cuerpo son reutilizadas
+  /**
+   * Obtener ciudadano por ID
+   */
+  async buscarCiudadanoPorId(id: number): Promise<CiudadanoData> {
+    try {
+      const response = await perfilesClient.get<CiudadanoData>(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.CIUDADANOS, `/${id}`)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Ciudadano no encontrado');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
 
-// URL base de tu API de Perfiles de Spring Boot
-const API_BASE_URL = 'http://localhost:8080/api-perfiles/v1/auth';
-const REGISTER_URL = `${API_BASE_URL}/register`;
+  /**
+   * Actualizar ciudadano existente
+   */
+  async actualizarCiudadano(id: number, ciudadano: Partial<CiudadanoData>): Promise<CiudadanoData> {
+    try {
+      // Asegurar que el ID del path se asigna al objeto
+      const ciudadanoConId = {
+        ...ciudadano,
+        idUsuario: id
+      };
 
-// Definición del tipo de usuario Ciudadano
-const CIUDADANO_TIPO: TipoUsuario = {
-    idTipoUsuario: 1, // ⭐ ID asumido para CIUDADANO
-    nombre: 'CIUDADANO',
-    permisos: [], 
-};
+      const response = await perfilesClient.put<CiudadanoData>(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.CIUDADANOS, `/${id}`),
+        ciudadanoConId
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Ciudadano no encontrado');
+      }
+      if (error.response?.status === 400) {
+        const errorMessage = this.getValidationErrorMessage(error.response.data);
+        throw new Error(errorMessage);
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
 
-/**
- * Función de utilidad para construir el cuerpo de la petición de registro, 
- * replicando la lógica de tu AuthService.
- */
-const buildRegistroBody = (formValues: UserRegistroType, tipoUsuario: TipoUsuario): any => {
-    
-    // Asumiendo formato RUN-DV
-    const [run, dv] = formValues.rut.split('-'); 
-    
-    // Estructura de la Entidad Usuario del Backend
-    const usuarioParaBackend = {
-        nombre: formValues.nombre,
-        correo: formValues.email, 
-        telefono: formValues.telefono,
-        run: run,
-        dv: dv,
-        contrasenia: formValues.contrasena, 
-        
-        // Asumiendo que tu backend usa aPaterno y aMaterno
-        aPaterno: "N/A", 
-        aMaterno: "N/A",
+  /**
+   * Eliminar ciudadano
+   */
+  async eliminarCiudadano(id: number): Promise<void> {
+    try {
+      await perfilesClient.delete(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.CIUDADANOS, `/${id}`)
+      );
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Ciudadano no encontrado');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
 
-        // Valores fijos/predeterminados
-        idEstado: 1, 
-        fechaRegistro: new Date().toISOString().slice(0, 19).replace('T', ' '),
-        
-        // Tipo de Usuario
-        tipoUsuario: tipoUsuario,
-    };
-    
-    return usuarioParaBackend;
-};
+  /**
+   * Extrae mensajes de error de validación del backend
+   */
+  private getValidationErrorMessage(errorData: any): string {
+    if (typeof errorData === 'string') {
+      return errorData;
+    }
+    if (errorData?.message) {
+      return errorData.message;
+    }
+    if (errorData?.errors) {
+      // Para errores de validación de campos específicos
+      return Object.values(errorData.errors).join(', ');
+    }
+    return 'Error de validación en los datos del ciudadano';
+  }
 
+  /**
+   * Manejo centralizado de errores
+   */
+  private handleError(error: any): void {
+    if (error.response) {
+      const status = error.response.status;
+      const message = error.response.data?.message || error.response.data || error.message;
 
-/**
- * Gestiona las operaciones específicas del perfil de Ciudadano, principalmente el registro.
- */
-export const CiudadanoService = {
-  
-    /**
-     * Registra un nuevo Ciudadano.
-     * @param formValues Los datos completos del formulario de registro.
-     * @returns Promesa con el Usuario creado (UserData).
-     */
-    registerCiudadano: async (formValues: UserRegistroType): Promise<UserData> => {
-        
-        const registroBody = buildRegistroBody(formValues, CIUDADANO_TIPO);
+      switch (status) {
+        case 500:
+          throw new Error('Error interno del servidor');
+        case 409:
+          throw new Error('Conflicto de datos: ' + message);
+        default:
+          throw new Error(`Error ${status}: ${message}`);
+      }
+    } else if (error.request) {
+      throw new Error('Error de conexión: No se pudo contactar al servidor');
+    } else {
+      throw new Error('Error: ' + error.message);
+    }
+  }
+}
 
-        try {
-            const response: AxiosResponse<UserData> = await axios.post(REGISTER_URL, registroBody, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            return response.data;
-        } catch (error) {
-            // Manejo y propagación de errores (ej: 409 Conflict)
-            throw error; 
-        }
-    },
-    
-    // Aquí podrías añadir otros métodos específicos de Ciudadano si son necesarios, 
-    // como actualizar su dirección principal.
-};
+export default new CiudadanoService();

@@ -1,101 +1,135 @@
-// src/services/EquipoService.ts
-import axios from 'axios';
-import { perfilesClient, PerfilesEndpoints, type PerfilesEndpointsType } from '../../clients/PerfilesClient.tsx'; 
-import { type Equipo, type EquipoRequest } from '../../../types/PerfilesType.ts'; 
+import type { Equipo, EquipoRequest } from '../../../types/PerfilesType';
+import { perfilesClient, buildApiUrlPathPerfiles, PerfilesEndpoints } from '../../../service/clients/PerfilesClient';
 
-/**
- * Función de utilidad para construir el path completo del recurso.
- * @param resource El recurso principal (ej: PerfilEndpoints.EQUIPOS).
- * @param pathAdicional Un path opcional que se añade al final (ej: '/123').
- * @returns El path relativo completo (ej: '/equipos/123').
- */
-const buildApiUrlPathEquipo = (resource: PerfilesEndpointsType, pathAdicional: string = ''): string => {
-    // Lógica para asegurar la unión correcta del path
-    const cleanPathAdicional = pathAdicional.startsWith('/') || pathAdicional === '' ? pathAdicional : `/${pathAdicional}`;
-    return `${resource}${cleanPathAdicional}`;
+class EquipoService {
+  /**
+   * Obtener todos los equipos
+   */
+  async listarEquipos(): Promise<Equipo[]> {
+    try {
+      const response = await perfilesClient.get<Equipo[]>(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.EQUIPOS)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 204) {
+        return []; // Retorna array vacío si no hay contenido
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Buscar equipo por ID
+   */
+  async buscarEquipoPorId(id: number): Promise<Equipo> {
+    try {
+      const response = await perfilesClient.get<Equipo>(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.EQUIPOS, `/${id}`)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Equipo no encontrado');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Crear un nuevo equipo
+   */
+  async crearEquipo(equipo: EquipoRequest): Promise<string> {
+    try {
+      const response = await perfilesClient.post(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.EQUIPOS),
+        equipo
+      );
+      
+      if (response.status === 201) {
+        return 'Equipo creado con éxito.';
+      }
+      return 'Equipo creado.';
+    } catch (error: any) {
+      if (error.response?.status === 400) {
+        throw new Error(error.response.data || 'Error en la solicitud');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar equipo existente
+   */
+  async actualizarEquipo(id: number, equipo: EquipoRequest): Promise<string> {
+    try {
+      const response = await perfilesClient.put(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.EQUIPOS, `/${id}`),
+        equipo
+      );
+      
+      if (response.status === 200) {
+        return 'Actualizado con éxito';
+      }
+      return 'Equipo actualizado.';
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Equipo no encontrado');
+      }
+      if (error.response?.status === 400) {
+        throw new Error(error.response.data || 'Error en la solicitud');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Eliminar equipo
+   */
+  async eliminarEquipo(id: number): Promise<string> {
+    try {
+      await perfilesClient.delete(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.EQUIPOS, `/${id}`)
+      );
+      return 'Equipo eliminado con éxito.';
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Equipo no encontrado');
+      }
+      if (error.response?.status === 400) {
+        throw new Error(error.response.data || 'Error al eliminar equipo');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Manejo centralizado de errores
+   */
+  private handleError(error: any): void {
+    if (error.response) {
+      const status = error.response.status;
+      const message = error.response.data?.message || error.response.data || error.message;
+
+      switch (status) {
+        case 500:
+          throw new Error('Error interno del servidor');
+        case 409:
+          throw new Error('Conflicto: ' + message);
+        default:
+          throw new Error(`Error ${status}: ${message}`);
+      }
+    } else if (error.request) {
+      throw new Error('Error de conexión: No se pudo contactar al servidor');
+    } else {
+      throw new Error('Error: ' + error.message);
+    }
+  }
 }
 
-// --------------------------------------------------------------------------------
-// FUNCIONES DEL SERVICIO DE EQUIPOS
-// --------------------------------------------------------------------------------
-
-/**
- * Obtiene la lista completa de todos los equipos.
- * @returns Una promesa que resuelve con la lista de objetos Equipo.
- */
-export const getAllEquipos = async (): Promise<Equipo[]> => {
-    const path = buildApiUrlPathEquipo(PerfilesEndpoints.EQUIPOS); 
-    try {
-        const response = await perfilesClient.get<Equipo[]>(path);
-        console.log("Equipos obtenidos con éxito.");
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error(`[EquipoService] Error al obtener equipos: ${error.message}`, error.response?.data);
-        } else {
-            console.error("[EquipoService] Error inesperado al obtener equipos:", error);
-        }
-        throw error;
-    }
-};
-
-/**
- * Obtiene un equipo específico por su ID.
- * @param idEquipo El ID del equipo a buscar.
- * @returns Una promesa que resuelve con el objeto Equipo.
- */
-export const getEquipoById = async (idEquipo: number): Promise<Equipo> => {
-    const path = buildApiUrlPathEquipo(PerfilesEndpoints.EQUIPOS, `${idEquipo}`);
-    try {
-        const response = await perfilesClient.get<Equipo>(path);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 404) {
-            console.warn(`[EquipoService] Equipo con ID ${idEquipo} no encontrado.`);
-        } else if (axios.isAxiosError(error)) {
-            console.error(`[EquipoService] Error al obtener equipo ID ${idEquipo}: ${error.message}`, error.response?.data);
-        }
-        throw error;
-    }
-};
-
-/**
- * Crea un nuevo equipo.
- * @param newEquipo Los datos del nuevo equipo.
- * @returns Una promesa que resuelve con el objeto Equipo creado.
- */
-export const createEquipo = async (newEquipo: EquipoRequest): Promise<Equipo> => {
-    const path = buildApiUrlPathEquipo(PerfilesEndpoints.EQUIPOS);
-    try {
-        const response = await perfilesClient.post<Equipo>(path, newEquipo);
-        console.log("Equipo creado con éxito:", response.data);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error(`[EquipoService] Error al crear equipo: ${error.message}`, error.response?.data);
-        } else {
-            console.error("[EquipoService] Error inesperado al crear equipo:", error);
-        }
-        throw error;
-    }
-};
-
-/**
- * Actualiza un equipo existente.
- * @param idEquipo El ID del equipo a actualizar.
- * @param updatedEquipo Los datos del equipo con las modificaciones.
- * @returns Una promesa que resuelve con el objeto Equipo actualizado.
- */
-export const updateEquipo = async (idEquipo: number, updatedEquipo: EquipoRequest): Promise<Equipo> => {
-    const path = buildApiUrlPathEquipo(PerfilesEndpoints.EQUIPOS, `${idEquipo}`);
-    try {
-        const response = await perfilesClient.put<Equipo>(path, updatedEquipo);
-        console.log(`Equipo ID ${idEquipo} actualizado con éxito.`);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error(`[EquipoService] Error al actualizar equipo ID ${idEquipo}: ${error.message}`, error.response?.data);
-        }
-        throw error;
-    }
-};
+export default new EquipoService();

@@ -6,7 +6,7 @@ import type { Errors, ContactData, AuthContextType, UserData } from '../types/Pe
 
 import FormField from '../components/Formulario'; 
 
-import { useAuth } from '../hook/UseAuth'; // 💡
+import { useAuth } from '../hooks/useAuth'; // 💡
 
 import {
     validateEmail,

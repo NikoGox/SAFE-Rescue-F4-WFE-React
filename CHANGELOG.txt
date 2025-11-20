@@ -1,6 +1,12 @@
 ╔══════════════════════════════════════════════╗
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
+❚❙❘ VERSIÓN 1.0.10.1
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se corrijen los types para que sean exactos con el backend
+├─• Se crean los hooks que manejan la percistencia
+└─• Se corrijen los services
+
 
 ❚❙❘ VERSIÓN 1.0.10
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useAuth } from '../hook/UseAuth';
+import { useAuth } from '../hooks/useAuth';
 import Logo from "../assets/sr_logo.png";
 
 import type { Errors, UserData, UserType } from '../types/PerfilesType';

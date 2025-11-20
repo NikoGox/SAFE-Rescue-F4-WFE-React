@@ -14,7 +14,7 @@ export const GeolocalizacionEndpoints = {
     DIRECCIONES: '/direcciones',
     COMUNAS: '/comunas',
     REGIONES: '/regiones',
-    COORDENADAS: '/localizaciones' // Corregí el nombre a 'COORDENADAS' por consistencia
+    COORDENADAS: '/coordenadas' // Corregí el nombre a 'COORDENADAS' por consistencia
 } as const;
 
 // Tipo que extrae los valores de cadena del objeto para su uso en funciones

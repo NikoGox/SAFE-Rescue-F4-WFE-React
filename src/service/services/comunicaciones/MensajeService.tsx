@@ -1,95 +1,231 @@
-// src/services/MensajeService.ts
+import type { 
+  MensajeResponse,
+  MensajeCreationDTO,
+  MensajeConUsuario
+} from '../../../types/ComunicacionType'; 
+import { comunicacionesClient, buildApiUrlPathComunicaciones, ComunicacionesEndpoints } from '../../clients/ComunicacionClient';
 
-import axios, { type AxiosResponse } from 'axios';
-import { type MensajeResponse, type MensajeCreationDTO } from '../../../types/ComunicacionType'; 
-// Usamos el cliente configurado para el microservicio de Comunicación
-import { comunicacionesClient } from '../../clients/ComunicacionClient'; 
-
-const API_BASE = '/api/v1'; 
-// El endpoint apunta a los mensajes DENTRO de una conversación
-const ENDPOINT_CONVERSACIONES = `${API_BASE}/conversaciones`; 
-
-/**
- * Gestiona la consulta, envío y edición de Mensajes dentro de una Conversación.
- */
-export const MensajeService = {
-
-    /**
-     * Obtiene el historial de mensajes de una conversación específica, usualmente ordenados por fecha.
-     * Endpoint asumido: GET /api/v1/conversaciones/{idConversacion}/mensajes
-     *
-     * @param idConversacion El ID de la conversación.
-     * @returns Promesa que resuelve con una lista de MensajeResponse (historial).
-     */
-    getMessagesByConvId: async (idConversacion: number): Promise<MensajeResponse[]> => {
-        const path = `${ENDPOINT_CONVERSACIONES}/${idConversacion}/mensajes`;
-        
-        try {
-            const response: AxiosResponse<MensajeResponse[]> = await comunicacionesClient.get(path);
-            
-            console.log(`Mensajes cargados para la conversación ID ${idConversacion}.`);
-            return response.data;
-            
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error(`[MensajeService] Error al obtener mensajes para conv ID ${idConversacion}: ${error.message}`, error.response?.data);
-            }
-            throw error; // Propagar el error
-        }
-    },
-    
-    /**
-     * Envía un nuevo mensaje a la conversación.
-     * Endpoint asumido: POST /api/v1/conversaciones/{idConversacion}/mensajes
-     *
-     * @param data El DTO con el contenido y el emisor.
-     * @returns Promesa que resuelve con el MensajeResponse del mensaje enviado.
-     */
-    sendMessage: async (data: MensajeCreationDTO): Promise<MensajeResponse> => {
-        // La ruta utiliza el ID de la conversación, aunque también esté en el payload
-        const path = `${ENDPOINT_CONVERSACIONES}/${data.idConversacion}/mensajes`;
-        
-        try {
-            const response: AxiosResponse<MensajeResponse> = await comunicacionesClient.post(path, data);
-            
-            console.log(`Mensaje enviado a la conversación ${data.idConversacion}.`);
-            return response.data;
-            
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error(`[MensajeService] Error al enviar mensaje: ${error.message}`, error.response?.data);
-            }
-            throw error;
-        }
-    },
-    
-    /**
-     * Edita el contenido de un mensaje existente.
-     * Endpoint asumido: PATCH /api/v1/conversaciones/mensajes/{idMensaje}
-     *
-     * @param idMensaje El ID del mensaje a editar.
-     * @param nuevoContenido El nuevo texto del mensaje.
-     * @returns Promesa que resuelve con el MensajeResponse actualizado.
-     */
-    editMessage: async (idMensaje: number, nuevoContenido: string): Promise<MensajeResponse> => {
-        // Nota: Asumo que el endpoint de edición es a nivel de mensaje (no de conversación)
-        const path = `${API_BASE}/conversaciones/mensajes/${idMensaje}`;
-        
-        try {
-            // Se envía solo el campo a actualizar (contenido)
-            const response: AxiosResponse<MensajeResponse> = await comunicacionesClient.patch(
-                path, 
-                { contenido: nuevoContenido }
-            );
-            
-            console.log(`Mensaje ID ${idMensaje} editado.`);
-            return response.data;
-            
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error(`[MensajeService] Error al editar mensaje ${idMensaje}: ${error.message}`, error.response?.data);
-            }
-            throw error;
-        }
+class MensajeService {
+  /**
+   * Crear mensaje en conversación
+   */
+  async crearMensaje(conversacionId: number, mensaje: MensajeCreationDTO): Promise<MensajeResponse> {
+    try {
+      const response = await comunicacionesClient.post<MensajeResponse>(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.CONVERSACIONES, `/${conversacionId}/mensajes`),
+        mensaje
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 400) {
+        const errorMessage = this.getValidationErrorMessage(error.response.data);
+        throw new Error(errorMessage);
+      }
+      if (error.response?.status === 404) {
+        throw new Error('Conversación no encontrada');
+      }
+      this.handleError(error);
+      throw error;
     }
-};
+  }
+
+  /**
+   * Obtener todos los mensajes
+   */
+  async listarMensajes(): Promise<MensajeResponse[]> {
+    try {
+      const response = await comunicacionesClient.get<MensajeResponse[]>(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.MENSAJES)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 204) {
+        return []; // Retorna array vacío si no hay mensajes
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Buscar mensaje por ID
+   */
+  async buscarMensajePorId(idMensaje: number): Promise<MensajeResponse> {
+    try {
+      const response = await comunicacionesClient.get<MensajeResponse>(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.MENSAJES, `/${idMensaje}`)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Mensaje no encontrado');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Eliminar mensaje
+   */
+  async eliminarMensaje(idMensaje: number): Promise<void> {
+    try {
+      await comunicacionesClient.delete(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.MENSAJES, `/${idMensaje}`)
+      );
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Mensaje no encontrado');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener mensajes por conversación (método alternativo)
+   */
+  async obtenerMensajesPorConversacion(conversacionId: number): Promise<MensajeResponse[]> {
+    try {
+      const response = await comunicacionesClient.get<MensajeResponse[]>(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.CONVERSACIONES, `/${conversacionId}/mensajes`)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 204) {
+        return []; // Retorna array vacío si no hay mensajes
+      }
+      if (error.response?.status === 404) {
+        throw new Error('Conversación no encontrada');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener mensajes por usuario emisor
+   */
+  async obtenerMensajesPorUsuario(idUsuario: number): Promise<MensajeResponse[]> {
+    try {
+      const response = await comunicacionesClient.get<MensajeResponse[]>(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.MENSAJES, `/usuario/${idUsuario}`)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 204) {
+        return [];
+      }
+      if (error.response?.status === 404) {
+        throw new Error('Usuario no encontrado');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Marcar mensaje como leído
+   */
+  async marcarComoLeido(idMensaje: number): Promise<MensajeResponse> {
+    try {
+      const response = await comunicacionesClient.patch<MensajeResponse>(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.MENSAJES, `/${idMensaje}/leido`)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Mensaje no encontrado');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener mensajes con información del usuario emisor
+   */
+  async obtenerMensajesConUsuario(conversacionId: number): Promise<MensajeConUsuario[]> {
+    try {
+      const mensajes = await this.obtenerMensajesPorConversacion(conversacionId);
+      
+      // Aquí podrías enriquecer con información del usuario
+      // Por ahora retornamos los mensajes básicos
+      return mensajes.map(mensaje => ({
+        ...mensaje,
+        nombreEmisor: `Usuario ${mensaje.idUsuarioEmisor}`,
+        avatarEmisor: `/avatars/${mensaje.idUsuarioEmisor}.jpg`
+      }));
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Enviar mensaje rápido (utilidad para uso común)
+   */
+  async enviarMensajeRapido(conversacionId: number, idUsuarioEmisor: number, detalle: string): Promise<MensajeResponse> {
+    try {
+      const mensajeDTO: MensajeCreationDTO = {
+        idConversacion: conversacionId,
+        idUsuarioEmisor: idUsuarioEmisor,
+        detalle: detalle,
+        idEstado: 1 // Estado por defecto: ENVIADO
+      };
+      
+      return await this.crearMensaje(conversacionId, mensajeDTO);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Extrae mensajes de error de validación del backend
+   */
+  private getValidationErrorMessage(errorData: any): string {
+    if (typeof errorData === 'string') {
+      return errorData;
+    }
+    if (errorData?.message) {
+      return errorData.message;
+    }
+    if (errorData?.errors) {
+      return Object.values(errorData.errors).join(', ');
+    }
+    
+    // Mensajes específicos para mensajes
+    if (errorData?.includes?.('ID de usuario no válido')) {
+      return 'El ID del usuario emisor no es válido';
+    }
+    if (errorData?.includes?.('Estado externo no válido')) {
+      return 'El estado del mensaje no es válido';
+    }
+    
+    return 'Error de validación en los datos del mensaje';
+  }
+
+  /**
+   * Manejo centralizado de errores
+   */
+  private handleError(error: any): void {
+    if (error.response) {
+      const status = error.response.status;
+      const message = error.response.data?.message || error.response.data || error.message;
+
+      switch (status) {
+        case 500:
+          throw new Error('Error interno del servidor');
+        case 409:
+          throw new Error('Conflicto: ' + message);
+        default:
+          throw new Error(`Error ${status}: ${message}`);
+      }
+    } else if (error.request) {
+      throw new Error('Error de conexión: No se pudo contactar al servidor');
+    } else {
+      throw new Error('Error: ' + error.message);
+    }
+  }
+}
+
+export default new MensajeService();

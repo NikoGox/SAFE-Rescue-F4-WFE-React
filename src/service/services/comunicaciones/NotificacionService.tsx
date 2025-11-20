@@ -1,111 +1,166 @@
-// src/services/NotificacionService.ts
+import type { 
+  NotificacionResponse, 
+  NotificacionCreationDTO 
+} from '../../../types/ComunicacionType'; 
+import { comunicacionesClient, buildApiUrlPathComunicaciones, ComunicacionesEndpoints } from '../../clients/ComunicacionClient'; 
 
-import axios, { type AxiosResponse } from 'axios';
-import { type NotificacionResponse } from '../../../types/ComunicacionType'; 
-// Usamos el cliente configurado para el microservicio de Comunicación, que incluye Notificaciones. 
-import { comunicacionesClient } from '../../clients/ComunicacionClient'; 
+// Interface para la respuesta paginada
+interface NotificacionPageResponse {
+  content: NotificacionResponse[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
 
-const API_BASE = '/api/v1'; 
-const ENDPOINT_NOTIFICACIONES = `${API_BASE}/notificaciones`; 
-
-/**
- * Gestiona la consulta y gestión de Notificaciones del usuario.
- */
-export const NotificacionService = {
-
-    /**
-     * Obtiene todas las notificaciones (leídas y no leídas) para el usuario actual.
-     * Endpoint asumido: GET /api/v1/notificaciones/usuario/{idUsuario}
-     *
-     * @param idUsuario El ID del usuario cuyas notificaciones se desean obtener.
-     * @returns Promesa que resuelve con una lista de NotificacionResponse.
-     */
-    getNotificationsByUserId: async (idUsuario: number): Promise<NotificacionResponse[]> => {
-        const path = `${ENDPOINT_NOTIFICACIONES}/usuario/${idUsuario}`;
-        
-        try {
-            const response: AxiosResponse<NotificacionResponse[]> = await comunicacionesClient.get(path);
-            
-            console.log(`Notificaciones cargadas para el usuario ID ${idUsuario}.`);
-            return response.data;
-            
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error(`[NotificacionService] Error al obtener notificaciones: ${error.message}`, error.response?.data);
-            }
-            throw error; // Propagar el error
-        }
-    },
-    
-    /**
-     * Marca una notificación específica como leída.
-     * Endpoint asumido: PATCH /api/v1/notificaciones/{idNotificacion}/leer
-     *
-     * @param idNotificacion El ID de la notificación a marcar como leída.
-     * @returns Promesa que resuelve con la NotificacionResponse actualizada.
-     */
-    markAsRead: async (idNotificacion: number): Promise<NotificacionResponse> => {
-        const path = `${ENDPOINT_NOTIFICACIONES}/${idNotificacion}/leer`;
-        
-        try {
-            // Usamos PATCH para actualizar el estado 'leida' en el backend
-            const response: AxiosResponse<NotificacionResponse> = await comunicacionesClient.patch(path, {});
-            
-            console.log(`Notificación ID ${idNotificacion} marcada como leída.`);
-            return response.data;
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error(`[NotificacionService] Error al marcar como leída la notificación ${idNotificacion}: ${error.message}`, error.response?.data);
-            }
-            throw error;
-        }
-    },
-    
-    /**
-     * Marca todas las notificaciones pendientes del usuario como leídas.
-     * Endpoint asumido: PATCH /api/v1/notificaciones/usuario/{idUsuario}/leer-todo
-     *
-     * @param idUsuario El ID del usuario.
-     * @returns Promesa que se resuelve al completar la acción.
-     */
-    markAllAsRead: async (idUsuario: number): Promise<void> => {
-        const path = `${ENDPOINT_NOTIFICACIONES}/usuario/${idUsuario}/leer-todo`;
-        
-        try {
-            await comunicacionesClient.patch(path, {});
-            console.log(`Todas las notificaciones del usuario ${idUsuario} marcadas como leídas.`);
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error(`[NotificacionService] Error al marcar todas como leídas: ${error.message}`, error.response?.data);
-            }
-            throw error;
-        }
-    },
-
-    /**
-     * Obtiene el conteo de notificaciones no leídas para el usuario actual.
-     * Endpoint asumido: GET /api/v1/notificaciones/usuario/{idUsuario}/no-leidas/count
-     *
-     * @param idUsuario El ID del usuario.
-     * @returns Promesa que resuelve con el conteo (número) de notificaciones no leídas.
-     */
-    getUnreadCount: async (idUsuario: number): Promise<number> => {
-        const path = `${ENDPOINT_NOTIFICACIONES}/usuario/${idUsuario}/no-leidas/count`;
-        
-        try {
-            // Se asume que el backend devuelve el conteo como un número plano
-            const response: AxiosResponse<number> = await comunicacionesClient.get(path);
-            
-            console.log(`Conteo de no leídas para ID ${idUsuario}: ${response.data}`);
-            return response.data;
-            
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                // En caso de error de conexión, retornamos 0 para no bloquear la UI.
-                console.error(`[NotificacionService] Error al obtener conteo de no leídas: ${error.message}`);
-                return 0; 
-            }
-            throw error;
-        }
+class NotificacionService {
+  /**
+   * Crear una nueva notificación
+   */
+  async crearNotificacion(notificacion: NotificacionCreationDTO): Promise<NotificacionResponse> {
+    try {
+      const response = await comunicacionesClient.post<NotificacionResponse>(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.NOTIFICACIONES),
+        notificacion
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 400) {
+        const errorMessage = this.getValidationErrorMessage(error.response.data);
+        throw new Error(errorMessage);
+      }
+      if (error.response?.status === 404) {
+        throw new Error('Conversación no encontrada');
+      }
+      this.handleError(error);
+      throw error;
     }
-};
+  }
+
+  /**
+   * Obtener notificaciones pendientes del usuario (paginadas)
+   */
+  async listarNotificacionesPendientes(
+    idUsuarioReceptor: string, 
+    page: number = 0, 
+    size: number = 10
+  ): Promise<NotificacionPageResponse> {
+    try {
+      const response = await comunicacionesClient.get<NotificacionPageResponse>(
+        buildApiUrlPathComunicaciones(
+          ComunicacionesEndpoints.NOTIFICACIONES, 
+          `/usuario/${idUsuarioReceptor}/pendientes?page=${page}&size=${size}&sort=fechaCreacion,desc`
+        )
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 204) {
+        return {
+          content: [],
+          totalElements: 0,
+          totalPages: 0,
+          size: 0,
+          number: 0
+        };
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Marcar notificación específica como leída
+   */
+  async marcarComoLeida(idNotificacion: number): Promise<NotificacionResponse> {
+    try {
+      const response = await comunicacionesClient.patch<NotificacionResponse>(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.NOTIFICACIONES, `/${idNotificacion}/leida`)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Notificación no encontrada');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Marcar todas las notificaciones de un usuario como leídas
+   */
+  async marcarTodasComoLeidas(idUsuarioReceptor: string): Promise<string> {
+    try {
+      const response = await comunicacionesClient.patch(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.NOTIFICACIONES, `/usuario/${idUsuarioReceptor}/leidas`)
+      );
+      return response.data; // Retorna el mensaje del backend
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Usuario no encontrado');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener todas las notificaciones del usuario (sin paginación - si existe este endpoint)
+   */
+  async listarNotificacionesPorUsuario(idUsuarioReceptor: string): Promise<NotificacionResponse[]> {
+    try {
+      const response = await comunicacionesClient.get<NotificacionResponse[]>(
+        buildApiUrlPathComunicaciones(ComunicacionesEndpoints.NOTIFICACIONES, `/usuario/${idUsuarioReceptor}`)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 204 || error.response?.status === 404) {
+        return [];
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Extrae mensajes de error de validación del backend
+   */
+  private getValidationErrorMessage(errorData: any): string {
+    if (typeof errorData === 'string') {
+      return errorData;
+    }
+    if (errorData?.message) {
+      return errorData.message;
+    }
+    if (errorData?.errors) {
+      // Para errores de validación de campos específicos
+      return Object.values(errorData.errors).join(', ');
+    }
+    return 'Error de validación en los datos de la notificación';
+  }
+
+  /**
+   * Manejo centralizado de errores
+   */
+  private handleError(error: any): void {
+    if (error.response) {
+      const status = error.response.status;
+      const message = error.response.data?.message || error.response.data || error.message;
+
+      switch (status) {
+        case 500:
+          throw new Error('Error interno del servidor o fallo de comunicación con microservicios');
+        case 409:
+          throw new Error('Conflicto: ' + message);
+        default:
+          throw new Error(`Error ${status}: ${message}`);
+      }
+    } else if (error.request) {
+      throw new Error('Error de conexión: No se pudo contactar al servidor');
+    } else {
+      throw new Error('Error: ' + error.message);
+    }
+  }
+}
+
+export default new NotificacionService();

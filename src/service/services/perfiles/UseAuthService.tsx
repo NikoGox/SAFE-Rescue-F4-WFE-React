@@ -1,185 +1,158 @@
-// src/services/AuthService.ts
+import type { LoginRequest, AuthResponseDTO, UserRegistroBackendType } from '../../../types/PerfilesType';
+import { perfilesClient, buildApiUrlPathPerfiles, PerfilesEndpoints,tokenManager, setToken, clearToken } from '../../../service/clients/PerfilesClient';
 
-import axios from 'axios';
+class UseAuthService {
+  /**
+   * Iniciar sesión
+   */
+  async login(credentials: LoginRequest): Promise<AuthResponseDTO> {
+    try {
+      const response = await perfilesClient.post<AuthResponseDTO>(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.AUTH, '/login'),
+        credentials
+      );
+      
+      // Guardar el token automáticamente después del login exitoso
+      if (response.data.token) {
+        setToken(response.data.token);
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        throw new Error('Credenciales inválidas');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
 
-// Usamos los nombres corregidos
+  /**
+   * Registrar nuevo usuario
+   */
+  async register(usuario: UserRegistroBackendType): Promise<any> {
+    try {
+      const response = await perfilesClient.post<any>(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.AUTH, '/register'),
+        usuario
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 400) {
+        const errorMessage = this.getValidationErrorMessage(error.response.data);
+        throw new Error(errorMessage);
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
 
-import { perfilesClient, PerfilesEndpoints, type PerfilesEndpointsType } from '../../clients/PerfilesClient.tsx';
+  /**
+   * Cerrar sesión
+   */
+  async logout(): Promise<void> {
+    try {
+      // Limpiar token localmente primero
+      clearToken();
+      
+      // Intentar hacer logout en el servidor (opcional)
+      await perfilesClient.post(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.AUTH, '/logout')
+      );
+    } catch (error: any) {
+      // El logout puede fallar silenciosamente
+      console.warn('Error durante logout:', error.message);
+    } finally {
+      // Siempre limpiar el token localmente
+      clearToken();
+    }
+  }
 
-import { type UserData, type UserRegistroType } from '../../../types/PerfilesType.ts';
+  /**
+   * Verificar si el usuario está autenticado
+   */
+  isAuthenticated(): boolean {
+    const token = tokenManager.getToken();
+    if (!token) return false;
+    
+    // Verificar si el token está expirado
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return Date.now() < payload.exp * 1000;
+    } catch {
+      return false;
+    }
+  }
 
+  /**
+   * Obtener el ID del usuario desde el token
+   */
+  getUserIdFromToken(): number | null {
+    const token = tokenManager.getToken();
+    if (!token) return null;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return parseInt(payload.sub, 10);
+    } catch {
+      return null;
+    }
+  }
 
+  /**
+   * Obtener el tipo de perfil desde el token
+   */
+  getTipoPerfilFromToken(): string | null {
+    const token = tokenManager.getToken();
+    if (!token) return null;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.tipoPerfil || null;
+    } catch {
+      return null;
+    }
+  }
 
-// --- Tipos internos para el servicio de autenticación ---
+  /**
+   * Extrae mensajes de error de validación del backend
+   */
+  private getValidationErrorMessage(errorData: any): string {
+    if (typeof errorData === 'string') {
+      return errorData;
+    }
+    if (errorData?.message) {
+      return errorData.message;
+    }
+    if (errorData?.errors) {
+      return Object.values(errorData.errors).join(', ');
+    }
+    
+    return 'Error de validación en los datos de registro';
+  }
 
+  /**
+   * Manejo centralizado de errores
+   */
+  private handleError(error: any): void {
+    if (error.response) {
+      const status = error.response.status;
+      const message = error.response.data?.message || error.response.data || error.message;
 
-
-/**
-
- * Interfaz para el cuerpo de la solicitud de Login.
-
- */
-
-export interface LoginRequest {
-
-    nombreUsuario: string; // O el campo que uses para identificar al usuario
-
-    contrasena: string;
-
+      switch (status) {
+        case 500:
+          throw new Error('Error interno del servidor');
+        case 403:
+          throw new Error('Acceso denegado');
+        default:
+          throw new Error(`Error ${status}: ${message}`);
+      }
+    } else if (error.request) {
+      throw new Error('Error de conexión: No se pudo contactar al servidor');
+    } else {
+      throw new Error('Error: ' + error.message);
+    }
+  }
 }
 
-
-
-/**
-
- * Interfaz para la respuesta de una autenticación exitosa.
-
- * Es crucial que incluya el token para futuras peticiones.
-
- */
-
-export interface AuthTokenResponse {
-
-    token: string;
-
-    // Opcional: El backend puede devolver el objeto UserData completo aquí
-
-    userData: UserData;
-
-}
-
-
-
-
-
-// --------------------------------------------------------------------------------
-
-// FUNCIONES DEL SERVICIO DE AUTENTICACIÓN
-
-// --------------------------------------------------------------------------------
-
-
-
-/**
-
- * Realiza el proceso de inicio de sesión contra el backend.
-
- * @param credentials El nombre de usuario/email y la contraseña.
-
- * @returns Una promesa que resuelve con la respuesta de autenticación (Token y UserData).
-
- */
-
-export const loginUser = async (credentials: LoginRequest): Promise<AuthTokenResponse> => {
-
-    // Asumimos que el endpoint de login es /auth/login
-
-    const path = `${PerfilesEndpoints.AUTH}/login`;
-
-    try {
-
-        const response = await perfilesClient.post<AuthTokenResponse>(path, credentials);
-
-        console.log("Login exitoso. Token recibido.");
-
-        return response.data;
-
-    } catch (error) {
-
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
-
-            console.error(`[AuthService] Credenciales inválidas.`, error.response?.data);
-
-        } else if (axios.isAxiosError(error)) {
-
-            console.error(`[AuthService] Error al intentar iniciar sesión: ${error.message}`, error.response?.data);
-
-        }
-
-        // Propagamos el error para que el componente de la UI lo maneje (ej: mostrar mensaje de error)
-
-        throw error;
-
-    }
-
-};
-
-
-
-/**
-
- * Realiza el proceso de registro de un nuevo usuario.
-
- * @param registrationData Los datos completos del nuevo usuario (incluida la contraseña y los detalles de dirección).
-
- * @returns Una promesa que resuelve con el objeto UserData del usuario recién creado.
-
- */
-
-export const registerUser = async (registrationData: UserRegistroType): Promise<UserData> => {
-
-    // Asumimos que el endpoint de registro es /auth/register
-
-    const path = `${PerfilesEndpoints.AUTH}/register`;
-
-    try {
-
-        // NOTA: El backend debe manejar la creación de la entidad Bombero/Ciudadano
-
-        // basado en un campo adicional o la lógica interna.
-
-        const response = await perfilesClient.post<UserData>(path, registrationData);
-
-        console.log("Registro de usuario exitoso.", response.data.nombreUsuario);
-
-        return response.data;
-
-    } catch (error) {
-
-        if (axios.isAxiosError(error)) {
-
-            // Error común: 409 Conflict si el RUT/Email ya existe
-
-            console.error(`[AuthService] Error al registrar usuario: ${error.message}`, error.response?.data);
-
-        }
-
-        throw error;
-
-    }
-
-};
-
-
-
-/**
-
- * Realiza el proceso de cierre de sesión.
-
- * En APIs modernas, esto suele ser solo una limpieza del token en el cliente.
-
- * Si el backend necesita ser notificado, se puede implementar aquí.
-
- */
-
-export const logoutUserBackend = async (): Promise<void> => {
-
-    // Endpoint opcional para invalidar el token en el servidor (ej: /auth/logout)
-
-    const path = `${PerfilesEndpoints.AUTH}/logout`;
-
-    try {
-
-        await perfilesClient.post(path);
-
-        console.log("Notificación de logout al backend exitosa.");
-
-    } catch (error) {
-
-        // El error de logout suele ser ignorado si el cliente ya eliminó el token
-
-        console.warn("[AuthService] Error al notificar logout al backend (se ignora si el token local ya fue eliminado):", error);
-
-    }
-
-};
+export default new UseAuthService();

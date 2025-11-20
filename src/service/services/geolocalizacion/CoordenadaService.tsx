@@ -1,68 +1,158 @@
-// src/services/CoordenadasService.ts
-import axios, { AxiosError } from 'axios';
-import { geolocalizacionClient, GeolocalizacionEndpoints, type GeolocalizacionEndpointsType } from '../../clients/GeolocalizacionClient.tsx';
-import { type Coordenadas, type GeocodingResult } from '../../../types/GeolocalizacionType.ts'; 
-// Asumiendo que existe un tipo Coordenadas {lat: number, lng: number} 
-// y un GeocodingResult para el resultado de la búsqueda
+// src/services/geolocalizacion/CoordenadasService.ts
 
-/**
- * Función de utilidad para construir el path completo del recurso.
- * @param resource El recurso principal (ej: GeolocalizacionEndpoints.GEOCODE).
- * @param pathAdicional Un path opcional que se añade al final (ej: '/search').
- * @returns El path relativo completo (ej: '/geocode/search').
- */
-const buildApiUrlPathCoordenadas = (resource: GeolocalizacionEndpointsType, pathAdicional: string = ''): string => {
-    // Lógica para asegurar la unión correcta del path
-    const cleanPathAdicional = pathAdicional.startsWith('/') || pathAdicional === '' ? pathAdicional : `/${pathAdicional}`;
-    return `${resource}${cleanPathAdicional}`;
-}
+import type { Coordenadas } from '../../../types/GeolocalizacionType.ts';
+import { 
+    geolocalizacionClient, 
+    buildApiUrlPathGeolocalizacion, 
+    GeolocalizacionEndpoints,
+    type GeolocalizacionEndpointsType
+} from '../../clients/GeolocalizacionClient.ts';
+import { AxiosError } from 'axios';
 
-// --------------------------------------------------------------------------------
-// FUNCIONES DEL SERVICIO DE COORDENADAS (GEOCODIFICACIÓN)
-// --------------------------------------------------------------------------------
+// ❗ IMPORTANTE: El controller usa "/coordenadas" pero el cliente tiene "/localizaciones"
+// Necesitamos verificar cuál es el endpoint correcto
+const COORDENADAS_RESOURCE: GeolocalizacionEndpointsType = GeolocalizacionEndpoints.COORDENADAS;
 
-/**
- * Realiza una geocodificación (busca coordenadas a partir de una dirección de texto).
- * @param query La dirección de texto a buscar (ej: "Av. Siempre Viva 742, Springfield").
- * @returns Una promesa que resuelve con una lista de resultados de geocodificación.
- */
-export const geocodeAddress = async (query: string): Promise<GeocodingResult[]> => {
-    // Asumiendo que tu API tiene un endpoint para buscar direcciones: /geocode/search?address=...
-    const path = buildApiUrlPathCoordenadas(GeolocalizacionEndpoints.COORDENADAS, `/search`); 
-    
-    try {
-        // Usamos params para enviar la dirección como parámetro de consulta
-        const response = await geolocalizacionClient.get<GeocodingResult[]>(path, { params: { address: query } });
-        console.log(`Geocodificación para "${query}" exitosa.`, response.data);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error(`[CoordenadasService] Error en geocodificación para "${query}": ${error.message}`, error.response?.data);
-        } else {
-            console.error("[CoordenadasService] Error inesperado en geocodificación:", error);
+export const CoordenadasService = {
+    /**
+     * Obtiene todas las coordenadas registradas en el sistema.
+     * Endpoint: GET /api-geolocalizacion/v1/coordenadas
+     * @returns Promesa que resuelve con array de coordenadas o array vacío si no hay contenido
+     */
+    getAll: async (): Promise<Coordenadas[]> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(COORDENADAS_RESOURCE);
+            const response = await geolocalizacionClient.get<Coordenadas[]>(urlPath);
+            return response.data;
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error("[CoordenadasService] Error en getAll:", axiosError.message);
+            
+            if (axiosError.response?.status === 204) {
+                // El backend devuelve 204 NO_CONTENT cuando no hay coordenadas
+                return [];
+            }
+            
+            if (axiosError.response) {
+                throw new Error(`Error al obtener coordenadas: ${axiosError.response.status}`);
+            }
+            throw error;
         }
-        throw error;
-    }
-}
+    },
 
-/**
- * Realiza una geocodificación inversa (busca la dirección a partir de coordenadas).
- * @param lat La latitud.
- * @param lng La longitud.
- * @returns Una promesa que resuelve con el resultado de la dirección encontrada.
- */
-export const reverseGeocode = async (lat: number, lng: number): Promise<GeocodingResult> => {
-    // Asumiendo que tu API tiene un endpoint para geocodificación inversa: /geocode/reverse?lat=...&lng=...
-    const path = buildApiUrlPathCoordenadas(GeolocalizacionEndpoints.COORDENADAS, `/reverse`); 
-
-    try {
-        const response = await geolocalizacionClient.get<GeocodingResult>(path, { params: { lat, lng } });
-        console.log(`Geocodificación inversa para (${lat}, ${lng}) exitosa.`, response.data);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error(`[CoordenadasService] Error en geocodificación inversa para (${lat}, ${lng}): ${error.message}`, error.response?.data);
+    /**
+     * Busca coordenadas por su ID.
+     * Endpoint: GET /api-geolocalizacion/v1/coordenadas/{id}
+     * @param idCoordenadas ID de las coordenadas a buscar
+     * @returns Promesa que resuelve con las Coordenadas encontradas
+     */
+    getById: async (idCoordenadas: number): Promise<Coordenadas> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(COORDENADAS_RESOURCE, `/${idCoordenadas}`);
+            const response = await geolocalizacionClient.get<Coordenadas>(urlPath);
+            return response.data;
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error(`[CoordenadasService] Error en getById(${idCoordenadas}):`, axiosError.message);
+            
+            if (axiosError.response?.status === 404) {
+                throw new Error(`Coordenadas con ID ${idCoordenadas} no encontradas.`);
+            }
+            
+            if (axiosError.response) {
+                throw new Error(`Error al obtener coordenadas: ${axiosError.response.status}`);
+            }
+            throw error;
         }
-        throw error;
+    },
+
+    /**
+     * Crea nuevas coordenadas.
+     * Endpoint: POST /api-geolocalizacion/v1/coordenadas
+     * CORRECCIÓN: El backend devuelve String, no las Coordenadas creadas
+     * @param coordenadas Datos de las coordenadas a crear (sin idCoordenadas)
+     * @returns Promesa que resuelve con mensaje de confirmación
+     */
+    create: async (coordenadas: Omit<Coordenadas, 'idCoordenadas'>): Promise<string> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(COORDENADAS_RESOURCE);
+            const response = await geolocalizacionClient.post<string>(urlPath, coordenadas);
+            return response.data; // "Coordenadas creadas con éxito."
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error("[CoordenadasService] Error en create:", axiosError.message, axiosError.response?.data);
+
+            if (axiosError.response) {
+                // El backend devuelve mensaje de error en el body
+                if (axiosError.response.data) {
+                    throw new Error(axiosError.response.data as string);
+                }
+                throw new Error(`Error al crear las coordenadas: ${axiosError.response.status}`);
+            }
+            throw error;
+        }
+    },
+
+    /**
+     * Actualiza coordenadas existentes.
+     * Endpoint: PUT /api-geolocalizacion/v1/coordenadas/{id}
+     * CORRECCIÓN: El backend devuelve String, no las Coordenadas actualizadas
+     * @param idCoordenadas ID de las coordenadas a actualizar
+     * @param coordenadas Datos actualizados de las coordenadas (debe incluir todos los campos)
+     * @returns Promesa que resuelve con mensaje de confirmación
+     */
+    update: async (idCoordenadas: number, coordenadas: Coordenadas): Promise<string> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(COORDENADAS_RESOURCE, `/${idCoordenadas}`);
+            const response = await geolocalizacionClient.put<string>(urlPath, coordenadas);
+            return response.data; // "Coordenadas actualizadas con éxito"
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error(`[CoordenadasService] Error en update(${idCoordenadas}):`, axiosError.message);
+
+            if (axiosError.response?.status === 404) {
+                throw new Error(`Coordenadas con ID ${idCoordenadas} no encontradas.`);
+            }
+            
+            if (axiosError.response) {
+                // El backend devuelve mensaje de error en el body
+                if (axiosError.response.data) {
+                    throw new Error(axiosError.response.data as string);
+                }
+                throw new Error(`Error al actualizar las coordenadas: ${axiosError.response.status}`);
+            }
+            throw error;
+        }
+    },
+
+    /**
+     * Elimina coordenadas del sistema.
+     * Endpoint: DELETE /api-geolocalizacion/v1/coordenadas/{id}
+     * CORRECCIÓN: El backend devuelve String, no void
+     * @param idCoordenadas ID de las coordenadas a eliminar
+     * @returns Promesa que resuelve con mensaje de confirmación
+     */
+    delete: async (idCoordenadas: number): Promise<string> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(COORDENADAS_RESOURCE, `/${idCoordenadas}`);
+            const response = await geolocalizacionClient.delete<string>(urlPath);
+            return response.data; // "Coordenadas eliminadas con éxito."
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error(`[CoordenadasService] Error en delete(${idCoordenadas}):`, axiosError.message);
+            
+            if (axiosError.response?.status === 404) {
+                throw new Error(`Coordenadas con ID ${idCoordenadas} no encontradas.`);
+            }
+            
+            if (axiosError.response) {
+                // El backend devuelve mensaje de error en el body
+                if (axiosError.response.data) {
+                    throw new Error(axiosError.response.data as string);
+                }
+                throw new Error(`Error al eliminar las coordenadas: ${axiosError.response.status}`);
+            }
+            throw error;
+        }
     }
-}
+};

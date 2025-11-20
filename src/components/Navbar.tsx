@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Dropdown from "./Dropdown"; // Asegúrate de que esta ruta sea correcta
 import styles from "./Navbar.module.css"; 
 import Logo from "../assets/sr_logo.png";
-import { useAuth } from "../hook/UseAuth"; 
+import { useAuth } from "../hooks/useAuth"; 
 
 const Navbar: React.FC = () => {
 

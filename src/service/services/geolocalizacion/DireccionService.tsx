@@ -1,85 +1,156 @@
-// src/services/DireccionService.ts
-import axios, { AxiosError } from 'axios';
-import { geolocalizacionClient, GeolocalizacionEndpoints, type GeolocalizacionEndpointsType } from '../../clients/GeolocalizacionClient.tsx';
-import { type Direccion, type DireccionRequest } from '../../../types/GeolocalizacionType.ts';
-// Asumiendo que existe un tipo Direccion y DireccionRequest
+// src/services/geolocalizacion/DireccionService.ts
 
-/**
- * Función de utilidad para construir el path completo del recurso.
- * @param resource El recurso principal (ej: GeolocalizacionEndpoints.DIRECCIONES).
- * @param pathAdicional Un path opcional que se añade al final (ej: '/123').
- * @returns El path relativo completo (ej: '/direcciones/123').
- */
-const buildApiUrlPathDireccion = (resource: GeolocalizacionEndpointsType, pathAdicional: string = ''): string => {
-    // Lógica para asegurar la unión correcta del path
-    const cleanPathAdicional = pathAdicional.startsWith('/') || pathAdicional === '' ? pathAdicional : `/${pathAdicional}`;
-    return `${resource}${cleanPathAdicional}`;
-}
+import type { Direccion } from '../../../types/GeolocalizacionType.ts';
+import { 
+    geolocalizacionClient, 
+    buildApiUrlPathGeolocalizacion, 
+    GeolocalizacionEndpoints,
+    type GeolocalizacionEndpointsType
+} from '../../clients/GeolocalizacionClient.ts';
+import { AxiosError } from 'axios';
 
-// --------------------------------------------------------------------------------
-// FUNCIONES DEL SERVICIO DE DIRECCIONES
-// --------------------------------------------------------------------------------
+const DIRECCIONES_RESOURCE: GeolocalizacionEndpointsType = GeolocalizacionEndpoints.DIRECCIONES;
 
-/**
- * Obtiene la información de una dirección específica por su ID.
- * @param idDireccion El ID de la dirección a buscar.
- * @returns Una promesa que resuelve con el objeto Direccion.
- */
-export const getDireccionById = async (idDireccion: number): Promise<Direccion> => {
-    const path = buildApiUrlPathDireccion(GeolocalizacionEndpoints.DIRECCIONES, `${idDireccion}`);
-    try {
-        const response = await geolocalizacionClient.get<Direccion>(path);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 404) {
-            console.warn(`[DireccionService] Dirección con ID ${idDireccion} no encontrada.`);
-        } else if (axios.isAxiosError(error)) {
-            console.error(`[DireccionService] Error al obtener dirección ID ${idDireccion}: ${error.message}`, error.response?.data);
+export const DireccionService = {
+    /**
+     * Obtiene todas las direcciones registradas en el sistema.
+     * Endpoint: GET /api-geolocalizacion/v1/direcciones
+     * @returns Promesa que resuelve con array de direcciones o array vacío si no hay contenido
+     */
+    getAll: async (): Promise<Direccion[]> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(DIRECCIONES_RESOURCE);
+            const response = await geolocalizacionClient.get<Direccion[]>(urlPath);
+            return response.data;
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error("[DireccionService] Error en getAll:", axiosError.message);
+            
+            if (axiosError.response?.status === 204) {
+                // El backend devuelve 204 NO_CONTENT cuando no hay direcciones
+                return [];
+            }
+            
+            if (axiosError.response) {
+                throw new Error(`Error al obtener direcciones: ${axiosError.response.status}`);
+            }
+            throw error;
         }
-        throw error;
-    }
-}
+    },
 
-/**
- * Crea una nueva dirección.
- * @param newDireccion Los datos de la nueva dirección (ej: calle, número, comuna_id).
- * @returns Una promesa que resuelve con el objeto Direccion creado.
- */
-export const createDireccion = async (newDireccion: DireccionRequest): Promise<Direccion> => {
-    const path = buildApiUrlPathDireccion(GeolocalizacionEndpoints.DIRECCIONES);
-    try {
-        // Usamos POST para crear un nuevo recurso
-        const response = await geolocalizacionClient.post<Direccion>(path, newDireccion);
-        console.log("Dirección creada con éxito:", response.data);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            // Manejo de errores 400 (Bad Request) o 422 (Unprocessable Entity) comunes en POST/PUT
-            console.error(`[DireccionService] Error al crear dirección: ${error.message}`, error.response?.data);
-        } else {
-            console.error("[DireccionService] Error inesperado al crear dirección:", error);
+    /**
+     * Busca una dirección por su ID.
+     * Endpoint: GET /api-geolocalizacion/v1/direcciones/{id}
+     * @param idDireccion ID de la dirección a buscar
+     * @returns Promesa que resuelve con la Dirección encontrada
+     */
+    getById: async (idDireccion: number): Promise<Direccion> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(DIRECCIONES_RESOURCE, `/${idDireccion}`);
+            const response = await geolocalizacionClient.get<Direccion>(urlPath);
+            return response.data;
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error(`[DireccionService] Error en getById(${idDireccion}):`, axiosError.message);
+            
+            if (axiosError.response?.status === 404) {
+                throw new Error(`Dirección con ID ${idDireccion} no encontrada.`);
+            }
+            
+            if (axiosError.response) {
+                throw new Error(`Error al obtener dirección: ${axiosError.response.status}`);
+            }
+            throw error;
         }
-        throw error;
-    }
-}
+    },
 
-/**
- * Actualiza una dirección existente.
- * @param idDireccion El ID de la dirección a actualizar.
- * @param updatedDireccion Los datos de la dirección con las modificaciones.
- * @returns Una promesa que resuelve con el objeto Direccion actualizado.
- */
-export const updateDireccion = async (idDireccion: number, updatedDireccion: DireccionRequest): Promise<Direccion> => {
-    const path = buildApiUrlPathDireccion(GeolocalizacionEndpoints.DIRECCIONES, `${idDireccion}`);
-    try {
-        // Usamos PUT o PATCH para actualizar un recurso
-        const response = await geolocalizacionClient.put<Direccion>(path, updatedDireccion);
-        console.log(`Dirección ID ${idDireccion} actualizada con éxito:`, response.data);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error(`[DireccionService] Error al actualizar dirección ID ${idDireccion}: ${error.message}`, error.response?.data);
+    /**
+     * Crea una nueva dirección.
+     * Endpoint: POST /api-geolocalizacion/v1/direcciones
+     * CORRECCIÓN: El backend devuelve String, no la Dirección creada
+     * @param direccion Datos de la dirección a crear (sin idDireccion)
+     * @returns Promesa que resuelve con mensaje de confirmación
+     */
+    create: async (direccion: Omit<Direccion, 'idDireccion'>): Promise<string> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(DIRECCIONES_RESOURCE);
+            const response = await geolocalizacionClient.post<string>(urlPath, direccion);
+            return response.data; // "Dirección creada con éxito."
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error("[DireccionService] Error en create:", axiosError.message, axiosError.response?.data);
+
+            if (axiosError.response) {
+                // El backend devuelve mensaje de error en el body
+                if (axiosError.response.data) {
+                    throw new Error(axiosError.response.data as string);
+                }
+                throw new Error(`Error al crear la dirección: ${axiosError.response.status}`);
+            }
+            throw error;
         }
-        throw error;
+    },
+
+    /**
+     * Actualiza una dirección existente.
+     * Endpoint: PUT /api-geolocalizacion/v1/direcciones/{id}
+     * CORRECCIÓN: El backend devuelve String, no la Dirección actualizada
+     * @param idDireccion ID de la dirección a actualizar
+     * @param direccion Datos actualizados de la dirección (debe incluir todos los campos)
+     * @returns Promesa que resuelve con mensaje de confirmación
+     */
+    update: async (idDireccion: number, direccion: Direccion): Promise<string> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(DIRECCIONES_RESOURCE, `/${idDireccion}`);
+            const response = await geolocalizacionClient.put<string>(urlPath, direccion);
+            return response.data; // "Dirección actualizada con éxito"
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error(`[DireccionService] Error en update(${idDireccion}):`, axiosError.message);
+
+            if (axiosError.response?.status === 404) {
+                throw new Error(`Dirección con ID ${idDireccion} no encontrada.`);
+            }
+            
+            if (axiosError.response) {
+                // El backend devuelve mensaje de error en el body
+                if (axiosError.response.data) {
+                    throw new Error(axiosError.response.data as string);
+                }
+                throw new Error(`Error al actualizar la dirección: ${axiosError.response.status}`);
+            }
+            throw error;
+        }
+    },
+
+    /**
+     * Elimina una dirección del sistema.
+     * Endpoint: DELETE /api-geolocalizacion/v1/direcciones/{id}
+     * CORRECCIÓN: El backend devuelve String, no void
+     * @param idDireccion ID de la dirección a eliminar
+     * @returns Promesa que resuelve con mensaje de confirmación
+     */
+    delete: async (idDireccion: number): Promise<string> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(DIRECCIONES_RESOURCE, `/${idDireccion}`);
+            const response = await geolocalizacionClient.delete<string>(urlPath);
+            return response.data; // "Dirección eliminada con éxito."
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error(`[DireccionService] Error en delete(${idDireccion}):`, axiosError.message);
+            
+            if (axiosError.response?.status === 404) {
+                throw new Error(`Dirección con ID ${idDireccion} no encontrada.`);
+            }
+            
+            if (axiosError.response) {
+                // El backend devuelve mensaje de error en el body
+                if (axiosError.response.data) {
+                    throw new Error(axiosError.response.data as string);
+                }
+                throw new Error(`Error al eliminar la dirección: ${axiosError.response.status}`);
+            }
+            throw error;
+        }
     }
-}
+};

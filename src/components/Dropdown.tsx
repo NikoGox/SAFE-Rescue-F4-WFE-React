@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 
-import { useAuth } from '../hook/UseAuth';
+import { useAuth } from '../hooks/useAuth';
 
 import type { UserType, UserData } from "../types/PerfilesType"; 
 import PerfilDefault from "../assets/perfil-default.png";

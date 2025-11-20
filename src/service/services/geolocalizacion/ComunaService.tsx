@@ -1,64 +1,156 @@
-// src/services/ComunaService.ts
-import axios, { AxiosError } from 'axios';
-import { geolocalizacionClient, GeolocalizacionEndpoints, type GeolocalizacionEndpointsType } from '../../clients/GeolocalizacionClient.tsx';
-import { type Comuna } from '../../../types/GeolocalizacionType.ts';
+// src/services/geolocalizacion/ComunaService.ts
 
-/**
- * Función de utilidad para construir el path completo del recurso.
- * @param resource El recurso principal (ej: GeolocalizacionEndpoints.COMUNAS).
- * @param pathAdicional Un path opcional que se añade al final (ej: '/123').
- * @returns El path relativo completo (ej: '/comunas/123').
- */
-const buildApiUrlPathComuna = (resource: GeolocalizacionEndpointsType, pathAdicional: string = ''): string => {
-    // Aseguramos que el path adicional se una correctamente.
-    const cleanPathAdicional = pathAdicional.startsWith('/') || pathAdicional === '' ? pathAdicional : `/${pathAdicional}`;
-    return `${resource}${cleanPathAdicional}`;
-}
+import type { Comuna } from '../../../types/GeolocalizacionType.ts';
+import { 
+    geolocalizacionClient, 
+    buildApiUrlPathGeolocalizacion, 
+    GeolocalizacionEndpoints,
+    type GeolocalizacionEndpointsType
+} from '../../clients/GeolocalizacionClient.ts';
+import { AxiosError } from 'axios';
 
-// --------------------------------------------------------------------------------
-// FUNCIONES DEL SERVICIO DE COMUNAS
-// --------------------------------------------------------------------------------
+const COMUNAS_RESOURCE: GeolocalizacionEndpointsType = GeolocalizacionEndpoints.COMUNAS;
 
-/**
- * Obtiene la lista completa de todas las comunas (Nivel 1).
- * @returns Una promesa que resuelve con la lista de objetos Comuna
- */
-export const getAllComunas = async (): Promise<Comuna[]> => {
-    const path = buildApiUrlPathComuna(GeolocalizacionEndpoints.COMUNAS);
-    try {
-        const response = await geolocalizacionClient.get<Comuna[]>(path);
-        console.log("Comunas obtenidas con éxito:", response.data);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            // Ajustado el mensaje de error de 'Comunaes' a 'comunas'
-            console.error(`[ComunaService] Error al obtener comunas: ${error.message}`, error.response?.data);
-        } else {
-            console.error("[ComunaService] Error inesperado al obtener Comunas:", error);
+export const ComunaService = {
+    /**
+     * Obtiene todas las comunas registradas en el sistema.
+     * Endpoint: GET /api-geolocalizacion/v1/comunas
+     * @returns Promesa que resuelve con array de comunas o array vacío si no hay contenido
+     */
+    getAll: async (): Promise<Comuna[]> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(COMUNAS_RESOURCE);
+            const response = await geolocalizacionClient.get<Comuna[]>(urlPath);
+            return response.data;
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error("[ComunaService] Error en getAll:", axiosError.message);
+            
+            if (axiosError.response?.status === 204) {
+                // El backend devuelve 204 NO_CONTENT cuando no hay comunas
+                return [];
+            }
+            
+            if (axiosError.response) {
+                throw new Error(`Error al obtener comunas: ${axiosError.response.status}`);
+            }
+            throw error;
         }
-        // Propagamos el error para que el componente de la UI lo maneje.
-        throw error; 
+    },
+
+    /**
+     * Busca una comuna por su ID.
+     * Endpoint: GET /api-geolocalizacion/v1/comunas/{id}
+     * @param idComuna ID de la comuna a buscar
+     * @returns Promesa que resuelve con la Comuna encontrada
+     */
+    getById: async (idComuna: number): Promise<Comuna> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(COMUNAS_RESOURCE, `/${idComuna}`);
+            const response = await geolocalizacionClient.get<Comuna>(urlPath);
+            return response.data;
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error(`[ComunaService] Error en getById(${idComuna}):`, axiosError.message);
+            
+            if (axiosError.response?.status === 404) {
+                throw new Error(`Comuna con ID ${idComuna} no encontrada.`);
+            }
+            
+            if (axiosError.response) {
+                throw new Error(`Error al obtener comuna: ${axiosError.response.status}`);
+            }
+            throw error;
+        }
+    },
+
+    /**
+     * Crea una nueva comuna.
+     * Endpoint: POST /api-geolocalizacion/v1/comunas
+     * CORRECCIÓN: El backend devuelve String, no la Comuna creada
+     * @param comuna Datos de la comuna a crear (sin idComuna)
+     * @returns Promesa que resuelve con mensaje de confirmación
+     */
+    create: async (comuna: Omit<Comuna, 'idComuna'>): Promise<string> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(COMUNAS_RESOURCE);
+            const response = await geolocalizacionClient.post<string>(urlPath, comuna);
+            return response.data; // "Comuna creada con éxito."
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error("[ComunaService] Error en create:", axiosError.message, axiosError.response?.data);
+
+            if (axiosError.response) {
+                // El backend devuelve mensaje de error en el body
+                if (axiosError.response.data) {
+                    throw new Error(axiosError.response.data as string);
+                }
+                throw new Error(`Error al crear la comuna: ${axiosError.response.status}`);
+            }
+            throw error;
+        }
+    },
+
+    /**
+     * Actualiza una comuna existente.
+     * Endpoint: PUT /api-geolocalizacion/v1/comunas/{id}
+     * CORRECCIÓN: El backend devuelve String, no la Comuna actualizada
+     * @param idComuna ID de la comuna a actualizar
+     * @param comuna Datos actualizados de la comuna (debe incluir todos los campos)
+     * @returns Promesa que resuelve con mensaje de confirmación
+     */
+    update: async (idComuna: number, comuna: Comuna): Promise<string> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(COMUNAS_RESOURCE, `/${idComuna}`);
+            const response = await geolocalizacionClient.put<string>(urlPath, comuna);
+            return response.data; // "Comuna actualizada con éxito"
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error(`[ComunaService] Error en update(${idComuna}):`, axiosError.message);
+
+            if (axiosError.response?.status === 404) {
+                throw new Error(`Comuna con ID ${idComuna} no encontrada.`);
+            }
+            
+            if (axiosError.response) {
+                // El backend devuelve mensaje de error en el body
+                if (axiosError.response.data) {
+                    throw new Error(axiosError.response.data as string);
+                }
+                throw new Error(`Error al actualizar la comuna: ${axiosError.response.status}`);
+            }
+            throw error;
+        }
+    },
+
+    /**
+     * Elimina una comuna del sistema.
+     * Endpoint: DELETE /api-geolocalizacion/v1/comunas/{id}
+     * CORRECCIÓN: El backend devuelve String, no void
+     * @param idComuna ID de la comuna a eliminar
+     * @returns Promesa que resuelve con mensaje de confirmación
+     */
+    delete: async (idComuna: number): Promise<string> => {
+        try {
+            const urlPath = buildApiUrlPathGeolocalizacion(COMUNAS_RESOURCE, `/${idComuna}`);
+            const response = await geolocalizacionClient.delete<string>(urlPath);
+            return response.data; // "Comuna eliminada con éxito."
+        } catch (error) {
+            const axiosError = error as AxiosError;
+            console.error(`[ComunaService] Error en delete(${idComuna}):`, axiosError.message);
+            
+            if (axiosError.response?.status === 404) {
+                throw new Error(`Comuna con ID ${idComuna} no encontrada.`);
+            }
+            
+            if (axiosError.response) {
+                // El backend devuelve mensaje de error en el body
+                if (axiosError.response.data) {
+                    throw new Error(axiosError.response.data as string);
+                }
+                throw new Error(`Error al eliminar la comuna: ${axiosError.response.status}`);
+            }
+            throw error;
+        }
     }
 };
-
-/**
- * Obtiene una comuna específica por su ID.
- * @param idComuna El ID de la comuna a buscar. <--- CORREGIDO
- * @returns Una promesa que resuelve con el objeto Comuna.
- */
-export const getComunaById = async (idComuna: number): Promise<Comuna> => {
-    const path = buildApiUrlPathComuna(GeolocalizacionEndpoints.COMUNAS, `${idComuna}`);
-    try {
-        const response = await geolocalizacionClient.get<Comuna>(path);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 404) {
-            // CORREGIDO: De Región a Comuna
-            console.warn(`[ComunaService] Comuna con ID ${idComuna} no encontrada.`);
-        } else if (axios.isAxiosError(error)) {
-            // CORREGIDO: De Región a Comuna
-            console.error(`[ComunaService] Error al obtener comuna ID ${idComuna}: ${error.message}`, error.response?.data);
-        }
-        throw error;
-    }
-}

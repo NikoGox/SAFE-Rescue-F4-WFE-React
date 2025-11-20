@@ -1,85 +1,136 @@
-import axios, { type AxiosResponse } from 'axios';
-import { type TipoIncidente } from '../../../types/IncidenteType'; 
-import { incidentesClient } from '../../clients/IncidentesClient'; 
 
-// URL base de tu API de Incidentes (asumimos que el endpoint es '/tipos')
-const API_BASE = '/api/v1'; 
-const ENDPOINT_TIPOS = `${API_BASE}/tipos`; 
+import type { TipoIncidente } from '../../../types/IncidenteType'; 
+import { incidentesClient, buildApiUrlPathIncidentes, IncidentesEndpoints } from '../../clients/IncidentesClient'; 
 
-/**
- * Gestiona las operaciones de consulta y gestión de Tipos de Incidente.
- */
-export const TipoIncidenteService = {
-
-    /**
-     * Obtiene una lista completa de todos los tipos de incidentes registrados en el sistema.
-     * Ideal para llenar selects/dropdowns en formularios.
-     * * Endpoint asumido: GET /api/v1/tipos
-     *
-     * @param token Opcional: El token JWT, si tu cliente no lo inyecta globalmente.
-     * @returns Una promesa que resuelve con la lista de TipoIncidente.
-     */
-    getAllTiposIncidentes: async (token?: string): Promise<TipoIncidente[]> => {
-        const path = ENDPOINT_TIPOS;
-        
-        try {
-            const response: AxiosResponse<TipoIncidente[]> = await incidentesClient.get(path, {
-                // headers: token ? { 'Authorization': `Bearer ${token}` } : {}, // Solo si es necesario
-            });
-            
-            console.log("Tipos de incidentes cargados con éxito.");
-            return response.data;
-            
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error(`[TipoIncidenteService] Error al obtener tipos de incidentes: ${error.message}`, error.response?.data);
-            }
-            throw error; // Propagar el error para que la UI lo maneje
-        }
-    },
-    
-    /**
-     * Obtiene solo los tipos de incidentes que están marcados como ACTIVO.
-     * * Endpoint asumido: GET /api/v1/tipos/activos
-     *
-     * @param token Opcional: El token JWT.
-     * @returns Una promesa que resuelve con la lista de TipoIncidente activos.
-     */
-    getTiposIncidentesActivos: async (token?: string): Promise<TipoIncidente[]> => {
-        const path = `${ENDPOINT_TIPOS}/activos`;
-        
-        try {
-            const response: AxiosResponse<TipoIncidente[]> = await incidentesClient.get(path, {
-                // headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-            });
-            
-            console.log("Tipos de incidentes activos cargados.");
-            return response.data;
-            
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error(`[TipoIncidenteService] Error al obtener tipos activos: ${error.message}`, error.response?.data);
-            }
-            throw error;
-        }
-    },
-    
-    // --- Opcional: Método para administradores ---
-    
-    /**
-     * Obtiene un Tipo de Incidente por su ID.
-     * Endpoint asumido: GET /api/v1/tipos/{id}
-     */
-    getTipoIncidenteById: async (id: number, token?: string): Promise<TipoIncidente> => {
-        const path = `${ENDPOINT_TIPOS}/${id}`;
-        
-        try {
-            const response: AxiosResponse<TipoIncidente> = await incidentesClient.get(path);
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+class TipoIncidenteService {
+  /**
+   * Obtener todos los tipos de incidente
+   */
+  async listarTiposIncidente(): Promise<TipoIncidente[]> {
+    try {
+      const response = await incidentesClient.get<TipoIncidente[]>(
+        buildApiUrlPathIncidentes(IncidentesEndpoints.TIPOINCIDENTES)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 204) {
+        return []; // Retorna array vacío si no hay contenido
+      }
+      this.handleError(error);
+      throw error;
     }
-    
-    // Aquí se añadirían métodos POST/PUT/DELETE si el frontend gestiona la creación o edición.
-};
+  }
+
+  /**
+   * Buscar tipo de incidente por ID
+   */
+  async buscarTipoIncidentePorId(id: number): Promise<TipoIncidente> {
+    try {
+      const response = await incidentesClient.get<TipoIncidente>(
+        buildApiUrlPathIncidentes(IncidentesEndpoints.TIPOINCIDENTES, `/${id}`)
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Tipo Incidente no encontrado');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Crear un nuevo tipo de incidente
+   */
+  async crearTipoIncidente(tipoIncidente: Omit<TipoIncidente, 'idTipoIncidente'>): Promise<string> {
+    try {
+      const response = await incidentesClient.post(
+        buildApiUrlPathIncidentes(IncidentesEndpoints.TIPOINCIDENTES),
+        tipoIncidente
+      );
+      
+      if (response.status === 201) {
+        return 'Tipo Incidente creado con éxito.';
+      }
+      return 'Tipo Incidente creado.';
+    } catch (error: any) {
+      if (error.response?.status === 400) {
+        throw new Error(error.response.data || 'Error en la solicitud');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar tipo de incidente existente
+   */
+  async actualizarTipoIncidente(id: number, tipoIncidente: Omit<TipoIncidente, 'idTipoIncidente'>): Promise<string> {
+    try {
+      const response = await incidentesClient.put(
+        buildApiUrlPathIncidentes(IncidentesEndpoints.TIPOINCIDENTES, `/${id}`),
+        tipoIncidente
+      );
+      
+      if (response.status === 200) {
+        return 'Actualizado con éxito';
+      }
+      return 'Tipo Incidente actualizado.';
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Tipo Incidente no encontrado');
+      }
+      if (error.response?.status === 400) {
+        throw new Error(error.response.data || 'Error en la solicitud');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Eliminar tipo de incidente
+   */
+  async eliminarTipoIncidente(id: number): Promise<string> {
+    try {
+      await incidentesClient.delete(
+        buildApiUrlPathIncidentes(IncidentesEndpoints.TIPOINCIDENTES, `/${id}`)
+      );
+      return 'Tipo Incidente eliminado con éxito.';
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        throw new Error('Tipo Incidente no encontrado');
+      }
+      if (error.response?.status === 400) {
+        throw new Error(error.response.data || 'Error al eliminar tipo de incidente');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Manejo centralizado de errores
+   */
+  private handleError(error: any): void {
+    if (error.response) {
+      const status = error.response.status;
+      const message = error.response.data?.message || error.response.data || error.message;
+
+      switch (status) {
+        case 500:
+          throw new Error('Error interno del servidor');
+        case 409:
+          throw new Error('Conflicto: ' + message);
+        default:
+          throw new Error(`Error ${status}: ${message}`);
+      }
+    } else if (error.request) {
+      throw new Error('Error de conexión: No se pudo contactar al servidor');
+    } else {
+      throw new Error('Error: ' + error.message);
+    }
+  }
+}
+
+export default new TipoIncidenteService();

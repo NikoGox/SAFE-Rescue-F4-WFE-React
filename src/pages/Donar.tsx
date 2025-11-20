@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState, useEffect, useCallback, type ChangeEv
 import "./Donar.css";
 
 import FormField from '../components/Formulario'; 
-import { useAuth } from "../hook/UseAuth";
+import { useAuth } from "../hooks/useAuth";
 import type { Errors } from "../types/PerfilesType";
 
 import { FaDollarSign, FaMoneyBillWave, FaCoins, FaHandHoldingUsd, FaPlus } from 'react-icons/fa';

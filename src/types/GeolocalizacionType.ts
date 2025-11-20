@@ -91,5 +91,3 @@ export interface GeocodingResult {
     idComuna?: number;
     idRegion?: number;
 }
-
-// Nota: PagedResponse ahora se importa de './GlobalTypes'

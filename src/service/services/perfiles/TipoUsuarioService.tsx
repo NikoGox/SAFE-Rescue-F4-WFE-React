@@ -1,102 +1,109 @@
-// src/services/TipoUsuarioService.ts
-import axios from 'axios';
-// Usamos los nombres corregidos
-import { perfilesClient, PerfilesEndpoints, type PerfilesEndpointsType } from '../../clients/PerfilesClient.tsx'; 
-import { type TipoUsuario, type TipoUsuarioRequest } from '../../../types/PerfilesType.ts'; 
+import type { TipoUsuario, TipoUsuarioRequest } from '../../../types/PerfilesType.ts'; 
+import { perfilesClient, buildApiUrlPathPerfiles, PerfilesEndpoints } from '../../clients/PerfilesClient.tsx'; 
 
-/**
- * Función de utilidad para construir el path completo del recurso.
- * @param resource El recurso principal (ej: PerfilesEndpoints.TIPOS_USUARIO).
- * @param pathAdicional Un path opcional que se añade al final (ej: '/123').
- * @returns El path relativo completo (ej: '/tipos-usuario/123').
- */
-const buildApiUrlPathTipoUsuario = (resource: PerfilesEndpointsType, pathAdicional: string = ''): string => {
-    // Lógica para asegurar la unión correcta del path
-    const cleanPathAdicional = pathAdicional.startsWith('/') || pathAdicional === '' ? pathAdicional : `/${pathAdicional}`;
-    return `${resource}${cleanPathAdicional}`;
+class TipoUsuarioService {
+  /**
+   * Obtener todos los tipos de usuario
+   */
+  async listarTiposUsuario(): Promise<TipoUsuario[]> {
+    try {
+      const response = await perfilesClient.get<TipoUsuario[]>(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.TIPOSUSUARIO)
+      );
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtener un tipo de usuario por ID
+   */
+  async buscarTipoUsuarioPorId(id: number): Promise<TipoUsuario> {
+    try {
+      const response = await perfilesClient.get<TipoUsuario>(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.TIPOSUSUARIO, `/${id}`)
+      );
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Crear un nuevo tipo de usuario
+   */
+  async crearTipoUsuario(tipoUsuario: TipoUsuarioRequest): Promise<TipoUsuario> {
+    try {
+      const response = await perfilesClient.post<TipoUsuario>(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.TIPOSUSUARIO),
+        tipoUsuario
+      );
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar un tipo de usuario existente
+   */
+  async actualizarTipoUsuario(id: number, tipoUsuario: TipoUsuarioRequest): Promise<TipoUsuario> {
+    try {
+      const response = await perfilesClient.put<TipoUsuario>(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.TIPOSUSUARIO, `/${id}`),
+        tipoUsuario
+      );
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Eliminar un tipo de usuario
+   */
+  async eliminarTipoUsuario(id: number): Promise<void> {
+    try {
+      await perfilesClient.delete(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.TIPOSUSUARIO, `/${id}`)
+      );
+    } catch (error) {
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Manejo centralizado de errores
+   */
+  private handleError(error: any): void {
+    if (error.response) {
+      const status = error.response.status;
+      const message = error.response.data?.message || error.message;
+
+      switch (status) {
+        case 400:
+          throw new Error(`Error de validación: ${message}`);
+        case 404:
+          throw new Error('Tipo de usuario no encontrado');
+        case 409:
+          throw new Error('Conflicto de datos: ' + message);
+        case 500:
+          throw new Error('Error interno del servidor');
+        default:
+          throw new Error(`Error ${status}: ${message}`);
+      }
+    } else if (error.request) {
+      throw new Error('Error de conexión: No se pudo contactar al servidor');
+    } else {
+      throw new Error('Error: ' + error.message);
+    }
+  }
 }
 
-// --------------------------------------------------------------------------------
-// FUNCIONES DEL SERVICIO DE TIPOS DE USUARIO
-// --------------------------------------------------------------------------------
-
-/**
- * Obtiene la lista completa de todos los tipos de usuario.
- * @returns Una promesa que resuelve con la lista de objetos TipoUsuario.
- */
-export const getAllTiposUsuario = async (): Promise<TipoUsuario[]> => {
-    const path = buildApiUrlPathTipoUsuario(PerfilesEndpoints.TIPOSUSUARIO); 
-    try {
-        const response = await perfilesClient.get<TipoUsuario[]>(path);
-        console.log("Tipos de usuario obtenidos con éxito.");
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error(`[TipoUsuarioService] Error al obtener tipos de usuario: ${error.message}`, error.response?.data);
-        } else {
-            console.error("[TipoUsuarioService] Error inesperado al obtener tipos de usuario:", error);
-        }
-        throw error;
-    }
-};
-
-/**
- * Obtiene un tipo de usuario específico por su ID.
- * @param idTipoUsuario El ID del tipo de usuario a buscar.
- * @returns Una promesa que resuelve con el objeto TipoUsuario.
- */
-export const getTipoUsuarioById = async (idTipoUsuario: number): Promise<TipoUsuario> => {
-    const path = buildApiUrlPathTipoUsuario(PerfilesEndpoints.TIPOSUSUARIO, `${idTipoUsuario}`);
-    try {
-        const response = await perfilesClient.get<TipoUsuario>(path);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 404) {
-            console.warn(`[TipoUsuarioService] Tipo de usuario con ID ${idTipoUsuario} no encontrado.`);
-        } else if (axios.isAxiosError(error)) {
-            console.error(`[TipoUsuarioService] Error al obtener tipo de usuario ID ${idTipoUsuario}: ${error.message}`, error.response?.data);
-        }
-        throw error;
-    }
-};
-
-/**
- * Crea un nuevo tipo de usuario.
- * @param newTipoUsuario Los datos del nuevo tipo de usuario.
- * @returns Una promesa que resuelve con el objeto TipoUsuario creado.
- */
-export const createTipoUsuario = async (newTipoUsuario: TipoUsuarioRequest): Promise<TipoUsuario> => {
-    const path = buildApiUrlPathTipoUsuario(PerfilesEndpoints.TIPOSUSUARIO);
-    try {
-        const response = await perfilesClient.post<TipoUsuario>(path, newTipoUsuario);
-        console.log("Tipo de usuario creado con éxito:", response.data);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error(`[TipoUsuarioService] Error al crear tipo de usuario: ${error.message}`, error.response?.data);
-        } else {
-            console.error("[TipoUsuarioService] Error inesperado al crear tipo de usuario:", error);
-        }
-        throw error;
-    }
-};
-
-/**
- * Actualiza un tipo de usuario existente.
- * @param idTipoUsuario El ID del tipo de usuario a actualizar.
- * @param updatedTipoUsuario Los datos del tipo de usuario con las modificaciones.
- * @returns Una promesa que resuelve con el objeto TipoUsuario actualizado.
- */
-export const updateTipoUsuario = async (idTipoUsuario: number, updatedTipoUsuario: TipoUsuarioRequest): Promise<TipoUsuario> => {
-    const path = buildApiUrlPathTipoUsuario(PerfilesEndpoints.TIPOSUSUARIO, `${idTipoUsuario}`);
-    try {
-        const response = await perfilesClient.put<TipoUsuario>(path, updatedTipoUsuario);
-        console.log(`Tipo de usuario ID ${idTipoUsuario} actualizado con éxito.`);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error(`[TipoUsuarioService] Error al actualizar tipo de usuario ID ${idTipoUsuario}: ${error.message}`, error.response?.data);
-        }
-        throw error;
-    }
-};
+export default new TipoUsuarioService();
