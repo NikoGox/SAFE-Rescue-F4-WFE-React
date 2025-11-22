@@ -1,0 +1,107 @@
+.formGroupRegistro {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.formGroupRegistro label {
+    font-weight: 600;
+    color: var(--color-secondary);
+    font-size: 0.95rem;
+}
+
+.formControlRegistro {
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--border-radius-sm);
+    padding: 0.75rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    height: 48px;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+    background-color: var(--color-white);
+    font-family: inherit;
+}
+
+.formControlRegistro::placeholder {
+    color: var(--color-gray);
+    opacity: 1;
+}
+
+.formControlRegistro:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(32, 163, 216, 0.25);
+}
+
+.formControlRegistro:disabled {
+    background-color: var(--color-light-gray);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.formControlRegistro.inputError {
+    border-color: var(--color-error) !important;
+    background-color: rgba(231, 76, 60, 0.05);
+}
+
+/* ===== PASSWORD INPUT STYLES ===== */
+.passwordInputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.passwordInput {
+    padding-right: 2.5rem;
+}
+
+.togglePasswordButton {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    transition: opacity 0.2s;
+    z-index: 10;
+}
+
+.togglePasswordButton:hover:not(:disabled) {
+    opacity: 0.7;
+}
+
+.togglePasswordButton:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.togglePasswordButton:active:not(:disabled) {
+    opacity: 0.5;
+}
+
+.togglePasswordButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+/* ===== ERROR MESSAGES ===== */
+.mensajeError {
+    color: var(--color-error);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+.errorText {
+    color: var(--color-error);
+}

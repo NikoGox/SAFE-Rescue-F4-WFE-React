@@ -1,23 +1,20 @@
 import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
-import Dropdown from "./Dropdown"; // Asegúrate de que esta ruta sea correcta
-import styles from "./Navbar.module.css"; 
+import Dropdown from "./Dropdown"; // Asumiré que existe por ahora
+import styles from "./Navbar.module.css";
 import Logo from "../assets/sr_logo.png";
 import { useAuth } from "../hooks/useAuth"; 
 
 const Navbar: React.FC = () => {
-
-    const { loading } = useAuth(); 
+    const { isLoggedIn, loading } = useAuth();
+    
     const scrollToTop = useCallback(() => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
     if (loading) {
         return (
-            <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top ">
+            <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top">
                 <div className="container-fluid">
                     <div className="navbar-brand d-flex align-items-center">
                         <div className="spinner-border spinner-border-sm me-2" role="status">
@@ -34,6 +31,7 @@ const Navbar: React.FC = () => {
         <nav className={`${styles.navbarWrapper} navbar navbar-expand-lg navbar-light bg-light fixed-top shadow`}>
             <div className={`${styles.container} container-fluid`}>
                 
+                {/* Logo y marca */}
                 <Link className={`${styles.logoBrand} navbar-brand`} to="/" onClick={scrollToTop}>
                     <img
                         src={Logo}
@@ -45,6 +43,7 @@ const Navbar: React.FC = () => {
                     <span className={styles.titulo}>SAFE Rescue</span>
                 </Link>
 
+                {/* Botón toggler para móviles */}
                 <button
                     className="navbar-toggler"
                     type="button"
@@ -57,22 +56,45 @@ const Navbar: React.FC = () => {
                     <span className="navbar-toggler-icon"></span>
                 </button>
 
+                {/* Contenido colapsable */}
                 <div className="collapse navbar-collapse" id="navbarMainContent">
                     <ul className={`${styles.navbarNav} navbar-nav ms-auto align-items-center`}>
                         
+                        {/* Enlaces públicos para todos los usuarios */}
                         <li className="nav-item">
-                            <Link className={`${styles.textANavbar} nav-link`} to="/incidentes" onClick={scrollToTop}>Incidentes</Link>
+                            <Link className={`${styles.textANavbar} nav-link`} to="/nosotros" onClick={scrollToTop}>
+                                Nosotros
+                            </Link>
                         </li>
                         <li className="nav-item"><span className={styles.espaciadorNavbar}>|</span></li>
-                        <li className="nav-item">
-                            <Link className={`${styles.textANavbar} nav-link`} to="/contactanos" onClick={scrollToTop}>Contáctanos</Link>
-                        </li>
-                        <li className="nav-item"><span className={styles.espaciadorNavbar}>|</span></li>
-                        <li className="nav-item">
-                            <Link className={`${styles.textANavbar} nav-link`} to="/donar" onClick={scrollToTop}>Donar</Link>
-                        </li>
                         
-                        <li className={`${styles['boton-login']} nav-item`}> 
+                        <li className="nav-item">
+                            <Link className={`${styles.textANavbar} nav-link`} to="/contactanos" onClick={scrollToTop}>
+                                Contáctanos
+                            </Link>
+                        </li>
+                        <li className="nav-item"><span className={styles.espaciadorNavbar}>|</span></li>
+                        
+                        <li className="nav-item">
+                            <Link className={`${styles.textANavbar} nav-link`} to="/donar" onClick={scrollToTop}>
+                                Donar
+                            </Link>
+                        </li>
+
+                        {/* Incidentes - Solo para usuarios autenticados */}
+                        {isLoggedIn && (
+                            <>
+                                <li className="nav-item"><span className={styles.espaciadorNavbar}>|</span></li>
+                                <li className="nav-item">
+                                    <Link className={`${styles.textANavbar} nav-link`} to="/incidentes" onClick={scrollToTop}>
+                                        Incidentes
+                                    </Link>
+                                </li>
+                            </>
+                        )}
+                        
+                        {/* Dropdown para acciones de usuario */}
+                        <li className={`${styles['boton-login']} nav-item`}>
                             <Dropdown />
                         </li>
                     </ul>

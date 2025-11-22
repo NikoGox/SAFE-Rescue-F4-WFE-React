@@ -3,9 +3,7 @@ import styles from "./formulario.module.css";
 import type { InputFieldProps as CustomInputFieldProps } from "../types/PerfilesType";
 
 interface FormFieldProps extends CustomInputFieldProps {
-
   isTextArea?: boolean;
-
   disabled?: boolean;
 }
 
@@ -31,10 +29,9 @@ const FormField: React.FC<FormFieldProps> = ({
 
   return (
     <div className={styles.formGroupRegistro}>
-      {" "}
       <label htmlFor={id} className={isCheckbox ? styles.checkboxLabel : ""}>
         {label}{" "}
-      </label>{" "}
+      </label>
       {isTextArea ? (
         <textarea
           id={id}
@@ -69,14 +66,14 @@ const FormField: React.FC<FormFieldProps> = ({
       )}
       {error && !isCheckbox && (
         <p className={`${styles.mensajeError} ${styles.errorText}`}>{error}</p>
-      )}{" "}
+      )}
       {error && isCheckbox && (
         <p
           className={`${styles.mensajeError} ${styles.errorText} ${styles.checkboxErrorPosition}`}
         >
           {error}
         </p>
-      )}{" "}
+      )}
     </div>
   );
 };

@@ -1,40 +1,30 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
-
 import { useAuth } from '../hooks/useAuth';
-
-import type { UserType, UserData } from "../types/PerfilesType"; 
+import { validateEmail, validateIsRequired } from '../utils/Validaciones';
 import PerfilDefault from "../assets/perfil-default.png";
 import "./Dropdown.css"; 
 
-const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-};
-
 const Dropdown: React.FC = () => {
-
-    const { isLoggedIn, authData, login, logout } = useAuth();
-
+    const { isLoggedIn, authData, userName, profileImage, login, logout, error } = useAuth();
     const navigate = useNavigate();
+    
     const [email, setEmail] = useState("");
-    const [pass, setPass] = useState("");
+    const [password, setPassword] = useState("");
     const [loginError, setLoginError] = useState("");
     const [emailError, setEmailError] = useState(""); 
-    const [passError, setPassError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
     
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-                setEmailError("");
-                setPassError("");
-                setLoginError("");
+                closeDropdown();
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -46,59 +36,50 @@ const Dropdown: React.FC = () => {
     const closeDropdown = () => {
         setIsOpen(false);
         setEmail("");
-        setPass("");
+        setPassword("");
         setEmailError("");
-        setPassError("");
+        setPasswordError("");
         setLoginError("");
     };
 
-    const handleLoginSubmit = (e: React.FormEvent) => {
+    const handleLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
         setLoginError("");
         setEmailError("");
-        setPassError("");
+        setPasswordError("");
 
-        let hasError = false;
+        // Usar tus validaciones importadas
+        const emailValidation = validateEmail(email);
+        const passwordValidation = validateIsRequired(password, "La contraseña");
 
-        if (!isValidEmail(email)) {
-            setEmailError("Formato de correo inválido.");
-            hasError = true;
+        if (emailValidation) {
+            setEmailError(emailValidation);
+            return;
         }
 
-        if (pass.length === 0) {
-            setPassError("Debe ingresar la contraseña.");
-            hasError = true;
-        }
-
-        if (hasError) {
-            return; 
+        if (passwordValidation) {
+            setPasswordError(passwordValidation);
+            return;
         }
 
         try {
-            const usuarios: UserType[] = JSON.parse(localStorage.getItem('usuariosRegistrados') || '[]');
+            setIsLoggingIn(true);
+            const success = await login({ correo: email, contrasena: password });
             
-            const usuarioEncontrado = usuarios.find(
-                (u: UserType) => u.email === email && u.contrasena === pass
-            );
-
-            if (usuarioEncontrado) {
-                
-                const { contrasena, ...userDataSafe }: UserType = usuarioEncontrado; 
-                const userDataForStorage: UserData = userDataSafe; 
-
-                login(userDataForStorage); 
-                
+            if (success) {
                 setEmail("");
-                setPass("");
+                setPassword("");
                 closeDropdown();
                 navigate('/');
             } else {
-                setLoginError("Correo o contraseña incorrectos");
+                setLoginError(error || "Error al iniciar sesión");
             }
-        } catch (error) {
-            console.error('Error en login:', error);
-            setLoginError("Error al iniciar sesión");
+        } catch (err) {
+            setLoginError("Error de conexión. Intente nuevamente.");
+            console.error('Error en login:', err);
+        } finally {
+            setIsLoggingIn(false);
         }
     };
 
@@ -114,8 +95,21 @@ const Dropdown: React.FC = () => {
         setShowPassword(prev => !prev);
     };
 
-    const userName = authData?.nombreUsuario || authData?.nombre || "Usuario";
-    const profileImage = authData?.profileImage;
+    // Limpiar errores cuando el usuario escribe
+    const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setEmail(e.target.value);
+        if (emailError) setEmailError("");
+        if (loginError) setLoginError("");
+    };
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPassword(e.target.value);
+        if (passwordError) setPasswordError("");
+        if (loginError) setLoginError("");
+    };
+
+    const displayName = userName || "Usuario";
+    const userProfileImage = profileImage || PerfilDefault;
 
     const loginContent = (
         <form onSubmit={handleLoginSubmit} className="px-4 py-3">
@@ -127,13 +121,10 @@ const Dropdown: React.FC = () => {
                     id="loginEmail"
                     data-testid="loginEmail"
                     value={email}
-                    onChange={(e) => {
-                        setEmail(e.target.value);
-                        setEmailError(""); 
-                        setLoginError("");
-                    }}
+                    onChange={handleEmailChange}
                     required
                     placeholder="tu.correo@ejemplo.com"
+                    disabled={isLoggingIn}
                 />
                 {emailError && <div className="invalid-feedback">{emailError}</div>}
             </div>
@@ -142,27 +133,25 @@ const Dropdown: React.FC = () => {
                 <div className="input-group has-validation">
                     <input
                         type={showPassword ? "text" : "password"}
-                        className={`form-control ${passError ? 'is-invalid' : ''}`}
+                        className={`form-control ${passwordError ? 'is-invalid' : ''}`}
                         id="loginPassword"
                         data-testid="loginPassword"
-                        value={pass}
-                        onChange={(e) => {
-                            setPass(e.target.value);
-                            setPassError("");
-                            setLoginError("");
-                        }}
+                        value={password}
+                        onChange={handlePasswordChange}
                         required
                         placeholder="•••••••••"
+                        disabled={isLoggingIn}
                     />
                     <button
                         className="btn btn-outline-secondary boton-ojo"
                         type="button"
                         onClick={togglePasswordVisibility}
                         aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                        disabled={isLoggingIn}
                     >
                         {showPassword ? <BsEyeSlash size={20} /> : <BsEye size={20} />}
                     </button>
-                    {passError && <div className="invalid-feedback">{passError}</div>}
+                    {passwordError && <div className="invalid-feedback">{passwordError}</div>}
                 </div>
             </div>
             {loginError && (
@@ -170,7 +159,21 @@ const Dropdown: React.FC = () => {
                     <small>{loginError}</small>
                 </div>
             )}
-            <button type="submit" className="btn btn-primary w-100" data-testid="login-submit-button">Iniciar Sesión</button>
+            <button 
+                type="submit" 
+                className="btn btn-primary w-100" 
+                data-testid="login-submit-button"
+                disabled={isLoggingIn}
+            >
+                {isLoggingIn ? (
+                    <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                        Iniciando sesión...
+                    </>
+                ) : (
+                    "Iniciar Sesión"
+                )}
+            </button>
         </form>
     );
     
@@ -178,16 +181,21 @@ const Dropdown: React.FC = () => {
         <>
             <div className="dropdown-header text-center user-info-header">
                 <img
-                    src={profileImage || PerfilDefault}
+                    src={userProfileImage}
                     alt="Foto de perfil"
                     className="rounded-circle mb-2"
                     style={{ width: '60px', height: '60px', objectFit: 'cover' }}
                 />
-                <strong>Hola, {userName}</strong>
+                <strong>Hola, {displayName}</strong>
             </div>
             <div className="dropdown-divider"></div>
             <Link className="dropdown-item" to="/perfil" onClick={closeDropdown}>
                 <i className="bi bi-person me-2"></i>Mi Perfil
+            </Link>
+            
+            {/* Incidentes en el dropdown para acceso rápido */}
+            <Link className="dropdown-item" to="/incidentes" onClick={closeDropdown}>
+                <i className="bi bi-list-ul me-2"></i>Incidentes
             </Link>
 
             <div className="dropdown-divider"></div>
@@ -214,9 +222,9 @@ const Dropdown: React.FC = () => {
             >
                 {isLoggedIn ? (
                     <div className="d-flex align-items-center text-dark">
-                        <span className="me-2">{userName}</span>
+                        <span className="me-2">{displayName}</span>
                         <img
-                            src={profileImage || PerfilDefault} 
+                            src={userProfileImage}
                             alt="Perfil de usuario"
                             className="rounded-circle"
                             style={{ width: '32px', height: '32px', objectFit: 'cover' }}

@@ -1,129 +1,56 @@
 /*
- * Archivo: src/pages/Registro/Registrarse.module.css (CORREGIDO)
+ * Archivo: src/pages/Registro/Registrarse.module.css (MEJORADO Y CENTRADO)
  * --------------------------------------------------
- * Contiene: Estilos del formulario de registro (tarjeta con imagen lateral),
- * con reducción de espaciado vertical entre los campos del formulario.
+ * Contiene: Estilos del formulario de registro centrado sin imagen lateral,
+ * con espaciado consistente y diseño optimizado.
  */
 
-/* ===== 0. CONTENEDOR DE PÁGINA (Ajustado para permitir scroll) ===== */
+/* ===== 0. CONTENEDOR DE PÁGINA CENTRADO ===== */
 
 .registroPageContainer {
-  /* Fondo */
+  /* Fondo gradiente suave */
   background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
   min-height: 100vh;
-  /* Mantenemos el espaciado vertical de 3rem */
-  padding: 3rem 1rem;
+  padding: 2rem 1rem;
 
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
 }
 
-/* ===== 1. LAYOUT PRINCIPAL Y CONTENEDORES ===== */
+/* ===== 1. CONTENEDOR PRINCIPAL CENTRADO ===== */
 
-.contenedorPrincipal {
-  /* Limitar el ancho de la tarjeta */
-  max-width: 1200px;
-  width: 90%;
-
-  margin: auto;
-
-  /* Propiedades de Tarjeta */
+.contenedorPrincipalCentrado {
+  width: 100%;
+  max-width: 700px;
   display: flex;
+  justify-content: center;
+}
+
+.seccionFormularioCentrada {
+  background: var(--color-white);
   border-radius: var(--border-radius-lg);
-  overflow: hidden;
   box-shadow: var(--shadow-heavy);
-  background-color: var(--color-white);
-  min-height: auto;
-  max-height: none;
-}
-
-.seccionFormulario {
-  flex: 2;
-  /* Mantenemos el padding interno en 3rem */
   padding: 3rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  background-image: linear-gradient(var(--color-white) 100%);
+  width: 100%;
 }
 
-/* ===== 2. SECCIÓN IMAGEN (Estilo de Barra Lateral) ===== */
-
-.seccionImagen {
-  flex: 2;
-  background: url('../assets/registrarse.png') no-repeat center center;
-  background-size: cover;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: var(--color-white);
-  position: relative;
-  padding: 2rem;
-  text-align: center;
-}
-
-.contenidoImagen {
-  text-align: center;
-  max-width: 350px;
-  /* CORRECCIÓN: Usar el RGB de var(--color-245264) (#245264 -> rgb(36, 82, 100)) con opacidad 0.8 */
-  background-color: rgba(36, 82, 100, 0.8);
-  padding: 2rem;
-  border-radius: 10px;
-}
-
-.tituloImagen {
-  font-weight: 700;
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-.textoImagen {
-  font-size: 1.05rem;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
-}
-
-.beneficiosLista {
-  text-align: left;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.beneficiosLista li {
-  margin-bottom: 0.8rem;
-  display: flex;
-  align-items: center;
-  font-weight: 500;
-}
-
-.beneficiosLista li::before {
-  content: "✓";
-  color: var(--color-success);
-  /* Asumiendo que success es un color brillante */
-  font-weight: bold;
-  margin-right: 10px;
-  font-size: 1.2rem;
-}
-
-/* ===== 3. CABECERA DEL FORMULARIO ===== */
+/* ===== 2. CABECERA DEL FORMULARIO CENTRADA ===== */
 
 .logoFormulario {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.logoFormulario img {
-  height: 70px;
+.logoCentrado {
+  display: block;
+  margin: 0 auto 1rem;
+  height: 80px;
 }
 
 .tituloFormulario {
   font-weight: 700;
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   margin-bottom: 0.5rem;
   text-align: center;
   /* Efecto de texto degradado */
@@ -135,16 +62,58 @@
 
 .subtituloFormulario {
   color: var(--color-gray);
-  margin-bottom: 1.25rem;
+  margin-bottom: 2rem;
   text-align: center;
   font-size: 1.1rem;
+  line-height: 1.5;
 }
 
-/* ===== 4. CAMPOS DE FORMULARIO (MODIFICADO) ===== */
+/* ===== 3. ESTRUCTURA DE SECCIONES ===== */
+
+.seccionFormularioGrupo {
+  margin-bottom: 2rem;
+}
+
+.tituloSeccion {
+  color: var(--color-primary);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-primary-light);
+}
+
+.separadorSeccion {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+  margin: 2rem 0;
+  border: none;
+}
+
+/* ===== 4. SISTEMA DE GRID Y ESPACIADO ===== */
+
+.formRow {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.formCol {
+  flex: 1;
+  min-width: 0;
+  /* Previene overflow */
+}
+
+.formColFull {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+/* ===== 5. CAMPOS DE FORMULARIO MEJORADOS ===== */
 
 .formGroupRegistro {
   margin-bottom: 0.75rem;
-  /* Espaciado ajustado */
+  width: 100%;
 }
 
 .formGroupRegistro label {
@@ -155,229 +124,262 @@
   font-size: 0.95rem;
 }
 
-
 .formControlRegistro {
-  /* PROPIEDADES BASE UNIFICADAS */
   border: 1px solid var(--color-light-gray);
   border-radius: var(--border-radius-sm);
   padding: 0.75rem 1rem;
   width: 100%;
   box-sizing: border-box;
-  height: 44px;
+  height: 48px;
   font-size: 1rem;
-  line-height: 1.2;
+  line-height: 1.5;
   transition: all 0.3s ease;
   background-color: var(--color-white);
 }
 
-/* Placeholder color unificado para inputs y textareas */
-.formControlRegistro::placeholder,
-input.formControlRegistro::placeholder,
-textarea.formControlRegistro::placeholder {
-  /* CAMBIO APLICADO AQUÍ */
+/* Placeholder consistente */
+.formControlRegistro::placeholder {
   color: var(--color-gray);
   opacity: 1;
-  /* asegurar visibilidad consistente */
 }
 
-/* Prefijos para navegadores antiguos */
-/* CAMBIO APLICADO EN LOS PREFIJOS */
-.formControlRegistro::-webkit-input-placeholder {
-  color: var(--color-gray);
-  
-}
-
-.formControlRegistro:-ms-input-placeholder {
-  color: var(--color-gray);
-  
-}
-
-.formControlRegistro::-ms-input-placeholder {
-  color: var(--color-gray);
-
-}
-
-/* AÑADIDO CRÍTICO: Estilos de Foco (Tomado de Contactanos.module.css y App.css) */
-.formControlRegistro:focus,
-input.formControlRegistro:focus,
-textarea.formControlRegistro:focus,
-.formControlRegistro:focus-visible {
+/* Estados de foco */
+.formControlRegistro:focus {
   border-color: var(--color-primary);
   outline: none;
-  /* Usando el RGB de var(--color-primary): #20a3d8 -> rgb(32, 163, 216) */
   box-shadow: 0 0 0 0.2rem rgba(32, 163, 216, 0.25);
 }
 
+/* ===== 6. SELECTS MEJORADOS ===== */
 
-.formRow {
+.fullWidthSelect {
+  width: 100%;
+  text-align: center;
+  text-align-last: center;
+}
+
+.selectMejorado {
+  padding: 0.75rem 1rem !important;
+  height: 48px !important;
+  line-height: 1.5 !important;
+  display: flex !important;
+  align-items: center !important;
+  appearance: menulist !important;
+}
+
+.selectMejorado option {
+  padding: 0.5rem 0.75rem !important;
+  line-height: 1.5 !important;
+  text-align: left;
+}
+
+/* ===== 7. CHECKBOXES ===== */
+
+.checkboxContainer {
+  margin: 0.75rem 0;
+}
+
+.checkboxContainer label {
   display: flex;
-  flex-wrap: wrap;
-  /* Mantenemos el gap horizontal */
-  gap: 1.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
   margin-bottom: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--color-secondary);
 }
 
-.formCol {
-  flex: 1;
-  min-width: 220px;
+.checkboxContainer input[type="checkbox"] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
 }
 
-
-
-.mensajeError {
-  color: var(--color-error);
-  font-size: 0.85rem;
-  margin-top: 0.25rem;
-}
-
-/* ===== 5. BOTONES Y CHECKBOX ===== */
+/* ===== 8. BOTÓN DE REGISTRO ===== */
 
 .btnRegistro {
-  /* Estilo de botón degradado (Alineado con App.css) */
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   color: var(--color-white);
   border: none;
-  padding: 0.9rem 2rem;
+  padding: 1rem 2rem;
   font-weight: 600;
   border-radius: var(--border-radius-sm);
   width: 100%;
-  margin-top: 0.75rem;
+  margin-top: 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: var(--shadow-medium);
+  font-size: 1.1rem;
+  height: 50px;
 }
 
-.btnRegistro:hover {
-  /* Efecto hover */
+.btnRegistro:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: var(--shadow-heavy);
   background: linear-gradient(135deg, var(--color-primary-dark) 0%, #1a5276 100%);
 }
 
-.checkboxContainer {
-  display: flex;
-  align-items: center;
-  margin-top: 0.75rem;
+.btnRegistro:disabled {
+  background: var(--color-light-gray);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-.checkboxContainer input {
-  margin-right: 10px;
-}
+/* ===== 9. MENSAJES DE ESTADO ===== */
 
-.checkboxContainer label {
-  color: var(--color-secondary);
+.mensajeError {
+  color: var(--color-error);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
   font-weight: 500;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.terminosErrorPosition {
-  display: block;
-  margin-left: 30px;
-  margin-top: 0.5rem;
-}
-
-/* Clases de Éxito/Error (Alineado con App.css) */
-.inputError {
-  border-color: var(--color-error) !important;
 }
 
 .errorText {
   font-weight: 500;
 }
 
+.inputError {
+  border-color: var(--color-error) !important;
+  background-color: rgba(231, 76, 60, 0.05);
+}
+
+.terminosErrorPosition {
+  display: block;
+  margin-left: 1.875rem;
+  margin-top: 0.5rem;
+}
+
 .successMessageBox {
-  /* Colores de éxito de Bootstrap/App.css */
-  background-color: #d4edda;
+  background-color: rgba(46, 204, 113, 0.1);
+  border: 1px solid #2ecc71;
   color: #155724;
   padding: 1rem;
-  margin-bottom: 0.75rem;
-  border: 1px solid #c3e6cb;
+  margin-bottom: 1rem;
   border-radius: var(--border-radius-sm);
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
-/* ===== 6. RESPONSIVE DESIGN ===== */
 
-/* Pantallas grandes / Laptops */
-@media (max-width: 1250px) {
-  .contenedorPrincipal {
-    max-width: 95%;
-  }
+.successContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Tabletas y pantallas medianas (rompe la columna lateral) */
-@media (max-width: 992px) {
-  .contenedorPrincipal {
-    flex-direction: column;
-    max-width: 700px;
-    width: 90%;
-    margin: 0 auto;
+.progressBar {
+  width: 100%;
+  height: 4px;
+  background-color: #e0e0e0;
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: #4CAF50;
+  animation: progressFill 3s linear forwards;
+}
+
+@keyframes progressFill {
+  from {
+    width: 100%;
   }
 
-  .seccionImagen {
-    min-height: 250px;
-    padding: 2rem 1rem;
-    order: -1;
-    flex: none;
-    width: auto;
-  }
-
-  .seccionFormulario {
-    padding: 2.5rem;
-  }
-
-  .formCol {
-    min-width: 100%;
-  }
-
-  .tituloFormulario {
-    font-size: 2rem;
+  to {
+    width: 0%;
   }
 }
 
-/* Móviles pequeños */
-@media (max-width: 576px) {
-  .registroPageContainer {
-    padding: 0;
-  }
+/* ===== 10. RESPONSIVE DESIGN ===== */
 
-  .contenedorPrincipal {
-    max-width: 100%;
-    margin: 0;
-    border-radius: 0;
-    box-shadow: none;
-  }
-
-  .seccionFormulario,
-  .seccionImagen {
-    padding: 1.5rem;
-  }
-
-  .formGroupRegistro {
-    margin-bottom: 0.5rem;
+/* Tabletas */
+@media (max-width: 768px) {
+  .seccionFormularioCentrada {
+    padding: 2rem;
+    margin: 1rem;
   }
 
   .formRow {
-    margin-bottom: 0.3rem;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
-  .btnRegistro,
-  .checkboxContainer {
-    margin-top: 0.5rem;
+  .formCol {
+    width: 100%;
+  }
+
+  .separadorSeccion {
+    margin: 1.5rem 0;
   }
 
   .tituloFormulario {
-    font-size: 1.75rem;
+    font-size: 1.8rem;
+  }
+
+  .tituloSeccion {
+    font-size: 1.2rem;
+  }
+}
+
+/* Móviles */
+@media (max-width: 576px) {
+  .registroPageContainer {
+    padding: 1rem 0.5rem;
+  }
+
+  .seccionFormularioCentrada {
+    padding: 1.5rem;
+    margin: 0.5rem;
+  }
+
+  .logoCentrado {
+    height: 60px;
+  }
+
+  .tituloFormulario {
+    font-size: 1.6rem;
   }
 
   .subtituloFormulario {
     font-size: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
   }
 
-  .formRow {
-    flex-direction: column;
-    gap: 0;
+  .formControlRegistro {
+    padding: 0.75rem;
+    height: 44px;
+  }
+
+  .btnRegistro {
+    margin-top: 1rem;
+    height: 48px;
+    font-size: 1rem;
+  }
+
+  .seccionFormularioGrupo {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-width: 375px) {
+  .seccionFormularioCentrada {
+    padding: 1rem;
+  }
+
+  .tituloFormulario {
+    font-size: 1.4rem;
+  }
+
+  .formControlRegistro {
+    font-size: 0.9rem;
   }
 }

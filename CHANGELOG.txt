@@ -1,6 +1,14 @@
 ╔══════════════════════════════════════════════╗
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
+❚❙❘ VERSIÓN 1.0.11
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se implementa y corrige la lógica para que reciba datos del backend
+├─• Se modifican todos los componentes para que consuman backend
+├─• Se modifica la página de registro
+└─• Se logra el inicar sesión y registrarse desde la página web interactuando con el backend
+
+
 ❚❙❘ VERSIÓN 1.0.10.1
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
 ├─• Se corrijen los types para que sean exactos con el backend

@@ -12,18 +12,12 @@ SAFE Rescue es una aplicación diseñada para la gestión eficiente y rápida de
 
 ## Últimos cambios
 
-### ❚❙❘ VERSIÓN 1.0.10.1
+### ❚❙❘ VERSIÓN 1.0.11
 
-> <br>• Se empieza la implementación de conección con backend
-> <br>• Se crean los client que reciben la información usando axiom
-> <br>• Se crean types para los datos recibidos desde el backend
-> <br>• Se crean los service para el manejo de las funciones
-> <br>•
-> <br> > > > Se necesita implementar los service en los formularios y paginas
-> <br>•
-> <br>• Se corrijen los types para que sean exactos con el backend
-> <br>• Se crean los hooks que manejan la percistencia
-> <br>• Se corrijen los services
+> <br>• Se implementa y corrige la lógica para que reciba datos del backend
+> <br>• Se modifican todos los componentes para que consuman backend
+> <br>• Se modifica la página de registro
+> <br>• Se logra el inicar sesión y registrarse desde la página web interactuando con el backend
 > <br>
 
 

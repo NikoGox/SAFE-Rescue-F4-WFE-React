@@ -7,11 +7,6 @@ import { type Direccion, type Region, type Comuna } from "./GeolocalizacionType"
 // ===========================================================
 
 /**
- * Declaración forward para Bombero (para resolver dependencia circular)
- */
-export interface Bombero {}
-
-/**
  * Define la estructura de una Compañía (Usada en Bombero o simplemente una entidad).
  */
 export interface Compania {
@@ -109,12 +104,14 @@ export interface PerfilDireccion {
 export interface CiudadanoData extends BaseUsuario {
     tipoPerfil: 'CIUDADANO';
     idDireccion: number;
+    direccion?: PerfilDireccion; // Dirección completa opcional
 }
 
 // 2. Tipo Bombero
 export interface Bombero extends BaseUsuario {
     tipoPerfil: 'BOMBERO';
     equipo: Equipo;
+    compania?: Compania; // Información de compañía opcional
 }
 
 /**
@@ -146,17 +143,18 @@ export const formatearRUT = (run: string, dv: string): string => {
  */
 export const parsearRUT = (rutCompleto: string): { run: string, dv: string } => {
     const [run, dv] = rutCompleto.split('-');
-    return { run, dv };
+    return { run: run || '', dv: dv || '' };
 };
 
 // ===========================================================
-// 4. TIPOS DE REGISTRO Y AUTENTICACIÓN
+// 4. TIPOS DE REGISTRO Y AUTENTICACIÓN - CORREGIDOS
 // ===========================================================
 
 /**
  * Define la estructura para el formulario de registro en el frontend.
  */
 export interface UserRegistroFormType {
+    // Datos personales
     rutCompleto: string;            
     nombre: string;
     aPaterno: string;
@@ -165,23 +163,52 @@ export interface UserRegistroFormType {
     telefono: string;
     contrasena: string;
     confirmarContrasena: string;
-    idDireccion: number;            
     terminos: boolean;
+    
+    // Datos de dirección para geolocalización
+    direccion: {
+        calle: string;
+        numero: string;
+        villa?: string;
+        complemento?: string;
+        idComuna: number;
+        coordenadas?: {
+            latitud: number;
+            longitud: number;
+        };
+    };
+    
+    // Tipo de usuario
+    idTipoUsuario: number;
 }
 
 /**
  * DTO para enviar al backend durante el registro.
  */
 export interface UserRegistroBackendType {
+    // Datos de usuario (para microservicio de perfiles)
     run: string;
     dv: string;
     nombre: string;
-    aPaterno: string;
-    aMaterno: string;
-    correo: string;
+    apaterno: string;
+    amaterno: string;
     telefono: string;
-    contrasena: string;
-    idDireccion: number;
+    correo: string;
+    contrasenia: string;
+    idTipoUsuario: number;
+    
+    // Datos de dirección (para microservicio de geolocalización)
+    direccion: {
+        calle: string;
+        numero: string;
+        villa?: string;
+        complemento?: string;
+        idComuna: number;
+        coordenadas?: {
+            latitud: number;
+            longitud: number;
+        };
+    };
 }
 
 /**
@@ -198,7 +225,9 @@ export interface LoginRequest {
 export interface AuthResponseDTO {
     token: string;
     tipoPerfil: 'CIUDADANO' | 'BOMBERO';
-    userData: any; // Temporalmente any, se convierte a UserData
+    userData: UserData;
+    expiresIn?: number;
+    data: any;
 }
 
 /**
@@ -224,7 +253,6 @@ export const convertirAUserData = (authResponse: AuthResponseDTO): UserData => {
 
 /**
  * Define el DTO para actualizar un usuario.
- * Omite campos de identidad y hace opcionales los campos modificables.
  */
 export type UserUpdateRequest = Partial<Omit<BaseUsuario, 
     'idUsuario' | 'run' | 'dv' | 'nombreUsuario' | 'fechaRegistro'
@@ -236,7 +264,7 @@ export type UserUpdateRequest = Partial<Omit<BaseUsuario,
 };
 
 // ===========================================================
-// 6. TIPOS DE FORMULARIO Y CONTEXTO
+// 6. TIPOS DE FORMULARIO Y CONTEXTO - CORREGIDOS
 // ===========================================================
 
 /**
@@ -247,8 +275,7 @@ export interface ContactData extends BaseFields {
 }
 
 /**
- * Extiende la estructura de UserRegistroFormType con campos temporales 
- * para la validación y el estado del formulario de registro.
+ * Extiende la estructura de UserRegistroFormType
  */
 export interface FormDataType extends UserRegistroFormType {
     // Ya incluye todos los campos de UserRegistroFormType
@@ -257,15 +284,34 @@ export interface FormDataType extends UserRegistroFormType {
 /**
  * Define la estructura para almacenar los mensajes de error del formulario.
  */
+// En PerfilesType.ts, actualiza el tipo Errors:
 export type Errors = Partial<FormDataType & ContactData> & {
     general?: string;
-    detalleHomenaje?: string; 
+    detalleHomenaje?: string;
+    
+    // ✅ CORREGIDO: Tipo específico para errores de dirección
+    direccion?: {
+        calle?: string;
+        numero?: string;
+        villa?: string;
+        complemento?: string;
+        idComuna?: string;
+    };
+    
+    // Campos adicionales
+    terminos?: string;
+    idRegion?: string;
+    regionPersonalizada?: string;
+    comunaPersonalizada?: string;
+    usarDireccionManual?: string;
+    usarComunaPersonalizada?: string;
+    usarRegionPersonalizada?: string;
 };
 
-// ===========================================================
-// 7. TIPOS DE CONTEXTO Y PROPS
-// ===========================================================
 
+// ===========================================================
+// 7. TIPOS DE CONTEXTO Y PROPS - CORREGIDOS
+// ===========================================================
 
 /**
  * Define la estructura del contexto de autenticación.
@@ -277,11 +323,12 @@ export type AuthContextType = {
   authData: UserData | null;
   loading: boolean;
   error: string | null;
-  login: (credentials: { correo: string; contrasena: string }) => Promise<boolean>;
-  register: (userData: any) => Promise<boolean>;
+  login: (credentials: LoginRequest) => Promise<boolean>;
+  register: (userData: UserRegistroBackendType) => Promise<boolean>;
   logout: () => void;
   checkAuthStatus: () => void;
   clearError: () => void;
+  updateProfile?: (userData: UserUpdateRequest) => Promise<boolean>;
 };
 
 /**
@@ -296,14 +343,16 @@ export interface AuthProps {
 }
 
 // ===========================================================
-// 8. PROPS DE COMPONENTES
+// 8. PROPS DE COMPONENTES - CORREGIDOS
 // ===========================================================
 
 /**
  * Propiedades (Props) base para un componente de campo de formulario genérico.
  */
 export interface InputFieldProps {
-    id: keyof FormDataType | keyof ContactData | 'detalleHomenaje' | keyof PerfilDireccion; 
+    id: keyof FormDataType | keyof ContactData | keyof Errors | 
+        'calle' | 'numero' | 'villa' | 'complemento' | 'idComuna' |
+        `direccion.${keyof UserRegistroFormType['direccion']}`; 
     label: string;
     placeholder: string;
     type?: 'text' | 'email' | 'tel' | 'password' | 'rut' | 'checkbox' | 'number';
@@ -448,4 +497,35 @@ export const crearHistorialDTO = (
     }
     
     return dto;
+};
+
+// ===========================================================
+// 10. FUNCIONES UTILITARIAS PARA REGISTRO
+// ===========================================================
+
+/**
+ * Función para crear el DTO de registro completo
+ */
+export const crearRegistroDTO = (formData: UserRegistroFormType): UserRegistroBackendType => {
+    const { run, dv } = parsearRUT(formData.rutCompleto);
+    
+    return {
+        run,
+        dv,
+        nombre: formData.nombre,
+        apaterno: formData.aPaterno,
+        amaterno: formData.aMaterno,
+        telefono: formData.telefono,
+        correo: formData.correo,
+        contrasenia: formData.contrasena,
+        idTipoUsuario: formData.idTipoUsuario,
+        direccion: {
+            calle: formData.direccion.calle,
+            numero: formData.direccion.numero,
+            villa: formData.direccion.villa,
+            complemento: formData.direccion.complemento,
+            idComuna: formData.direccion.idComuna,
+            coordenadas: formData.direccion.coordenadas
+        }
+    };
 };

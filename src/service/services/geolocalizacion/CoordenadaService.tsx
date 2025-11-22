@@ -6,7 +6,7 @@ import {
     buildApiUrlPathGeolocalizacion, 
     GeolocalizacionEndpoints,
     type GeolocalizacionEndpointsType
-} from '../../clients/GeolocalizacionClient.ts';
+} from '../../clients/GeolocalizacionClient.tsx';
 import { AxiosError } from 'axios';
 
 // ❗ IMPORTANTE: El controller usa "/coordenadas" pero el cliente tiene "/localizaciones"

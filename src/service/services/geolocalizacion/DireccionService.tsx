@@ -6,7 +6,7 @@ import {
     buildApiUrlPathGeolocalizacion, 
     GeolocalizacionEndpoints,
     type GeolocalizacionEndpointsType
-} from '../../clients/GeolocalizacionClient.ts';
+} from '../../clients/GeolocalizacionClient.tsx';
 import { AxiosError } from 'axios';
 
 const DIRECCIONES_RESOURCE: GeolocalizacionEndpointsType = GeolocalizacionEndpoints.DIRECCIONES;
