@@ -1,5 +1,5 @@
 // contexts/AuthContext.tsx
-import React, { createContext, useContext, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext,type ReactNode, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth'; 
 import { usePersistencia } from '../hooks/usePersistencia';
 import type { AuthContextType, UserData } from '../types/PerfilesType'; 

@@ -14,7 +14,7 @@ export const PerfilesEndpoints = {
     HISTORIALUSUARIOS: '/historial',
     AUTH: '/auth',
     LOGIN: '/auth/login',
-    REGISTER: '/auth/register-ciudadano', // ✅ Corregido
+    REGISTER: '/auth/register-ciudadano', 
     VALIDATE: '/auth/validate'
 } as const;
 
@@ -57,8 +57,8 @@ export interface RegisterResponse {
     activo: boolean;
 }
 
-// 🔥 TOKEN DE SERVICIO INTERNO (S2S)
-const SERVICE_TOKEN = '8f4f22d4-1a98-4b7e-90f7-3c5e00b8c6e2'; // Reemplaza con tu token real
+//  TOKEN DE SERVICIO INTERNO (S2S)
+const SERVICE_TOKEN = '8f4f22d4-1a98-4b7e-90f7-3c5e00b8c6e2'; 
 
 /**
  * Cliente de Axios preconfigurado para el microservicio de perfiles
@@ -171,20 +171,24 @@ perfilesClient.interceptors.response.use(
 export const tokenManager = {
     setToken: (token: string): void => {
         if (typeof window !== 'undefined') {
-            localStorage.setItem('perfiles_token', token);
+            console.log(' Guardando token en localStorage:', token ? `${token.substring(0, 20)}...` : 'TOKEN VACÍO');
+            localStorage.setItem('token', token);  // ← CAMBIAR a 'token'
         }
     },
 
     getToken: (): string | null => {
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('perfiles_token');
+            const token = localStorage.getItem('token');  // ← CAMBIAR a 'token'
+            console.log(' Token recuperado:', token ? `${token.substring(0, 20)}...` : 'SIN TOKEN');
+            return token;
         }
         return null;
     },
 
     clearToken: (): void => {
         if (typeof window !== 'undefined') {
-            localStorage.removeItem('perfiles_token');
+            localStorage.removeItem('token');  // ← CAMBIAR a 'token'
+            console.log(' Token eliminado');
         }
     },
 
@@ -336,7 +340,6 @@ export const useAuth = () => {
         logout: authAPI.logout,
         register: authAPI.register,
         validateToken: authAPI.validateToken,
-        // 🔥 Agregar funciones de servicio
         serviceAPI
     };
 };

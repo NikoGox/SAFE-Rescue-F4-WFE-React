@@ -1,39 +1,24 @@
 import type { CiudadanoData } from '../../../types/PerfilesType';
-import { perfilesClient, buildApiUrlPathPerfiles, PerfilesEndpoints } from '../../../service/clients/PerfilesClient';
+import { perfilesClient, buildApiUrlPathPerfiles, PerfilesEndpoints } from '../../clients/PerfilesClient';
 
 class CiudadanoService {
-  /**
-   * Crear un nuevo ciudadano
-   */
-  async crearCiudadano(ciudadano: Omit<CiudadanoData, 'idUsuario'>): Promise<CiudadanoData> {
-    try {
-      const response = await perfilesClient.post<CiudadanoData>(
-        buildApiUrlPathPerfiles(PerfilesEndpoints.CIUDADANOS),
-        ciudadano
-      );
-      return response.data;
-    } catch (error: any) {
-      if (error.response?.status === 400) {
-        const errorMessage = this.getValidationErrorMessage(error.response.data);
-        throw new Error(errorMessage);
-      }
-      this.handleError(error);
-      throw error;
-    }
-  }
-
   /**
    * Obtener ciudadano por ID
    */
   async buscarCiudadanoPorId(id: number): Promise<CiudadanoData> {
     try {
+      console.log(` Llamando API: GET /ciudadanos/${id}`);
       const response = await perfilesClient.get<CiudadanoData>(
         buildApiUrlPathPerfiles(PerfilesEndpoints.CIUDADANOS, `/${id}`)
       );
+      console.log(' Respuesta recibida:', response.data);
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 404) {
-        throw new Error('Ciudadano no encontrado');
+        throw new Error(`Ciudadano con ID ${id} no encontrado`);
+      }
+      if (error.response?.status === 401) {
+        throw new Error('No autorizado: Token inválido o expirado');
       }
       this.handleError(error);
       throw error;
@@ -45,21 +30,43 @@ class CiudadanoService {
    */
   async actualizarCiudadano(id: number, ciudadano: Partial<CiudadanoData>): Promise<CiudadanoData> {
     try {
-      // Asegurar que el ID del path se asigna al objeto
-      const ciudadanoConId = {
-        ...ciudadano,
-        idUsuario: id
-      };
-
+      console.log(` Llamando API: PUT /ciudadanos/${id}`, ciudadano);
+      
       const response = await perfilesClient.put<CiudadanoData>(
         buildApiUrlPathPerfiles(PerfilesEndpoints.CIUDADANOS, `/${id}`),
-        ciudadanoConId
+        ciudadano
       );
+      console.log(' Respuesta recibida:', response.data);
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 404) {
         throw new Error('Ciudadano no encontrado');
       }
+      if (error.response?.status === 400) {
+        const errorMessage = this.getValidationErrorMessage(error.response.data);
+        throw new Error(errorMessage);
+      }
+      if (error.response?.status === 401) {
+        throw new Error('No autorizado: Token inválido o expirado');
+      }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  /**
+   * Crear un nuevo ciudadano
+   */
+  async crearCiudadano(ciudadano: Omit<CiudadanoData, 'idUsuario'>): Promise<CiudadanoData> {
+    try {
+      console.log(` Llamando API: POST /ciudadanos`, ciudadano);
+      const response = await perfilesClient.post<CiudadanoData>(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.CIUDADANOS),
+        ciudadano
+      );
+      console.log(' Respuesta recibida:', response.data);
+      return response.data;
+    } catch (error: any) {
       if (error.response?.status === 400) {
         const errorMessage = this.getValidationErrorMessage(error.response.data);
         throw new Error(errorMessage);
@@ -74,9 +81,11 @@ class CiudadanoService {
    */
   async eliminarCiudadano(id: number): Promise<void> {
     try {
+      console.log(` Llamando API: DELETE /ciudadanos/${id}`);
       await perfilesClient.delete(
         buildApiUrlPathPerfiles(PerfilesEndpoints.CIUDADANOS, `/${id}`)
       );
+      console.log(' Ciudadano eliminado correctamente');
     } catch (error: any) {
       if (error.response?.status === 404) {
         throw new Error('Ciudadano no encontrado');
@@ -97,7 +106,6 @@ class CiudadanoService {
       return errorData.message;
     }
     if (errorData?.errors) {
-      // Para errores de validación de campos específicos
       return Object.values(errorData.errors).join(', ');
     }
     return 'Error de validación en los datos del ciudadano';
@@ -110,6 +118,8 @@ class CiudadanoService {
     if (error.response) {
       const status = error.response.status;
       const message = error.response.data?.message || error.response.data || error.message;
+
+      console.error(` Error ${status}:`, message);
 
       switch (status) {
         case 500:

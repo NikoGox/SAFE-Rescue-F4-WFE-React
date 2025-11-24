@@ -1,54 +1,41 @@
-// hooks/useDatosConCache.ts
-import { useState, useEffect, useCallback } from 'react';
+// hooks/useDatos.ts - Hook unificado que combina ambos
+import { usePersistencia } from './usePersistencia';
 import { useSincronizacion } from './useSincronizacion';
 
-export const useDatosConCache = <T>(
+export const useDatos = () => {
+  const persistencia = usePersistencia();
+  const sincronizacion = useSincronizacion();
+
+  // Métodos combinados para casos de uso comunes
+  const cargarYPersistir = async (
     claveCache: string,
-    funcionFetch: () => Promise<T>,
-    dependencias: any[] = []
-) => {
-    const [datos, setDatos] = useState<T | null>(null);
-    const [cargando, setCargando] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    clavePersistencia: Parameters<typeof persistencia.guardarDato>[0],
+    funcionFetch: () => Promise<any>,
+    opciones: Parameters<typeof sincronizacion.sincronizarDatos>[2] = {}
+  ) => {
+    const datos = await sincronizacion.sincronizarDatos(claveCache, funcionFetch, {
+      ...opciones,
+      persistir: true,
+      clavePersistencia
+    });
+    return datos;
+  };
+
+  const obtenerDatos = (
+    claveCache: string,
+    clavePersistencia: Parameters<typeof persistencia.guardarDato>[0]
+  ) => {
+    // Intentar desde cache primero, luego desde persistencia
+    return persistencia.obtenerDato(clavePersistencia);
+  };
+
+  return {
+    // Exportar todo de ambos hooks
+    ...persistencia,
+    ...sincronizacion,
     
-    const { 
-        sincronizarDatos, 
-        sincronizando, 
-        errores,
-        generarClaveCache 
-    } = useSincronizacion();
-
-    const claveCompleta = generarClaveCache(claveCache, dependencias);
-
-    const cargarDatos = useCallback(async (forzar: boolean = false) => {
-        setCargando(true);
-        setError(null);
-        
-        try {
-            const resultado = await sincronizarDatos(claveCompleta, funcionFetch, forzar);
-            setDatos(resultado);
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Error al cargar datos';
-            setError(errorMessage);
-        } finally {
-            setCargando(false);
-        }
-    }, [claveCompleta, funcionFetch, sincronizarDatos]);
-
-    // Cargar datos automáticamente
-    useEffect(() => {
-        cargarDatos();
-    }, [cargarDatos]);
-
-    const recargar = useCallback(() => {
-        cargarDatos(true);
-    }, [cargarDatos]);
-
-    return {
-        datos,
-        cargando: cargando || sincronizando,
-        error: error || (errores.length > 0 ? errores[0] : null),
-        recargar,
-        errores
-    };
+    // Métodos combinados
+    cargarYPersistir,
+    obtenerDatos
+  };
 };

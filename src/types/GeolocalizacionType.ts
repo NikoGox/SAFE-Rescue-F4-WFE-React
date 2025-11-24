@@ -1,5 +1,3 @@
-import type { PagedResponse } from "./GlobalTypes";
-
 /**
  * Interfaz que representa una entidad geográfica de Nivel 1 (Región/Estado).
  */
@@ -16,7 +14,7 @@ export interface Comuna {
     idComuna: number;
     nombre: string;
     // Opcional, ya que no es 'nullable=false' en el modelo Java.
-    codigoPostal?: string; 
+    codigoPostal?: string;
     idRegion: number; // Clave foránea (debe ser expuesta por el DTO del backend)
 }
 
@@ -47,14 +45,15 @@ export interface Direccion {
     idDireccion: number;
     calle: string;
     numero: string;
-    
+
     // Estos campos son opcionales en Java, por lo que se marcan como opcionales en TS.
-    villa?: string; 
+    villa?: string;
     complemento?: string;
-    
+
     // Relaciones (expuestas como IDs en el DTO de respuesta)
-    idComuna: number; 
-    idCoordenadas: number;
+    idComuna: number;
+    idCoordenadas?: number;
+    
 }
 
 /**
@@ -70,7 +69,7 @@ export interface DireccionRequest {
 
     // Relación por ID
     idComuna: number;
-    
+
     // Coordenadas aplanadas
     latitud: number;
     longitud: number;
@@ -83,11 +82,40 @@ export interface DireccionRequest {
 export interface GeocodingResult {
     coordenadas: CoordenadasSimple; // Latitud y longitud encontradas (formato simple)
     direccionCompleta: string; // Dirección formateada
-    precision: number; 
-    
-    idCoordenada?: number; 
-    
+    precision: number;
+
+    idCoordenada?: number;
+
     // Información opcional de contexto
     idComuna?: number;
     idRegion?: number;
+}
+
+export interface DireccionCompleta {
+    idDireccion: number;
+    calle: string;
+    numero: string;
+    villa?: string;
+    complemento?: string;
+    comuna: ComunaCompleta;
+    coordenadas?: Coordenadas;
+}
+
+export interface ComunaCompleta {
+    idComuna: number;
+    nombre: string;
+    codigoPostal?: string;
+    region: Region;
+}
+
+export interface Region {
+    idRegion: number;
+    nombre: string;
+    identificacion: string;
+}
+
+export interface Coordenadas {
+    idCoordenadas: number;
+    latitud: number;
+    longitud: number;
 }

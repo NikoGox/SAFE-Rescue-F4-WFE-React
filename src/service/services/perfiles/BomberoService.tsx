@@ -1,5 +1,5 @@
 import type { Bombero } from '../../../types/PerfilesType';
-import { perfilesClient, buildApiUrlPathPerfiles, PerfilesEndpoints } from '../../../service/clients/PerfilesClient';
+import { perfilesClient, buildApiUrlPathPerfiles, PerfilesEndpoints, serviceAPI } from '../../../service/clients/PerfilesClient';
 
 class BomberoService {
   /**
@@ -21,17 +21,25 @@ class BomberoService {
   }
 
   /**
-   * Buscar bombero por ID
+   * Buscar bombero por ID - ✅ USANDO TOKEN DE SERVICIO
    */
   async buscarBomberoPorId(id: number): Promise<Bombero> {
     try {
-      const response = await perfilesClient.get<Bombero>(
+      console.log(`🔥 Buscando bombero con ID: ${id} (usando token de servicio)`);
+
+      const response = await serviceAPI.getWithServiceToken<Bombero>(
         buildApiUrlPathPerfiles(PerfilesEndpoints.BOMBEROS, `/${id}`)
       );
+
+      console.log(`✅ Bombero encontrado:`, response.data);
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 404) {
         throw new Error('Bombero no encontrado');
+      }
+      if (error.response?.status === 403) {
+        console.error('❌ Acceso denegado - Verifica el token de servicio en PerfilesClient.tsx');
+        throw new Error('No tienes permisos para acceder a este recurso');
       }
       this.handleError(error);
       throw error;
@@ -59,24 +67,24 @@ class BomberoService {
   }
 
   /**
-   * Actualizar bombero existente
-   */
+ * Actualizar bombero existente
+ */
   async actualizarBombero(id: number, bombero: Partial<Bombero>): Promise<Bombero> {
     try {
-      // Asegurar que el ID del path se asigna al objeto para actualización completa
-      const bomberoActualizado = {
-        ...bombero,
-        idUsuario: id
-      };
+      // NO incluir idUsuario en el payload - solo en la URL
+      const { idUsuario, ...datosActualizar } = bombero;
+
+      console.log("Actualizando bombero ID:", id);
+      console.log("Datos enviados:", datosActualizar);
 
       const response = await perfilesClient.put<Bombero>(
         buildApiUrlPathPerfiles(PerfilesEndpoints.BOMBEROS, `/${id}`),
-        bomberoActualizado
+        datosActualizar
       );
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 404) {
-        throw new Error('Bombero no encontrado');
+        throw new Error("Bombero no encontrado");
       }
       if (error.response?.status === 400) {
         const errorMessage = this.getValidationErrorMessage(error.response.data);
@@ -101,7 +109,7 @@ class BomberoService {
         throw new Error('Bombero no encontrado');
       }
       if (error.response?.status === 400) {
-        throw new Error('No se puede eliminar el bombero: existen referencias activas (ej: es líder de un equipo)');
+        throw new Error('No se puede eliminar el bombero: existen referencias activas');
       }
       this.handleError(error);
       throw error;
@@ -119,11 +127,8 @@ class BomberoService {
       return errorData.message;
     }
     if (errorData?.errors) {
-      // Para errores de validación de campos específicos
       return Object.values(errorData.errors).join(', ');
     }
-    
-    // Mensajes específicos para bomberos
     if (errorData?.includes?.('RUN/Correo existente')) {
       return 'El RUN o correo electrónico ya existe en el sistema';
     }
@@ -133,7 +138,6 @@ class BomberoService {
     if (errorData?.includes?.('TipoUsuario no existe')) {
       return 'El tipo de usuario especificado no existe';
     }
-    
     return 'Error de validación en los datos del bombero';
   }
 
@@ -150,6 +154,8 @@ class BomberoService {
           throw new Error('Error interno del servidor');
         case 409:
           throw new Error('Conflicto de datos: ' + message);
+        case 403:
+          throw new Error('Acceso denegado - Verifica los permisos');
         default:
           throw new Error(`Error ${status}: ${message}`);
       }

@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { AuthProvider } from './hooks/AuthContext';
 
 // Componentes de Layout
 import Navbar from "./components/Navbar";
@@ -17,30 +18,33 @@ import RecuperarContrasena from "./pages/RecuperarContrasena";
 
 function App() {
   return (
-    <div className="app-container">
+    <AuthProvider>
+      <div className="app-container">
 
-      <div className="contenedor-principal">
-        <Navbar />
+        <div className="contenedor-principal">
+          <Navbar />
+        </div>
+
+        <div className="main-content-wrapper mt-5">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/incidentes" element={<Incidentes />} />
+            <Route path="/contactanos" element={<Contactanos />} />
+            <Route path="/donar" element={<Donar />} />
+            <Route path="/perfil" element={<Perfil />} />
+            <Route path="/registrarse" element={<Registrarse />} />
+            <Route path="/nosotros" element={<Nosotros />} />
+            <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
+          </Routes>
+        </div>
+
+        <div className="main-content-wrapper">
+          <Footer />
+        </div>
+
       </div>
 
-      <div className="main-content-wrapper mt-5"> 
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/incidentes" element={<Incidentes />} />
-          <Route path="/contactanos" element={<Contactanos />} />
-          <Route path="/donar" element={<Donar />} />
-          <Route path="/perfil" element={<Perfil />} />
-          <Route path="/registrarse" element={<Registrarse />} />
-          <Route path="/nosotros" element={<Nosotros />} />
-          <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
-        </Routes>
-      </div>
-
-      <div className="main-content-wrapper">
-        <Footer />
-      </div>
-
-    </div>
+    </AuthProvider>
   );
 }
 

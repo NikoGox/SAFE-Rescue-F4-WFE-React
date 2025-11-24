@@ -12,12 +12,14 @@ SAFE Rescue es una aplicación diseñada para la gestión eficiente y rápida de
 
 ## Últimos cambios
 
-### ❚❙❘ VERSIÓN 1.0.11
+### ❚❙❘ VERSIÓN 1.0.12
 
-> <br>• Se implementa y corrige la lógica para que reciba datos del backend
-> <br>• Se modifican todos los componentes para que consuman backend
-> <br>• Se modifica la página de registro
-> <br>• Se logra el inicar sesión y registrarse desde la página web interactuando con el backend
+> <br>• Se corrigen problemas para el cargado de datos de usuario
+> <br>• Se modifican el componente para cargar imagenes
+> <br>• Se modifica la página de perfiles para que muestre informacion segun el tipo de usuario
+> <br>• Se logra el subir las fotos al "servidor" (backend)
+> <br>>>> Se necesita corregir la logica de geolocalizacion
+> <br>>>> Se necesita corregir los metodos para crear incidentes (se necesita arreglar geolocalizacion primero)
 > <br>
 
 

@@ -228,6 +228,16 @@ class UseAuthService {
         return mapeo[campo] || campo;
     }
 
+    static async obtenerPerfilActual(): Promise<UserData> {
+        try {
+            const response = await perfilesClient.get<UserData>('/usuario/perfil-actual');
+            return response.data;
+        } catch (error) {
+            console.error('Error obteniendo perfil actual:', error);
+            throw error;
+        }
+    }
+
     /**
      * Determina si una operación requiere token de servicio
      */

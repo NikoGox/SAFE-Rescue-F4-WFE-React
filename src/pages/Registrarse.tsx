@@ -11,7 +11,8 @@ import {
     validateStrongPassword,
     validateConfirmPassword,
     validateNameLettersOnly,
-    validateIsRequired
+    validateIsRequired,
+    validateUsername
 } from '../utils/Validaciones';
 import type {
     UserRegistroFormType,
@@ -28,6 +29,7 @@ import { ComunaService } from '../service/services/geolocalizacion/ComunaService
 interface RegistroConDireccionManual {
     // Datos personales
     rutCompleto: string;
+    nombreUsuario: string;
     nombre: string;
     aPaterno: string;
     aMaterno: string;
@@ -73,6 +75,7 @@ const Registrarse: React.FC = () => {
 
     const [formData, setFormData] = useState<RegistroConDireccionManual>({
         rutCompleto: "",
+        nombreUsuario: "",
         nombre: "",
         aPaterno: "",
         aMaterno: "",
@@ -194,8 +197,9 @@ const Registrarse: React.FC = () => {
 
         const newErrors: Errors = {};
 
-        // ✅ USANDO TUS VALIDACIONES EXISTENTES PARA CADA CAMPO
+        //  USANDO TUS VALIDACIONES EXISTENTES PARA CADA CAMPO
         newErrors.rutCompleto = validateChileanRUT(formData.rutCompleto) || undefined;
+        newErrors.nombreUsuario = validateUsername(formData.nombreUsuario) || undefined;
         newErrors.nombre = validateNameLettersOnly(formData.nombre) || undefined;
         newErrors.aPaterno = validateNameLettersOnly(formData.aPaterno) || undefined;
         newErrors.aMaterno = validateNameLettersOnly(formData.aMaterno) || undefined;
@@ -306,10 +310,11 @@ const Registrarse: React.FC = () => {
             value = target.value;
         }
 
-        // ✅ CORREGIDO: Usamos el ID como string y manejamos cada caso específicamente
+
         switch (targetId) {
             // Campos de nivel superior
             case 'rutCompleto':
+            case 'nombreUsuario':
             case 'nombre':
             case 'aPaterno':
             case 'aMaterno':
@@ -416,10 +421,13 @@ const Registrarse: React.FC = () => {
         const targetId = id;
         let error: string | null = null;
 
-        // ✅ USANDO TUS FUNCIONES DE VALIDACIÓN EXISTENTES
+
         switch (targetId) {
             case 'rutCompleto':
                 error = validateChileanRUT(value);
+                break;
+            case 'nombreUsuario':
+                error = validateUsername(value);
                 break;
 
             case 'nombre':
@@ -563,6 +571,7 @@ const Registrarse: React.FC = () => {
         return {
             run: run,
             dv: dv,
+            nombreUsuario: formData.nombreUsuario,
             nombre: formData.nombre,
             apaterno: formData.aPaterno,
             amaterno: formData.aMaterno,
@@ -706,9 +715,24 @@ const Registrarse: React.FC = () => {
                             <div className={styles.formRow}>
                                 <div className={styles.formColFull}>
                                     <FormField
+                                        id="nombreUsuario"
+                                        dataTestId="register-nombreUsuario"
+                                        label={formatLabel("Nombre de Usuario")}
+                                        placeholder="usuario_nombre"
+                                        value={formData.nombreUsuario}
+                                        onChange={handleChange}
+                                        onBlur={handleBlur}
+                                        error={errors.nombreUsuario}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className={styles.formRow}>
+                                <div className={styles.formColFull}>
+                                    <FormField
                                         id="nombre"
                                         dataTestId="register-nombre"
-                                        label={formatLabel("Nombre Completo")}
+                                        label={formatLabel("Nombres")}
                                         placeholder="Juan"
                                         value={formData.nombre}
                                         onChange={handleChange}
@@ -841,17 +865,6 @@ const Registrarse: React.FC = () => {
                             <div className={styles.formRow}>
                                 <div className={styles.formColFull}>
                                     <div className={styles.formGroupRegistro}>
-                                        <div className={styles.checkboxContainer}>
-                                            <label>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.usarRegionPersonalizada}
-                                                    onChange={(e) => toggleModoRegion(e.target.checked)}
-                                                />
-                                                ¿Tu región no está en la lista? Escríbela
-                                            </label>
-                                        </div>
-
                                         {formData.usarRegionPersonalizada ? (
                                             <FormField
                                                 id="regionPersonalizada"
@@ -897,16 +910,6 @@ const Registrarse: React.FC = () => {
                             <div className={styles.formRow}>
                                 <div className={styles.formColFull}>
                                     <div className={styles.formGroupRegistro}>
-                                        <div className={styles.checkboxContainer}>
-                                            <label>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={formData.usarComunaPersonalizada}
-                                                    onChange={(e) => toggleModoComuna(e.target.checked)}
-                                                />
-                                                ¿Tu comuna no está en la lista? Escríbela
-                                            </label>
-                                        </div>
 
                                         {formData.usarComunaPersonalizada ? (
                                             <FormField

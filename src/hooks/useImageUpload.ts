@@ -1,64 +1,98 @@
+// src/hooks/useImageUpload.ts
 import { useState, useCallback } from 'react';
 import { FotoService } from '../service/services/registros/FotoService';
-import { useAuthContext } from '../hooks/AuthContext';
 
-interface UseImageUploadProps {
-    entityType: 'USUARIO' | 'INCIDENTE' | 'COMPANIA';
-    entityId?: number;
-    onImageUpdate?: (fotoId?: number) => void;
+interface UseImageUploadResult {
+    uploadedImageUrl: string | null;
+    isUploading: boolean;
+    uploadError: string | null;
+    handleFileUpload: (file: File) => Promise<string>;
+    clearUploadedImage: () => void;
+    handleFileDelete: (imageUrl: string) => Promise<void>;
 }
 
-export const useImageUpload = ({ entityType, entityId, onImageUpdate }: UseImageUploadProps) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [currentImage, setCurrentImage] = useState<string | undefined>();
-    const [isLoading, setIsLoading] = useState(false);
-    const { authData } = useAuthContext();
+export const useImageUpload = (): UseImageUploadResult => {
+    const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
 
-    const openModal = useCallback(() => {
-        setIsModalOpen(true);
-    }, []);
-
-    const closeModal = useCallback(() => {
-        setIsModalOpen(false);
-    }, []);
-
-    const handleImageSave = useCallback(async (newImage: string | undefined, fotoId?: number) => {
-        setIsLoading(true);
+    const handleFileUpload = useCallback(async (file: File): Promise<string> => {
+        setIsUploading(true);
+        setUploadError(null);
         try {
-            if (entityType === 'USUARIO' && authData) {
-                // Actualizar foto de perfil del usuario
-                // Aquí llamarías a tu servicio de usuarios para actualizar la foto
-                // await UsuarioService.actualizarFoto(authData.idUsuario, fotoId);
-            }
+            console.log(' Iniciando subida de imagen...', file.name);
             
-            setCurrentImage(newImage);
-            onImageUpdate?.(fotoId);
-        } catch (error) {
-            console.error('Error al actualizar imagen:', error);
-            throw error;
+            // Usar el servicio real para subir la imagen
+            const fotoCreada = await FotoService.subirFoto(file);
+            
+            // IMPORTANTE: La URL que devuelve el backend es una ruta de archivo local
+            // Necesitamos construir la URL completa para acceder a la imagen
+            const imageUrl = construirUrlCompleta(fotoCreada.url);
+            
+            console.log(' Imagen subida exitosamente:', {
+                id: fotoCreada.idFoto,
+                url: fotoCreada.url,
+                urlCompleta: imageUrl
+            });
+            
+            setUploadedImageUrl(imageUrl);
+            return imageUrl;
+            
+        } catch (error: any) {
+            console.error(" Error al subir imagen:", error);
+            const errorMessage = error.message || "Fallo la subida de imagen.";
+            setUploadError(errorMessage);
+            throw new Error(errorMessage);
         } finally {
-            setIsLoading(false);
+            setIsUploading(false);
         }
-    }, [entityType, authData, onImageUpdate]);
+    }, []);
 
-    const loadCurrentImage = useCallback(async () => {
-        if (!entityId) return;
-        
+    const handleFileDelete = useCallback(async (imageUrlToDelete: string): Promise<void> => {
+        setIsUploading(true);
+        setUploadError(null);
         try {
-            // Cargar imagen actual desde el backend si existe
-            // Esto dependerá de tu implementación específica
-        } catch (error) {
-            console.error('Error al cargar imagen:', error);
+            // TODO: Implementar eliminación en el backend cuando esté disponible
+            console.log('Eliminando imagen (pendiente implementar backend):', imageUrlToDelete);
+            
+            // Por ahora, solo limpiamos el estado local
+            if (uploadedImageUrl === imageUrlToDelete) {
+                setUploadedImageUrl(null);
+            }
+        } catch (error: any) {
+            console.error("Error al borrar imagen:", error);
+            const errorMessage = error.message || "Fallo al borrar la imagen.";
+            setUploadError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setIsUploading(false);
         }
-    }, [entityId]);
+    }, [uploadedImageUrl]);
+
+    const clearUploadedImage = useCallback(() => {
+        setUploadedImageUrl(null);
+        setUploadError(null);
+    }, []);
 
     return {
-        isModalOpen,
-        currentImage,
-        isLoading,
-        openModal,
-        closeModal,
-        handleImageSave,
-        loadCurrentImage
+        uploadedImageUrl,
+        isUploading,
+        uploadError,
+        handleFileUpload,
+        clearUploadedImage,
+        handleFileDelete,
     };
+};
+
+// Función auxiliar para construir la URL completa de la imagen
+const construirUrlCompleta = (rutaArchivo: string): string => {
+    // Si la ruta ya es una URL completa, devolverla tal cual
+    if (rutaArchivo.startsWith('http')) {
+        return rutaArchivo;
+    }
+    
+    // Si es una ruta de archivo local, construir la URL completa
+    // Ajusta esta base URL según tu configuración del backend
+    const baseUrl = 'http://localhost:8080'; // o la URL de tu API
+    return `${baseUrl}${rutaArchivo.startsWith('/') ? '' : '/'}${rutaArchivo}`;
 };

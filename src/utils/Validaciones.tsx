@@ -1,4 +1,4 @@
-import type { 
+import type {
   UserRegistroFormType,
   TipoUsuario,
   Compania,
@@ -6,11 +6,11 @@ import type {
   UserUpdateRequest
 } from '../types/PerfilesType';
 
-import type { 
+import type {
   IncidenteCreationDTO,
 } from '../types/IncidenteType';
 
-import type { 
+import type {
   DonacionCreationFrontendDTO
 } from '../types/DonacionesType';
 
@@ -477,10 +477,35 @@ export const validarMontoChileno = (monto: number): boolean => {
   return Number.isInteger(monto) && monto > 0;
 };
 
+/**
+ * Valida el nombre de usuario (alphanumérico, sin espacios, 4-20 caracteres)
+ */
+export const validateUsername = (username: string): string | null => {
+  if (!username || username.trim() === "") {
+    return "El nombre de usuario es obligatorio";
+  }
+
+  if (username.length < 4) {
+    return "El nombre de usuario debe tener al menos 4 caracteres";
+  }
+
+  if (username.length > 20) {
+    return "El nombre de usuario no puede exceder 20 caracteres";
+  }
+
+  // Solo permitir letras, números y guiones bajos
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+    return "El nombre de usuario solo puede contener letras, números y guiones bajos (_)";
+  }
+
+  return null;
+};
+
 // Exportar todo como objeto para fácil importación
 export const Validaciones = {
   // Mantenidas
   validateChileanRUT,
+  validateUsername,
   formatRut,
   cleanPhoneNumber,
   validatePhoneNumber,
@@ -493,7 +518,7 @@ export const Validaciones = {
   validateConfirmPassword,
   validateUrl,
   validateDate,
-  
+
   // Nuevas específicas del backend
   validarRegistroCompleto,
   validarIncidente,

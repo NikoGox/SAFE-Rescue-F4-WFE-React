@@ -9,8 +9,6 @@ import {
 } from '../../clients/GeolocalizacionClient.tsx';
 import { AxiosError } from 'axios';
 
-// ❗ IMPORTANTE: El controller usa "/coordenadas" pero el cliente tiene "/localizaciones"
-// Necesitamos verificar cuál es el endpoint correcto
 const COORDENADAS_RESOURCE: GeolocalizacionEndpointsType = GeolocalizacionEndpoints.COORDENADAS;
 
 export const CoordenadasService = {

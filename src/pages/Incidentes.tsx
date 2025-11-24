@@ -1,8 +1,7 @@
 // src/pages/Incidentes.tsx
 import React, { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
 import styles from './Incidentes.module.css';
+
 import DefaultIncidente from "../assets/default_incident.png";
 import Incendio from "../assets/incendio.png";
 import Derrumbe from "../assets/derrumbe.png";
@@ -14,26 +13,51 @@ import { RiEditFill } from "react-icons/ri";
 import { BsTrashFill } from "react-icons/bs";
 import { TiArrowSortedUp } from "react-icons/ti";
 import { TiArrowSortedDown } from "react-icons/ti";
-import { TbRefresh } from "react-icons/tb";
+import { TbRefresh, TbMapPin } from "react-icons/tb";
 import { TiPlus } from "react-icons/ti";
 
+import { useImageUpload } from "../hooks/useImageUpload";
 import ImageUploadModal from "../components/ImageUploadModal";
+import IncidenteService from "../service/services/incidentes/IncidenteService";
+import TipoIncidenteService from "../service/services/incidentes/TipoIncidenteService";
+import { IncidenteGeolocalizacionService } from "../service/services/incidentes/IncidenteGeolocalizacionService";
+import { ComunaService } from "../service/services/geolocalizacion/ComunaService";
+import { RegionService } from "../service/services/geolocalizacion/RegionService";
+import { DireccionService } from "../service/services/geolocalizacion/DireccionService";
+import { CoordenadasService } from "../service/services/geolocalizacion/CoordenadaService";
 
-import type { Incident , IncidentForm , EditForm   } from "../types/IncidenteType";
+import type {
+    IncidenteFrontendConGeolocalizacion,
+    IncidenteCreationFrontendConGeolocalizacion,
+    IncidenteUpdateFrontend,
+    EditForm
+} from "../types/IncidenteType";
+import type { Comuna, Region, Direccion } from "../types/GeolocalizacionType";
+
+interface TipoIncidenteOption {
+    idTipoIncidente: number;
+    nombre: string;
+}
 
 const Incidentes: React.FC = () => {
-    const [incidents, setIncidents] = useState<Incident[]>([]);
+    const [incidents, setIncidents] = useState<IncidenteFrontendConGeolocalizacion[]>([]);
+    const [tiposIncidente, setTiposIncidente] = useState<TipoIncidenteOption[]>([]);
+    const [comunas, setComunas] = useState<Comuna[]>([]);
+    const [regiones, setRegiones] = useState<Region[]>([]);
     const [showForm, setShowForm] = useState<boolean>(false);
     const [expandedIncident, setExpandedIncident] = useState<number | null>(null);
     const [editingIncident, setEditingIncident] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoadingTipos, setIsLoadingTipos] = useState<boolean>(false);
+    const [isLoadingGeolocalizacion, setIsLoadingGeolocalizacion] = useState<boolean>(false);
+    const [isLoadingGeografia, setIsLoadingGeografia] = useState(true);
 
     const [isImageModalOpen, setIsImageModalOpen] = useState<boolean>(false);
     const [currentImageUrl, setCurrentImageUrl] = useState<string>("");
     const [imageUploadContext, setImageUploadContext] = useState<'new' | 'edit'>('new');
-    const [tempImageUrl, setTempImageUrl] = useState<string>("");
 
     const [editForm, setEditForm] = useState<EditForm>({
+        title: "",
         description: "",
         location: "",
         type: "",
@@ -41,71 +65,207 @@ const Incidentes: React.FC = () => {
         imageUrl: ""
     });
 
-    const [newIncident, setNewIncident] = useState<IncidentForm>({
+    const [newIncident, setNewIncident] = useState({
+        title: "",
         type: "",
         description: "",
-        location: "",
+        calle: "",
+        numero: "",
+        villa: "",
+        complemento: "",
+        idComuna: "",
         imageUrl: ""
     });
 
-    const initialIncidentsData: Incident[] = [
-        { id: 1, type: 'Incendio', description: 'Incendio en una casa', location: 'Renca, El Montijo 2212', dateTime: '03/09/2024 22:50', status: 'En progreso', imageUrl: Incendio },
-        { id: 2, type: 'Explosión', description: 'Explosión de transformador', location: 'Renca, El Montijo 2212', dateTime: '03/09/2024 14:20', status: 'Cerrado', imageUrl: DefaultIncidente },
-        { id: 3, type: 'Accidente', description: 'Atropellamiento', location: 'Av. Vicuña Mackenna 6100', dateTime: '03/09/2024 13:15', status: 'Cerrado', imageUrl: Accidente },
-        { id: 4, type: 'Accidente', description: 'Colisión múltiple en vía', location: 'Autopista Central, Santiago', dateTime: '03/09/2024 12:50', status: 'En progreso', imageUrl: Accidente },
-        { id: 5, type: 'Fuga de gas', description: 'Fuga en cocina residencial', location: 'Av. Providencia 1234, Providencia', dateTime: '03/09/2024 12:25', status: 'Localizado', imageUrl: FugaGas },
-        { id: 6, type: 'Incendio', description: 'Fuego en almacén industrial', location: 'Av. Santa Rosa 1300, Santiago', dateTime: '03/09/2024 12:00', status: 'Cerrado', imageUrl: Incendio },
-        { id: 7, type: 'Fuga de gas', description: 'Fuga en instituto', location: 'Huechuraba, la calle 2212', dateTime: '03/09/2024 11:50', status: 'Cerrado', imageUrl: FugaGas },
-        { id: 8, type: 'Accidente', description: 'Colisión múltiple en vía', location: 'Av. Américo Vespucio, Las Condes', dateTime: '03/09/2024 09:30', status: 'Cerrado', imageUrl: Accidente },
-        { id: 9, type: 'Derrumbe', description: 'Colapso de estructura', location: 'Av. Santa Rosa 1300, Santiago', dateTime: '03/09/2024 09:50', status: 'En progreso', imageUrl: Derrumbe },
-        { id: 10, type: 'Incendio', description: 'Incendio en una casa', location: 'Av. Macul 4700, Macul', dateTime: '03/09/2024 09:50', status: 'En progreso', imageUrl: Incendio },
-        { id: 11, type: 'Derrame químico', description: 'Derrame de líquidos tóxicos', location: 'Av. Américo Vespucio Las Condes', dateTime: '03/09/2024 09:22', status: 'En progreso', imageUrl: DerrameQuimico },
-        { id: 12, type: 'Incendio', description: 'Incendio forestal', location: 'Av. La Florida 9600, La Florida', dateTime: '03/09/2024 08:57', status: 'Cerrado', imageUrl: Incendio },
-        { id: 13, type: 'Accidente', description: 'Atropellamiento', location: 'Av. Quilín 4500, Ñuñoa', dateTime: '03/09/2024 08:55', status: 'Cerrado', imageUrl: Accidente },
-        { id: 14, type: 'Explosión', description: 'Explosión de horno industrial', location: 'Av. Manquehue Norte 1400, Santiago', dateTime: '03/09/2024 08:22', status: 'Cerrado', imageUrl: DefaultIncidente },
-        { id: 15, type: 'Desplome', description: 'Árbol caído', location: 'Av. Irarrazaval 5200, Ñuñoa', dateTime: '03/09/2024 06:52', status: 'En progreso', imageUrl: DefaultIncidente },
-        { id: 16, type: 'Explosión', description: 'Explosión de tuberías', location: 'Av. Los Leones 2200, Providencia', dateTime: '03/09/2024 05:40', status: 'Cerrado', imageUrl: DefaultIncidente },
-    ];
+    const {
+        uploadedImageUrl,
+        isUploading,
+        uploadError,
+        handleFileUpload,
+        clearUploadedImage,
+        handleFileDelete
+    } = useImageUpload();
 
-    useEffect(() => {
-        loadIncidents();
+    const loadDatosGeograficos = useCallback(async (): Promise<void> => {
+        setIsLoadingGeolocalizacion(true);
+        try {
+            console.log(' Cargando datos geográficos...');
+
+            const [comunasData, regionesData] = await Promise.all([
+                ComunaService.getAll().catch(error => {
+                    console.error(' Error cargando comunas:', error);
+                    // Datos de respaldo como en Registrarse.tsx
+                    return [
+                        { idComuna: 1, nombre: 'Santiago', idRegion: 1 },
+                        { idComuna: 2, nombre: 'Providencia', idRegion: 1 },
+                        { idComuna: 3, nombre: 'Las Condes', idRegion: 1 },
+                        { idComuna: 4, nombre: 'Ñuñoa', idRegion: 1 }
+                    ];
+                }),
+                RegionService.getAll().catch(error => {
+                    console.error(' Error cargando regiones:', error);
+                    // Datos de respaldo
+                    return [
+                        { idRegion: 1, nombre: 'Metropolitana de Santiago', identificacion: 'RM' }
+                    ];
+                })
+            ]);
+
+            console.log(' Comunas cargadas:', comunasData.length);
+            console.log(' Regiones cargadas:', regionesData.length);
+
+            setComunas(comunasData);
+            setRegiones(regionesData);
+
+        } catch (error) {
+            console.error(' Error crítico al cargar datos geográficos:', error);
+            // Datos de ejemplo de respaldo (igual que en Registrarse.tsx)
+            setComunas([
+                { idComuna: 1, nombre: 'Santiago', idRegion: 1 },
+                { idComuna: 2, nombre: 'Providencia', idRegion: 1 },
+                { idComuna: 3, nombre: 'Las Condes', idRegion: 1 },
+                { idComuna: 4, nombre: 'Ñuñoa', idRegion: 1 }
+            ]);
+            setRegiones([
+                { idRegion: 1, nombre: 'Metropolitana de Santiago', identificacion: 'RM' }
+            ]);
+        } finally {
+            setIsLoadingGeolocalizacion(false);
+        }
+    }, []);
+
+    // Cargar tipos de incidente
+    const loadTiposIncidente = useCallback(async (): Promise<void> => {
+        setIsLoadingTipos(true);
+        try {
+            const tipos = await TipoIncidenteService.listarTiposIncidente();
+            setTiposIncidente(tipos);
+        } catch (error) {
+            console.error('Error al cargar tipos de incidente:', error);
+            setTiposIncidente([
+                { idTipoIncidente: 1, nombre: 'Incendio' },
+                { idTipoIncidente: 2, nombre: 'Explosión' },
+                { idTipoIncidente: 3, nombre: 'Accidente' },
+                { idTipoIncidente: 4, nombre: 'Fuga de gas' },
+                { idTipoIncidente: 5, nombre: 'Derrumbe' },
+                { idTipoIncidente: 6, nombre: 'Derrame químico' },
+                { idTipoIncidente: 7, nombre: 'Desplome' }
+            ]);
+        } finally {
+            setIsLoadingTipos(false);
+        }
     }, []);
 
     const loadIncidents = useCallback(async (): Promise<void> => {
         setIsLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 500));
+            console.log(' Cargando incidentes...');
 
-            const storedIncidents = localStorage.getItem('incidentes');
-            if (storedIncidents) {
-                const parsedIncidents: Incident[] = JSON.parse(storedIncidents);
-                const sortedIncidents = parsedIncidents.sort((a, b) => b.id - a.id);
-                setIncidents(sortedIncidents);
-            } else {
-                saveIncidentsToLocalStorage(initialIncidentsData);
-                const sortedIncidents = initialIncidentsData.sort((a, b) => b.id - a.id);
-                setIncidents(sortedIncidents);
+            const incidentesBackend = await IncidenteService.listarIncidentes();
+            console.log(' Incidentes cargados del backend:', incidentesBackend);
+
+            if (!incidentesBackend || incidentesBackend.length === 0) {
+                console.log(' No hay incidentes para mostrar');
+                setIncidents([]);
+                return;
             }
+
+            // Enriquecer incidentes de forma más robusta
+            const incidentesEnriquecidos = await Promise.all(
+                incidentesBackend.map(async (incidente) => {
+                    try {
+                        let direccionCompletaIncidente = null;
+
+                        // Obtener información de dirección (con manejo de errores mejorado)
+                        if (incidente.idDireccion && incidente.idDireccion > 0) {
+                            try {
+                                direccionCompletaIncidente = await IncidenteGeolocalizacionService.obtenerDireccionCompleta(incidente.idDireccion);
+                            } catch (error) {
+                                console.error(` Error obteniendo dirección ${incidente.idDireccion}:`, error);
+                                // Continuar sin información de dirección
+                            }
+                        }
+
+                        return {
+                            idIncidente: incidente.idIncidente,
+                            titulo: incidente.titulo,
+                            detalle: incidente.detalle,
+                            fechaRegistro: incidente.fechaRegistro,
+                            tipoIncidente: incidente.tipoIncidente,
+                            estadoIncidente: getEstadoFromId(incidente.idEstadoIncidente),
+                            imagenUrl: getDefaultImageByType(incidente.tipoIncidente.nombre),
+                            direccionCompletaIncidente,
+                            idEstadoIncidente: incidente.idEstadoIncidente
+                        };
+                    } catch (error) {
+                        console.error(` Error procesando incidente ${incidente.idIncidente}:`, error);
+                        // Retornar incidente básico
+                        return {
+                            idIncidente: incidente.idIncidente,
+                            titulo: incidente.titulo,
+                            detalle: incidente.detalle,
+                            fechaRegistro: incidente.fechaRegistro,
+                            tipoIncidente: incidente.tipoIncidente,
+                            estadoIncidente: getEstadoFromId(incidente.idEstadoIncidente),
+                            imagenUrl: getDefaultImageByType(incidente.tipoIncidente.nombre),
+                            direccionCompletaIncidente: null,
+                            idEstadoIncidente: incidente.idEstadoIncidente
+                        };
+                    }
+                })
+            );
+
+            const sortedIncidents = incidentesEnriquecidos.sort((a, b) => b.idIncidente - a.idIncidente);
+            setIncidents(sortedIncidents);
+            console.log(' Incidentes cargados exitosamente:', sortedIncidents.length);
+
         } catch (error) {
             console.error(' Error al cargar incidentes:', error);
+            setIncidents([]);
         } finally {
             setIsLoading(false);
         }
     }, []);
 
-    const saveIncidentsToLocalStorage = (data: Incident[]): void => {
-        try {
-            localStorage.setItem('incidentes', JSON.stringify(data));
-        } catch (error) {
-            console.error('Error al guardar incidentes:', error);
-        }
+    // Función auxiliar para obtener estado por ID
+    const getEstadoFromId = (idEstado: number): string => {
+        const estados = {
+            1: 'En progreso',
+            2: 'Localizado',
+            3: 'Cerrado'
+        };
+        return estados[idEstado as keyof typeof estados] || 'En progreso';
     };
 
-    const generateIncidentId = (): number => {
-        const incidents = JSON.parse(localStorage.getItem('incidentes') || '[]');
-        const maxId = incidents.reduce((max: number, inc: Incident) => Math.max(max, inc.id), 0);
-        return maxId + 1;
+    // Función auxiliar para obtener imagen por tipo
+    const getDefaultImageByType = (tipo: string): string => {
+        const imageMap: { [key: string]: string } = {
+            'Incendio': Incendio,
+            'Explosión': DefaultIncidente,
+            'Accidente': Accidente,
+            'Fuga de gas': FugaGas,
+            'Derrumbe': Derrumbe,
+            'Derrame químico': DerrameQuimico,
+            'Desplome': DefaultIncidente
+        };
+        return imageMap[tipo] || DefaultIncidente;
     };
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                await Promise.all([
+                    loadDatosGeograficos(),
+                    loadTiposIncidente(),
+                    loadIncidents()
+                ]);
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+            }
+        };
+
+        loadData();
+    }, [loadDatosGeograficos, loadTiposIncidente, loadIncidents]);
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -120,17 +280,20 @@ const Incidentes: React.FC = () => {
         }
     };
 
-    const handleImageSave = (newImage: string | undefined): void => {
-        if (imageUploadContext === 'new') {
-            setNewIncident(prev => ({ 
-                ...prev, 
-                imageUrl: newImage || "" 
-            }));
-        } else {
-            setEditForm(prev => ({ 
-                ...prev, 
-                imageUrl: newImage || "" 
-            }));
+    const handleImageSave = async (): Promise<void> => {
+        // Aquí deberías guardar la uploadedImageUrl en el estado correspondiente
+        if (uploadedImageUrl) {
+            if (imageUploadContext === 'new') {
+                setNewIncident(prev => ({
+                    ...prev,
+                    imageUrl: uploadedImageUrl
+                }));
+            } else {
+                setEditForm(prev => ({
+                    ...prev,
+                    imageUrl: uploadedImageUrl
+                }));
+            }
         }
         setIsImageModalOpen(false);
     };
@@ -141,124 +304,276 @@ const Incidentes: React.FC = () => {
         setIsImageModalOpen(true);
     };
 
-    const validateForm = (data: IncidentForm): boolean => {
-        if (!data.type || !data.description || !data.location) {
+    const validateForm = (): boolean => {
+        if (!newIncident.title || !newIncident.type || !newIncident.description || !newIncident.calle || !newIncident.numero || !newIncident.idComuna) {
             window.alert('Por favor, complete todos los campos requeridos');
             return false;
         }
 
-        if (data.type.length < 3 || data.description.length < 10 || data.location.length < 5) {
-            window.alert('Por favor, proporcione información más detallada');
+        if (newIncident.title.length < 5) {
+            window.alert('Por favor, ingrese un título más descriptivo (mínimo 5 caracteres)');
             return false;
+        }
+
+        if (newIncident.description.length < 10) {
+            window.alert('Por favor, proporcione una descripción más detallada');
+            return false;
+        }
+
+        // Validar que la comuna sea de la región metropolitana
+        const idComuna = parseInt(newIncident.idComuna);
+        const comunaSeleccionada = comunas.find(c => c.idComuna === idComuna);
+        if (comunaSeleccionada) {
+            const regionComuna = regiones.find(r => r.idRegion === comunaSeleccionada.idRegion);
+            const esRegionMetropolitana = regionComuna?.identificacion === 'RM' || regionComuna?.nombre.includes('Metropolitana');
+
+            if (!esRegionMetropolitana) {
+                window.alert('Por el momento solo se pueden reportar incidentes en la Región Metropolitana');
+                return false;
+            }
         }
 
         return true;
     };
 
-    const handleSubmitIncident = (e: React.FormEvent): void => {
+    const handleSubmitIncident = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
 
-        if (!validateForm(newIncident)) {
+        if (!validateForm()) {
             return;
         }
 
-        const now = new Date();
-        const dateTime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        const idComuna = parseInt(newIncident.idComuna);
+        if (isNaN(idComuna) || idComuna <= 0) {
+            alert('Por favor, seleccione una comuna válida');
+            return;
+        }
 
-        const incident: Incident = {
-            id: generateIncidentId(),
-            type: newIncident.type.trim(),
-            description: newIncident.description.trim(),
-            location: newIncident.location.trim(),
-            dateTime,
-            status: 'En progreso',
-            imageUrl: newIncident.imageUrl.trim() || DefaultIncidente
-        };
+        setIsLoading(true);
+        try {
+            // PRIMERO crear la dirección y obtener el ID
+            const idDireccion = await crearDireccionYObtenerId({
+                calle: newIncident.calle,
+                numero: newIncident.numero,
+                villa: newIncident.villa || undefined,
+                complemento: newIncident.complemento || undefined,
+                idComuna: idComuna
+            });
 
-        const updatedIncidents = [...incidents, incident];
-        const sortedIncidents = updatedIncidents.sort((a, b) => b.id - a.id);
+            // Obtener información de la comuna para persistencia visual
+            const comunaSeleccionada = comunas.find(c => c.idComuna === idComuna);
+            const regionSeleccionada = regiones.find(r => r.idRegion === comunaSeleccionada?.idRegion);
 
-        setIncidents(sortedIncidents);
-        saveIncidentsToLocalStorage(updatedIncidents);
+            // CORREGIR: Estructura completa del incidente según el backend
+            const incidenteData = {
+                titulo: newIncident.title,
+                detalle: newIncident.description,
+                fechaRegistro: new Date().toISOString(), // Fecha actual
+                region: regionSeleccionada?.nombre || '',
+                comuna: comunaSeleccionada?.nombre || '',
+                direccion: `${newIncident.calle} ${newIncident.numero}`,
+                tipoIncidenteId: parseInt(newIncident.type),
+                idDireccion: idDireccion,
+                idCiudadano: 1,
+                idEstadoIncidente: 1,
+                idUsuarioAsignado: null,
+                imagenUrl: newIncident.imageUrl || DefaultIncidente
+            };
 
-        setShowForm(false);
-        setNewIncident({
-            type: "",
-            description: "",
-            location: "",
-            imageUrl: ""
-        });
+            console.log('Enviando incidente al backend:', incidenteData);
+            await IncidenteService.crearIncidente(incidenteData);
 
-        alert("¡Incidente añadido correctamente!");
-    };
+            await loadIncidents();
 
-    const handleDeleteIncident = (id: number): void => {
-        if (window.confirm("¿Estás seguro de que quieres eliminar este incidente?")) {
-            const updatedIncidents = incidents.filter(incident => incident.id !== id);
-            setIncidents(updatedIncidents);
-            saveIncidentsToLocalStorage(updatedIncidents);
-            setExpandedIncident(null);
-            setEditingIncident(null);
+            setShowForm(false);
+            setNewIncident({
+                title: "",
+                type: "",
+                description: "",
+                calle: "",
+                numero: "",
+                villa: "",
+                complemento: "",
+                idComuna: "",
+                imageUrl: ""
+            });
 
-            // Feedback al usuario
-            alert("🗑️ Incidente eliminado correctamente");
+            alert("¡Incidente añadido correctamente!");
+        } catch (error) {
+            console.error('Error al crear incidente:', error);
+            alert('Error al crear incidente. Por favor, intenta nuevamente.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    /**
-     * Maneja la edición de un incidente
-     */
+    useEffect(() => {
+        console.log(' Estado actual de comunas:', comunas);
+        console.log(' Estado actual de regiones:', regiones);
+        console.log(' Comunas de RM:', getComunasRM());
+    }, [comunas, regiones]);
+
+    const crearDireccionYObtenerId = async (direccionData: {
+        calle: string;
+        numero: string;
+        villa?: string;
+        complemento?: string;
+        idComuna: number;
+        coordenadas?: number;
+    }): Promise<number> => {
+        try {
+            console.log('Datos de dirección a crear:', direccionData);
+            console.log('ID Comuna recibido:', direccionData.idComuna);
+            console.log('Tipo de ID Comuna:', typeof direccionData.idComuna);
+
+            // Verificar que la comuna existe
+            const comunaExiste = comunas.find(c => c.idComuna === direccionData.idComuna);
+            console.log('Comuna encontrada:', comunaExiste);
+
+            if (!comunaExiste) {
+                throw new Error(`Comuna con ID ${direccionData.idComuna} no existe en la lista cargada`);
+            }
+
+            // Crear el objeto dirección
+            const datosDireccion: Omit<Direccion, 'idDireccion'> = {
+                calle: direccionData.calle,
+                numero: direccionData.numero,
+                villa: direccionData.villa || undefined,
+                complemento: direccionData.complemento || undefined,
+                idComuna: direccionData.idComuna,
+                idCoordenadas: direccionData.coordenadas || undefined
+            };
+
+            console.log('Enviando al servicio DireccionService.create:', datosDireccion);
+            const mensajeRespuesta = await DireccionService.create(datosDireccion);
+            console.log('Dirección creada exitosamente:', mensajeRespuesta);
+
+            // Buscar la dirección recién creada
+            const direcciones = await DireccionService.getAll();
+            const direccionCreada = direcciones.find(dir =>
+                dir.calle === direccionData.calle &&
+                dir.numero === direccionData.numero &&
+                dir.idComuna === direccionData.idComuna
+            );
+
+            if (direccionCreada && direccionCreada.idDireccion) {
+                console.log('ID de dirección obtenido:', direccionCreada.idDireccion);
+                return direccionCreada.idDireccion;
+            } else {
+                throw new Error('No se pudo obtener el ID de la dirección creada');
+            }
+        } catch (error) {
+            console.error('Error creando dirección:', error);
+            throw new Error('No se pudo crear la dirección para el incidente');
+        }
+    };
+
+    // Función auxiliar para obtener comunas de la región metropolitana
+    const getComunasRM = useCallback((): Comuna[] => {
+        return comunas.filter(comuna => {
+            const region = regiones.find(r => r.idRegion === comuna.idRegion);
+            return region?.identificacion === 'RM' ||
+                region?.nombre.includes('Metropolitana') ||
+                region?.nombre.includes('Santiago');
+        });
+    }, [comunas, regiones]);
+
+    const handleDeleteIncident = async (id: number): Promise<void> => {
+        if (window.confirm("¿Estás seguro de que quieres eliminar este incidente?")) {
+            setIsLoading(true);
+            try {
+                await IncidenteService.eliminarIncidente(id);
+                await loadIncidents();
+                setExpandedIncident(null);
+                setEditingIncident(null);
+                alert("🗑️ Incidente eliminado correctamente");
+            } catch (error) {
+                console.error('Error al eliminar incidente:', error);
+                alert('Error al eliminar incidente. Por favor, intenta nuevamente.');
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    };
+
     const handleEditIncident = (id: number): void => {
-        const incident = incidents.find(inc => inc.id === id);
+        const incident = incidents.find(inc => inc.idIncidente === id);
         if (incident) {
+            // Convertir ID de estado a nombre para el formulario
+            const getEstadoNombre = (idEstado: number): string => {
+                const estados = {
+                    1: 'En progreso',
+                    2: 'Localizado',
+                    3: 'Cerrado'
+                };
+                return estados[idEstado as keyof typeof estados] || 'En progreso';
+            };
+
             setEditingIncident(id);
             setEditForm({
-                description: incident.description,
-                location: incident.location,
-                type: incident.type,
-                status: incident.status,
-                imageUrl: incident.imageUrl
+                title: incident.titulo,
+                description: incident.detalle,
+                location: incident.direccionCompletaIncidente
+                    ? IncidenteGeolocalizacionService.formatearDireccion(incident.direccionCompletaIncidente)
+                    : "",
+                type: incident.tipoIncidente.idTipoIncidente.toString(),
+                status: getEstadoNombre(incident.idEstadoIncidente || 1), // ← CORREGIDO
+                imageUrl: incident.imagenUrl || DefaultIncidente
             });
             setExpandedIncident(id);
         }
     };
 
-    /**
-     * Guarda los cambios de un incidente editado
-     */
-    const handleSaveIncident = (id: number): void => {
-        if (!validateForm(editForm)) {
+
+    const handleSaveIncident = async (id: number): Promise<void> => {
+        if (!editForm.description || !editForm.type || !editForm.title) {
+            alert('Por favor, complete los campos requeridos');
             return;
         }
 
-        const updatedIncidents = incidents.map(incident => {
-            if (incident.id === id) {
-                return {
-                    ...incident,
-                    description: editForm.description.trim(),
-                    location: editForm.location.trim(),
-                    type: editForm.type.trim(),
-                    status: editForm.status.trim(),
-                    imageUrl: editForm.imageUrl.trim() || incident.imageUrl
+        setIsLoading(true);
+        try {
+            // Convertir estado a ID numérico
+            const getEstadoId = (estado: string): number => {
+                const estadosMap: { [key: string]: number } = {
+                    'En progreso': 1,
+                    'Localizado': 2,
+                    'Cerrado': 3
                 };
-            }
-            return incident;
-        });
+                return estadosMap[estado] || 1;
+            };
 
-        setIncidents(updatedIncidents);
-        saveIncidentsToLocalStorage(updatedIncidents);
-        setEditingIncident(null);
-        setExpandedIncident(null);
+            const incidenteData: IncidenteUpdateFrontend = {
+                titulo: editForm.title,
+                detalle: editForm.description,
+                tipoIncidenteId: parseInt(editForm.type),
+                idEstadoIncidente: getEstadoId(editForm.status), // ← CORREGIDO: usar ID numérico
+                imagenUrl: editForm.imageUrl
+            };
 
-        setEditForm({
-            description: "",
-            location: "",
-            type: "",
-            status: "",
-            imageUrl: ""
-        });
+            console.log('Actualizando incidente con datos:', incidenteData);
+            await IncidenteService.actualizarIncidente(id, incidenteData as any);
 
-        alert("Incidente actualizado correctamente");
+            await loadIncidents();
+            setEditingIncident(null);
+            setExpandedIncident(null);
+
+            setEditForm({
+                title: "",
+                description: "",
+                location: "",
+                type: "",
+                status: "",
+                imageUrl: ""
+            });
+
+            alert("Incidente actualizado correctamente");
+        } catch (error) {
+            console.error('Error al actualizar incidente:', error);
+            alert('Error al actualizar incidente. Por favor, intenta nuevamente.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const getStatusClass = (status: string): string => {
@@ -267,7 +582,6 @@ const Incidentes: React.FC = () => {
             'localizado': 'estado-localizado',
             'cerrado': 'estado-cerrado'
         };
-
         return statusMap[status.toLowerCase()] || 'estado-default';
     };
 
@@ -281,17 +595,33 @@ const Incidentes: React.FC = () => {
             'derrame químico': '🧪',
             'desplome': '🌳'
         };
-
         return iconMap[type.toLowerCase()] || '📋';
+    };
+
+    const formatearUbicacionTabla = (incident: IncidenteFrontendConGeolocalizacion): string => {
+        if (!incident.direccionCompletaIncidente) {
+            return 'Ubicación no disponible';
+        }
+
+        const { calle, numero, comuna } = incident.direccionCompletaIncidente;
+
+        // Manejar casos donde la comuna no está disponible
+        const nombreComuna = comuna?.nombre || 'Comuna no disponible';
+
+        return `${calle} ${numero}, ${nombreComuna}`;
     };
 
     if (isLoading) {
         return (
             <div className={styles.cuerpo}>
-                <div className={styles['fondo-navbar']}></div>
                 <div className={styles['loading-container']}>
                     <div className={styles['loading-spinner']}></div>
-                    <p>Cargando incidentes...</p>
+                    <p>
+                        {isLoadingGeolocalizacion || isLoadingTipos
+                            ? 'Cargando datos del sistema...'
+                            : 'Cargando incidentes...'
+                        }
+                    </p>
                 </div>
             </div>
         );
@@ -314,7 +644,7 @@ const Incidentes: React.FC = () => {
                         data-testid="btn-nuevo-incidente"
                         className={`${styles['btn-primario']} ${styles['btn-grande']}`}
                         onClick={() => setShowForm(true)}
-                        disabled={showForm}
+                        disabled={showForm || isLoadingTipos || isLoadingGeolocalizacion}
                     >
                         Reportar Nuevo Incidente<TiPlus />
                     </button>
@@ -331,8 +661,13 @@ const Incidentes: React.FC = () => {
                                         setShowForm(false);
                                         setNewIncident({
                                             type: "",
+                                            title: "",
                                             description: "",
-                                            location: "",
+                                            calle: "",
+                                            numero: "",
+                                            villa: "",
+                                            complemento: "",
+                                            idComuna: "",
                                             imageUrl: ""
                                         });
                                     }}
@@ -343,41 +678,152 @@ const Incidentes: React.FC = () => {
 
                             <form role="form" onSubmit={handleSubmitIncident} className={styles['formulario-incidente']}>
                                 <div className={styles['grid-form']}>
-                                    <div className={styles['form-group']}>
-                                        <label htmlFor="type" className={styles['form-label']}>
-                                            Tipo de Incidente
+
+                                    {/* NUEVO CAMPO TÍTULO */}
+                                    <div className={`${styles['form-group']} ${styles['full-width']}`}>
+                                        <label htmlFor="title" className={styles['form-label']}>
+                                            Título del Incidente *
                                         </label>
                                         <input
                                             type="text"
+                                            id="title"
+                                            value={newIncident.title}
+                                            onChange={(e) => handleInputChange(e, 'new')}
+                                            placeholder="Ej: Incendio en edificio residencial"
+                                            className={styles['form-input']}
+                                            required
+                                            minLength={5}
+                                        />
+                                        <small className={styles['form-help']}>
+                                            Describe brevemente el incidente (mínimo 5 caracteres)
+                                        </small>
+                                    </div>
+
+                                    <div className={styles['form-group']}>
+                                        <label htmlFor="type" className={styles['form-label']}>
+                                            Tipo de Incidente *
+                                        </label>
+                                        <select
                                             id="type"
-                                            datatype="'incident-type'"
                                             value={newIncident.type}
                                             onChange={(e) => handleInputChange(e, 'new')}
-                                            placeholder="Ej: Incendio, Accidente, Fuga de gas..."
+                                            className={styles['form-input']}
+                                            required
+                                            disabled={isLoadingTipos}
+                                        >
+                                            <option value="">Seleccione un tipo</option>
+                                            {tiposIncidente.map(tipo => (
+                                                <option key={tipo.idTipoIncidente} value={tipo.idTipoIncidente}>
+                                                    {tipo.nombre}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {isLoadingTipos && <small>Cargando tipos...</small>}
+                                    </div>
+
+                                    <div className={styles['form-group']}>
+                                        <label htmlFor="calle" className={styles['form-label']}>
+                                            Calle *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="calle"
+                                            value={newIncident.calle}
+                                            onChange={(e) => handleInputChange(e, 'new')}
+                                            placeholder="Nombre de la calle"
                                             className={styles['form-input']}
                                             required
                                         />
                                     </div>
 
                                     <div className={styles['form-group']}>
-                                        <label htmlFor="location" className={styles['form-label']}>
-                                            Ubicación
+                                        <label htmlFor="numero" className={styles['form-label']}>
+                                            Número *
                                         </label>
                                         <input
                                             type="text"
-                                            data-testid="incident-location" 
-                                            id="location"
-                                            value={newIncident.location}
+                                            id="numero"
+                                            value={newIncident.numero}
                                             onChange={(e) => handleInputChange(e, 'new')}
-                                            placeholder="Dirección exacta o referencia..."
+                                            placeholder="Número"
                                             className={styles['form-input']}
                                             required
                                         />
+                                    </div>
+
+                                    <div className={styles['form-group']}>
+                                        <label htmlFor="villa" className={styles['form-label']}>
+                                            Villa/Población
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="villa"
+                                            value={newIncident.villa}
+                                            onChange={(e) => handleInputChange(e, 'new')}
+                                            placeholder="Opcional"
+                                            className={styles['form-input']}
+                                        />
+                                    </div>
+
+                                    <div className={styles['form-group']}>
+                                        <label htmlFor="complemento" className={styles['form-label']}>
+                                            Complemento
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="complemento"
+                                            value={newIncident.complemento}
+                                            onChange={(e) => handleInputChange(e, 'new')}
+                                            placeholder="Departamento, block, etc."
+                                            className={styles['form-input']}
+                                        />
+                                    </div>
+
+                                    <div className={styles['form-group']}>
+                                        <label htmlFor="idComuna" className={styles['form-label']}>
+                                            Comuna *
+                                        </label>
+                                        <select
+                                            id="idComuna"
+                                            value={newIncident.idComuna}
+                                            onChange={(e) => handleInputChange(e, 'new')}
+                                            className={styles['form-input']}
+                                            required
+                                            disabled={isLoadingGeolocalizacion}
+                                        >
+                                            <option value="">Seleccione una comuna</option>
+                                            {isLoadingGeolocalizacion ? (
+                                                <option disabled>Cargando comunas...</option>
+                                            ) : comunas.length > 0 ? (
+                                                getComunasRM().map(comuna => (
+                                                    <option key={comuna.idComuna} value={comuna.idComuna}>
+                                                        {comuna.nombre}
+                                                    </option>
+                                                ))
+                                            ) : (
+                                                <>
+                                                    <option value="1">Santiago</option>
+                                                    <option value="2">Providencia</option>
+                                                    <option value="3">Las Condes</option>
+                                                    <option value="4">Ñuñoa</option>
+                                                </>
+                                            )}
+                                        </select>
+
+                                        {isLoadingGeolocalizacion && (
+                                            <small className={styles['loading-text']}>Cargando comunas...</small>
+                                        )}
+
+                                        {comunas.length === 0 && !isLoadingGeolocalizacion && (
+                                            <small className={styles['warning-text']}>
+                                                No se pudieron cargar las comunas. Usando lista local.
+                                            </small>
+                                        )}
                                     </div>
 
                                     <div className={`${styles['form-group']} ${styles['full-width']}`}>
                                         <label htmlFor="description" className={styles['form-label']}>
-                                            Descripción Detallada
+                                            Descripción Detallada *
                                         </label>
                                         <textarea
                                             id="description"
@@ -398,9 +844,9 @@ const Incidentes: React.FC = () => {
                                         <div className={styles['image-upload-section']}>
                                             {newIncident.imageUrl ? (
                                                 <div className={styles['image-preview-container']}>
-                                                    <img 
-                                                        src={newIncident.imageUrl} 
-                                                        alt="Vista previa" 
+                                                    <img
+                                                        src={newIncident.imageUrl}
+                                                        alt="Vista previa"
                                                         className={styles['image-preview']}
                                                     />
                                                     <div className={styles['image-actions']}>
@@ -423,7 +869,7 @@ const Incidentes: React.FC = () => {
                                             ) : (
                                                 <button
                                                     type="button"
-                                                    className={styles['btn-subir-imagen']}
+                                                    className={styles['btn-secundario']}
                                                     onClick={() => openImageModal('new')}
                                                 >
                                                     Subir Imagen
@@ -437,8 +883,13 @@ const Incidentes: React.FC = () => {
                                 </div>
 
                                 <div className={styles['form-actions']}>
-                                    <button data-testid="submit-incident" type="submit" className={styles['btn-primario']}>
-                                        Enviar Reporte
+                                    <button
+                                        data-testid="submit-incident"
+                                        type="submit"
+                                        className={styles['btn-primario']}
+                                        disabled={isLoading}
+                                    >
+                                        {isLoading ? 'Enviando...' : 'Enviar Reporte'}
                                     </button>
                                     <button
                                         type="button"
@@ -446,12 +897,18 @@ const Incidentes: React.FC = () => {
                                         onClick={() => {
                                             setShowForm(false);
                                             setNewIncident({
+                                                title: "",
                                                 type: "",
                                                 description: "",
-                                                location: "",
+                                                calle: "",
+                                                numero: "",
+                                                villa: "",
+                                                complemento: "",
+                                                idComuna: "",
                                                 imageUrl: ""
                                             });
                                         }}
+                                        disabled={isLoading}
                                     >
                                         Cancelar
                                     </button>
@@ -468,13 +925,13 @@ const Incidentes: React.FC = () => {
                     </div>
                     <div className={styles.estadistica}>
                         <span data-testid="estadistica-numero" className={styles['estadistica-numero']}>
-                            {incidents.filter(i => i.status === 'En progreso').length}
+                            {incidents.filter(i => i.estadoIncidente === 'En progreso').length}
                         </span>
                         <span className={styles['estadistica-label']}>En Progreso</span>
                     </div>
                     <div className={styles.estadistica}>
                         <span data-testid="estadistica-numero" className={styles['estadistica-numero']}>
-                            {incidents.filter(i => i.status === 'Cerrado').length}
+                            {incidents.filter(i => i.estadoIncidente === 'Cerrado').length}
                         </span>
                         <span className={styles['estadistica-label']}>Resueltos</span>
                     </div>
@@ -486,6 +943,7 @@ const Incidentes: React.FC = () => {
                         <button
                             className={`${styles['btn-secundario']} ${styles['btn-pequeno']}`}
                             onClick={loadIncidents}
+                            disabled={isLoading}
                         >
                             <span className={styles.btnContenido}>
                                 Actualizar <TbRefresh />
@@ -506,6 +964,7 @@ const Incidentes: React.FC = () => {
                                     <tr>
                                         <th>ID</th>
                                         <th>Tipo</th>
+                                        <th>Título</th> 
                                         <th>Ubicación</th>
                                         <th>Estado</th>
                                         <th>Fecha/Hora</th>
@@ -514,37 +973,44 @@ const Incidentes: React.FC = () => {
                                 </thead>
                                 <tbody>
                                     {incidents.map(incident => (
-                                        <React.Fragment key={incident.id}>
-                                            {/* Fila principal del incidente */}
-                                            <tr className={`${styles['fila-incidente']} ${expandedIncident === incident.id ? styles.expandida : ''}`}>
-                                                <td className={styles['celda-id']}>{incident.id}</td>
+                                        <React.Fragment key={incident.idIncidente}>
+                                            <tr className={`${styles['fila-incidente']} ${expandedIncident === incident.idIncidente ? styles.expandida : ''}`}>
+                                                <td className={styles['celda-id']}>{incident.idIncidente}</td>
                                                 <td className={styles['celda-tipo']}>
                                                     <span className={styles['icono-tipo']}>
-                                                        {getIncidentIcon(incident.type)}
+                                                        {getIncidentIcon(incident.tipoIncidente.nombre)}
                                                     </span>
-                                                    {incident.type}
+                                                    {incident.tipoIncidente.nombre}
                                                 </td>
-                                                <td className={styles['celda-ubicacion']}>{incident.location}</td>
+                                                <td className={styles['celda-titulo']}> 
+                                                    <strong>{incident.titulo}</strong>
+                                                </td>
+                                                <td className={styles['celda-ubicacion']}>
+                                                    <div className={styles['ubicacion-completa']}>
+                                                        <TbMapPin className={styles['icono-ubicacion']} />
+                                                        {formatearUbicacionTabla(incident)}
+                                                    </div>
+                                                </td>
                                                 <td>
-                                                    <span className={`${styles['badge-estado']} ${styles[getStatusClass(incident.status)]}`}>
-                                                        {incident.status}
+                                                    <span className={`${styles['badge-estado']} ${styles[getStatusClass(incident.estadoIncidente || 'En progreso')]}`}>
+                                                        {incident.estadoIncidente || 'Indeterminado'}
                                                     </span>
                                                 </td>
-                                                <td className={styles['celda-fecha']}>{incident.dateTime}</td>
+                                                <td className={styles['celda-fecha']}>{incident.fechaRegistro}</td>
                                                 <td className={styles['celda-acciones']}>
                                                     <div className={styles['contenedor-acciones']}>
                                                         <button
                                                             className={`${styles['btn-accion']} ${styles['btn-info']}`}
                                                             onClick={() => setExpandedIncident(
-                                                                expandedIncident === incident.id ? null : incident.id
+                                                                expandedIncident === incident.idIncidente ? null : incident.idIncidente
                                                             )}
                                                             title="Ver detalles"
                                                         >
-                                                            {expandedIncident === incident.id ? <TiArrowSortedUp /> : <TiArrowSortedDown />}
+                                                            {expandedIncident === incident.idIncidente ? <TiArrowSortedUp /> : <TiArrowSortedDown />}
                                                         </button>
                                                         <button
                                                             className={`${styles['btn-accion']} ${styles['btn-warning']}`}
-                                                            onClick={() => handleEditIncident(incident.id)}
+                                                            onClick={() => handleEditIncident(incident.idIncidente)}
                                                             title="Editar incidente"
                                                         >
                                                             Editar
@@ -552,7 +1018,7 @@ const Incidentes: React.FC = () => {
                                                         </button>
                                                         <button
                                                             className={`${styles['btn-accion']} ${styles['btn-danger']}`}
-                                                            onClick={() => handleDeleteIncident(incident.id)}
+                                                            onClick={() => handleDeleteIncident(incident.idIncidente)}
                                                             title="Eliminar incidente"
                                                         >
                                                             Eliminar
@@ -562,40 +1028,46 @@ const Incidentes: React.FC = () => {
                                                 </td>
                                             </tr>
 
-                                            {expandedIncident === incident.id && (
+                                            {expandedIncident === incident.idIncidente && (
                                                 <tr className={styles['fila-detalles']}>
                                                     <td colSpan={6}>
                                                         <div className={styles['contenedor-detalles']}>
-                                                            {editingIncident === incident.id ? (
-                                                                // Formulario de edición
+                                                            {editingIncident === incident.idIncidente ? (
                                                                 <div className={styles['formulario-edicion']}>
-                                                                    <h4>{`✏️Editando Incidente #${incident.id}`}</h4>
-                                                                    <div className={styles['grid-form']}>
-                                                                        {/* Tipo de Incidente */}
-                                                                        <div className={styles['form-group']}>
-                                                                            <label htmlFor="edit-type" className={styles['form-label']}>Tipo de Incidente</label>
+                                                                    <h4>{`✏️Editando Incidente #${incident.idIncidente}`}</h4>
+                                                                    <div className={`${styles['grid-form']} ${styles['full-width']}`}>
+
+                                                                        <div className={`${styles['form-group']} ${styles['full-width']}`}>
+                                                                            <label htmlFor="edit-title" className={styles['form-label']}>Título del Incidente</label>
                                                                             <input
                                                                                 type="text"
+                                                                                id="edit-title"
+                                                                                value={editForm.title}
+                                                                                onChange={(e) => handleInputChange(e, 'edit')}
+                                                                                className={styles['form-input']}
+                                                                                required
+                                                                                minLength={5}
+                                                                            />
+                                                                        </div>
+
+                                                                        <div className={styles['form-group']}>
+                                                                            <label htmlFor="edit-type" className={styles['form-label']}>Tipo de Incidente</label>
+                                                                            <select
                                                                                 id="edit-type"
                                                                                 data-testid="incident-type"
                                                                                 value={editForm.type}
                                                                                 onChange={(e) => handleInputChange(e, 'edit')}
                                                                                 className={styles['form-input']}
                                                                                 required
-                                                                            />
-                                                                        </div>
-
-                                                                        <div className={styles['form-group']}>
-                                                                            <label htmlFor="edit-location" className={styles['form-label']}>Ubicación</label>
-                                                                            <input
-                                                                                type="text"
-                                                                                id="edit-location"
-                                                                                data-testid="incident-location"
-                                                                                value={editForm.location}
-                                                                                onChange={(e) => handleInputChange(e, 'edit')}
-                                                                                className={styles['form-input']}
-                                                                                required
-                                                                            />
+                                                                                disabled={isLoadingTipos}
+                                                                            >
+                                                                                <option value="">Seleccione un tipo</option>
+                                                                                {tiposIncidente.map(tipo => (
+                                                                                    <option key={tipo.idTipoIncidente} value={tipo.idTipoIncidente}>
+                                                                                        {tipo.nombre}
+                                                                                    </option>
+                                                                                ))}
+                                                                            </select>
                                                                         </div>
 
                                                                         <div className={styles['form-group']}>
@@ -634,9 +1106,9 @@ const Incidentes: React.FC = () => {
                                                                             <div className={styles['image-upload-section']}>
                                                                                 {editForm.imageUrl ? (
                                                                                     <div className={styles['image-preview-container']}>
-                                                                                        <img 
-                                                                                            src={editForm.imageUrl} 
-                                                                                            alt="Vista previa" 
+                                                                                        <img
+                                                                                            src={editForm.imageUrl}
+                                                                                            alt="Vista previa"
                                                                                             className={styles['image-preview']}
                                                                                         />
                                                                                         <div className={styles['image-actions']}>
@@ -659,7 +1131,7 @@ const Incidentes: React.FC = () => {
                                                                                 ) : (
                                                                                     <button
                                                                                         type="button"
-                                                                                        className={styles['btn-subir-imagen']}
+                                                                                        className={styles['btn-secundario']}
                                                                                         onClick={() => openImageModal('edit')}
                                                                                     >
                                                                                         Subir Imagen
@@ -672,13 +1144,15 @@ const Incidentes: React.FC = () => {
                                                                         <button
                                                                             data-testid="save-changes"
                                                                             className={styles['btn-primario']}
-                                                                            onClick={() => handleSaveIncident(incident.id)}
+                                                                            onClick={() => handleSaveIncident(incident.idIncidente)}
+                                                                            disabled={isLoading}
                                                                         >
-                                                                            Guardar Cambios
+                                                                            {isLoading ? 'Guardando...' : 'Guardar Cambios'}
                                                                         </button>
                                                                         <button
                                                                             className={styles['btn-secundario']}
                                                                             onClick={() => setEditingIncident(null)}
+                                                                            disabled={isLoading}
                                                                         >
                                                                             Cancelar
                                                                         </button>
@@ -688,42 +1162,80 @@ const Incidentes: React.FC = () => {
                                                                 <div className={styles['vista-detalles']}>
                                                                     <div className={styles['detalles-contenido']}>
                                                                         <div className={styles['detalles-texto']}>
-                                                                            <h4>Descripción Completa</h4>
-                                                                            <p data-testid="incident-description-text">{incident.description}</p>
+
+                                                                            <h4 className={styles['titulo-detalle']}>{incident.titulo}</h4>
+                                                                            <h6>Descripción Completa</h6>
+                                                                            <p data-testid="incident-description-text">{incident.detalle}</p>
 
                                                                             <div className={styles['info-adicional']}>
                                                                                 <div className={styles['info-item']}>
+                                                                                    <strong>🏷️ Título:</strong>
+                                                                                    <span>{incident.titulo}</span>
+                                                                                </div>
+                                                                                
+                                                                                <div className={styles['info-item']}>
                                                                                     <strong>📍 Ubicación:</strong>
-                                                                                    <span>{incident.location}</span>
+                                                                                    <span>
+                                                                                        {incident.direccionCompletaIncidente ? (
+                                                                                            <div className={styles['direccion-completa']}>
+                                                                                                <div>{incident.direccionCompletaIncidente.calle} {incident.direccionCompletaIncidente.numero}</div>
+                                                                                                {incident.direccionCompletaIncidente.villa && (
+                                                                                                    <div>Villa: {incident.direccionCompletaIncidente.villa}</div>
+                                                                                                )}
+                                                                                                {incident.direccionCompletaIncidente.complemento && (
+                                                                                                    <div>Complemento: {incident.direccionCompletaIncidente.complemento}</div>
+                                                                                                )}
+                                                                                                
+                                                                                            </div>
+                                                                                        ) : (
+                                                                                            'Ubicación no disponible'
+                                                                                        )}
+                                                                                    </span>
                                                                                 </div>
                                                                                 <div className={styles['info-item']}>
                                                                                     <strong>🕐 Reportado:</strong>
-                                                                                    <span>{incident.dateTime}</span>
+                                                                                    <span>{incident.fechaRegistro}</span>
                                                                                 </div>
                                                                                 <div className={styles['info-item']}>
                                                                                     <strong>🏷️ Tipo:</strong>
-                                                                                    <span>{incident.type}</span>
+                                                                                    <span>{incident.tipoIncidente.nombre}</span>
                                                                                 </div>
                                                                                 <div className={styles['info-item']}>
                                                                                     <strong>📊 Estado:</strong>
-                                                                                    <span className={`${styles['badge-estado']} ${styles[getStatusClass(incident.status)]}`}>
-                                                                                        {incident.status}
+                                                                                    <span className={`${styles['badge-estado']} ${styles[getStatusClass(incident.estadoIncidente || 'En progreso')]}`}>
+                                                                                        {incident.estadoIncidente || 'En progreso'}
                                                                                     </span>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
 
-                                                                        {incident.imageUrl && incident.imageUrl !== DefaultIncidente && (
+                                                                        {incident.imagenUrl && incident.imagenUrl !== DefaultIncidente ? (
                                                                             <div className={styles['detalles-imagen']}>
                                                                                 <h4>Evidencia Visual</h4>
-                                                                                <img
-                                                                                    src={incident.imageUrl}
-                                                                                    alt={`Imagen del incidente ${incident.id}`}
-                                                                                    className={styles['imagen-incidente']}
-                                                                                    onError={(e) => {
-                                                                                        (e.target as HTMLImageElement).src = DefaultIncidente;
-                                                                                    }}
-                                                                                />
+                                                                                <div className={styles['image-preview-container']}>
+                                                                                    <img
+                                                                                        src={incident.imagenUrl}
+                                                                                        alt={`Imagen del incidente ${incident.idIncidente}`}
+                                                                                        className={styles['image-preview']}
+                                                                                        onError={(e) => {
+                                                                                            (e.target as HTMLImageElement).src = DefaultIncidente;
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className={styles['detalles-imagen']}>
+                                                                                <h4>Evidencia Visual</h4>
+                                                                                <div className={styles['image-preview-container']}>
+                                                                                    <img
+                                                                                        src={DefaultIncidente}
+                                                                                        alt="Imagen por defecto del incidente"
+                                                                                        className={styles['image-preview']}
+                                                                                    />
+                                                                                    <div className={styles['image-placeholder']}>
+                                                                                        <small>No hay imagen disponible</small>
+                                                                                    </div>
+                                                                                </div>
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -732,6 +1244,7 @@ const Incidentes: React.FC = () => {
                                                         </div>
                                                     </td>
                                                 </tr>
+
                                             )}
                                         </React.Fragment>
                                     ))}
@@ -744,9 +1257,32 @@ const Incidentes: React.FC = () => {
 
             <ImageUploadModal
                 isOpen={isImageModalOpen}
-                onClose={() => setIsImageModalOpen(false)}
-                onImageSave={handleImageSave}
+                onClose={() => {
+                    setIsImageModalOpen(false);
+                    clearUploadedImage();
+                }}
+                onSave={(imageUrl) => {
+                    // Esta función se llama cuando se hace clic en "Guardar Imagen"
+                    if (imageUploadContext === 'new') {
+                        setNewIncident(prev => ({
+                            ...prev,
+                            imageUrl: imageUrl || ""
+                        }));
+                    } else {
+                        setEditForm(prev => ({
+                            ...prev,
+                            imageUrl: imageUrl || ""
+                        }));
+                    }
+                    setIsImageModalOpen(false);
+                    clearUploadedImage();
+                }}
                 currentImage={currentImageUrl}
+                isLoading={isUploading}
+                uploadError={uploadError}
+                onImageUpload={handleFileUpload}
+                onImageDelete={handleFileDelete}
+                onImageReplace={handleFileUpload}
             />
         </div>
     );

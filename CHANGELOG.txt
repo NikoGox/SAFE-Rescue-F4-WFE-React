@@ -1,6 +1,16 @@
 ╔══════════════════════════════════════════════╗
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
+❚❙❘ VERSIÓN 1.0.12
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se corrigen problemas para el cargado de datos de usuario
+├─• Se modifican el componente para cargar imagenes
+├─• Se modifica la página de perfiles para que muestre informacion segun el tipo de usuario
+└─• Se logra el subir las fotos al "servidor" (backend)
+
+>>> Se necesita corregir la logica de geolocalizacion
+>>> Se necesita corregir los metodos para crear incidentes (se necesita arreglar geolocalizacion primero)
+
 ❚❙❘ VERSIÓN 1.0.11
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
 ├─• Se implementa y corrige la lógica para que reciba datos del backend

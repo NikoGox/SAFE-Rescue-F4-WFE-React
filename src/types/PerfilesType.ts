@@ -1,6 +1,5 @@
 import React from "react";
-// Importamos los tipos de Geolocalización que ahora usamos
-import { type Direccion, type Region, type Comuna } from "./GeolocalizacionType"; 
+import { type Direccion, type Region, type Comuna } from "./GeolocalizacionType";
 
 // ===========================================================
 // 1. ESTRUCTURAS DE DATOS DE ENTIDADES DE PERFIL (Microservicio)
@@ -12,9 +11,9 @@ import { type Direccion, type Region, type Comuna } from "./GeolocalizacionType"
 export interface Compania {
     idCompania: number;
     nombre: string;
-    codigo?: string;                   
-    fechaFundacion?: string;            
-    idDireccion: number;                
+    codigo?: string;
+    fechaFundacion?: string;
+    idDireccion: number;
 }
 
 export type CompaniaRequest = Omit<Compania, 'idCompania'>;
@@ -35,10 +34,10 @@ export type TipoEquipoRequest = Omit<TipoEquipo, 'idTipoEquipo'>;
 export interface Equipo {
     idEquipo: number;
     nombre: string;
-    compania: Compania;           
-    tipoEquipo: TipoEquipo;         
-    lider?: Bombero | null;       
-    idEstado: number;            
+    compania: Compania;
+    tipoEquipo: TipoEquipo;
+    lider?: Bombero | null;
+    idEstado: number;
 }
 
 export type EquipoRequest = Omit<Equipo, 'idEquipo'>;
@@ -64,23 +63,24 @@ interface BaseFields {
     nombre: string;
     aPaterno: string;
     aMaterno: string;
-    correo: string;           
+    correo: string;
     telefono: string;
+    nombreUsuario?: string;
 }
 
 /**
  * Campos comunes para todos los tipos de perfil (Bombero, Ciudadano).
  */
 export interface BaseUsuario extends BaseFields {
-    idUsuario: number;        
-    run: string;              
-    dv: string;               
-    nombreUsuario?: string;   
-    idFoto?: number;          
-    fechaRegistro: string;    
-    intentosFallidos: number; 
-    idEstado: number;         
-    tipoUsuario: TipoUsuario; 
+    idUsuario: number;
+    run: string;
+    dv: string;
+    nombreUsuario?: string;
+    idFoto?: number;
+    fechaRegistro: string;
+    intentosFallidos: number;
+    idEstado: number;
+    tipoUsuario: TipoUsuario;
 }
 
 /**
@@ -91,27 +91,68 @@ export interface PerfilDireccion {
     idDireccion: number;
     calle: string;
     numero: string;
-    referencia?: string; 
+    referencia?: string;
     comuna: Comuna;
     region: Region;
+    villa?: string;
+    complemento?: string;
 }
 
 // ------------------------------------------
 // TIPOS DE PERFIL ESPECÍFICOS (Uniones Disjuntas)
 // ------------------------------------------
 
-// 1. Tipo Ciudadano
-export interface CiudadanoData extends BaseUsuario {
-    tipoPerfil: 'CIUDADANO';
-    idDireccion: number;
-    direccion?: PerfilDireccion; // Dirección completa opcional
+/**
+ * Interfaz base para UserData que incluye propiedades comunes.
+ */
+export interface UserDataBase extends BaseUsuario {
+    tipoPerfil?: 'CIUDADANO' | 'BOMBERO' | 'JEFE_COMPANIA';
+    apaterno?: string;
+    amaterno?: string;
+    equipo?: any;
+    direccion?: any;
 }
 
-// 2. Tipo Bombero
-export interface Bombero extends BaseUsuario {
-    tipoPerfil: 'BOMBERO';
-    equipo: Equipo;
-    compania?: Compania; // Información de compañía opcional
+/**
+ * Tipo Ciudadano
+ */
+export interface CiudadanoData extends UserDataBase {
+    tipoPerfil: 'CIUDADANO';
+    direccion: {
+        idDireccion?: number;
+        calle: string;
+        numero: number | string;
+        villa?: string;
+        complemento?: string;
+        comuna?: {
+            idComuna: number;
+            nombre: string;
+            idRegion: number;
+        };
+        region?: {
+            idRegion: number;
+            nombre: string;
+        };
+    };
+}
+
+/**
+ * Tipo Bombero
+ */
+export interface Bombero extends UserDataBase {
+    tipoPerfil: 'BOMBERO' | 'JEFE_COMPANIA';
+    equipo?: {
+        idEquipo: number;
+        nombre: string;
+        tipoEquipo?: {
+            idTipoEquipo: number;
+            nombre: string;
+        };
+        compania?: {
+            idCompania: number;
+            nombre: string;
+        };
+    };
 }
 
 /**
@@ -147,25 +188,24 @@ export const parsearRUT = (rutCompleto: string): { run: string, dv: string } => 
 };
 
 // ===========================================================
-// 4. TIPOS DE REGISTRO Y AUTENTICACIÓN - CORREGIDOS
+// 4. TIPOS DE REGISTRO Y AUTENTICACIÓN
 // ===========================================================
 
 /**
  * Define la estructura para el formulario de registro en el frontend.
  */
 export interface UserRegistroFormType {
-    // Datos personales
-    rutCompleto: string;            
+    rutCompleto: string;
+    nombreUsuario: string;
     nombre: string;
     aPaterno: string;
     aMaterno: string;
-    correo: string;                 
+    correo: string;
     telefono: string;
     contrasena: string;
     confirmarContrasena: string;
     terminos: boolean;
-    
-    // Datos de dirección para geolocalización
+
     direccion: {
         calle: string;
         numero: string;
@@ -177,17 +217,19 @@ export interface UserRegistroFormType {
             longitud: number;
         };
     };
-    
-    // Tipo de usuario
+
     idTipoUsuario: number;
+    equipo: string;
+    tipoEquipo: string;
+    compania: string;
 }
 
 /**
  * DTO para enviar al backend durante el registro.
  */
 export interface UserRegistroBackendType {
-    // Datos de usuario (para microservicio de perfiles)
     run: string;
+    nombreUsuario: string;
     dv: string;
     nombre: string;
     apaterno: string;
@@ -196,8 +238,7 @@ export interface UserRegistroBackendType {
     correo: string;
     contrasenia: string;
     idTipoUsuario: number;
-    
-    // Datos de dirección (para microservicio de geolocalización)
+
     direccion: {
         calle: string;
         numero: string;
@@ -215,7 +256,7 @@ export interface UserRegistroBackendType {
  * Define el DTO para solicitud de login.
  */
 export interface LoginRequest {
-    correo: string;    
+    correo: string;
     contrasena: string;
 }
 
@@ -224,7 +265,7 @@ export interface LoginRequest {
  */
 export interface AuthResponseDTO {
     token: string;
-    tipoPerfil: 'CIUDADANO' | 'BOMBERO';
+    tipoPerfil: 'CIUDADANO' | 'BOMBERO' | 'JEFE_COMPANIA';
     userData: UserData;
     expiresIn?: number;
     data: any;
@@ -242,7 +283,7 @@ export const convertirAUserData = (authResponse: AuthResponseDTO): UserData => {
     } else {
         return {
             ...authResponse.userData,
-            tipoPerfil: 'BOMBERO'
+            tipoPerfil: authResponse.tipoPerfil as 'BOMBERO' | 'JEFE_COMPANIA'
         } as Bombero;
     }
 };
@@ -254,9 +295,12 @@ export const convertirAUserData = (authResponse: AuthResponseDTO): UserData => {
 /**
  * Define el DTO para actualizar un usuario.
  */
-export type UserUpdateRequest = Partial<Omit<BaseUsuario, 
-    'idUsuario' | 'run' | 'dv' | 'nombreUsuario' | 'fechaRegistro'
->> & {
+export type UserUpdateRequest = {
+    nombre?: string;
+    aPaterno?: string;
+    aMaterno?: string;
+    correo?: string;
+    telefono?: string;
     contrasenaActual?: string;
     nuevaContrasena?: string;
     idDireccion?: number;
@@ -264,7 +308,7 @@ export type UserUpdateRequest = Partial<Omit<BaseUsuario,
 };
 
 // ===========================================================
-// 6. TIPOS DE FORMULARIO Y CONTEXTO - CORREGIDOS
+// 6. TIPOS DE FORMULARIO Y CONTEXTO
 // ===========================================================
 
 /**
@@ -284,12 +328,10 @@ export interface FormDataType extends UserRegistroFormType {
 /**
  * Define la estructura para almacenar los mensajes de error del formulario.
  */
-// En PerfilesType.ts, actualiza el tipo Errors:
 export type Errors = Partial<FormDataType & ContactData> & {
     general?: string;
     detalleHomenaje?: string;
-    
-    // ✅ CORREGIDO: Tipo específico para errores de dirección
+
     direccion?: {
         calle?: string;
         numero?: string;
@@ -297,8 +339,7 @@ export type Errors = Partial<FormDataType & ContactData> & {
         complemento?: string;
         idComuna?: string;
     };
-    
-    // Campos adicionales
+
     terminos?: string;
     idRegion?: string;
     regionPersonalizada?: string;
@@ -308,27 +349,53 @@ export type Errors = Partial<FormDataType & ContactData> & {
     usarRegionPersonalizada?: string;
 };
 
+/**
+ * Interface para los datos del formulario de perfil
+ */
+export interface PerfilFormData {
+    nombre: string;
+    aPaterno: string;
+    aMaterno: string;
+    correo: string;
+    telefono: string;
+    rutCompleto: string;
+
+    direccion: {
+        calle: string;
+        numero: string;
+        villa?: string;
+        complemento?: string;
+        idComuna: number;
+    };
+
+    idRegion: number;
+
+    equipo: string;
+    tipoEquipo: string;
+    compania: string;
+}
 
 // ===========================================================
-// 7. TIPOS DE CONTEXTO Y PROPS - CORREGIDOS
+// 7. TIPOS DE CONTEXTO Y PROPS
 // ===========================================================
 
 /**
  * Define la estructura del contexto de autenticación.
  */
 export type AuthContextType = {
-  isLoggedIn: boolean;
-  userName: string;
-  profileImage: string | undefined;
-  authData: UserData | null;
-  loading: boolean;
-  error: string | null;
-  login: (credentials: LoginRequest) => Promise<boolean>;
-  register: (userData: UserRegistroBackendType) => Promise<boolean>;
-  logout: () => void;
-  checkAuthStatus: () => void;
-  clearError: () => void;
-  updateProfile?: (userData: UserUpdateRequest) => Promise<boolean>;
+    isLoggedIn: boolean;
+    userName: string;
+    profileImage: string | undefined;
+    authData: UserData | null;
+    loading: boolean;
+    error: string | null;
+    login: (credentials: LoginRequest) => Promise<boolean>;
+    register: (userData: UserRegistroBackendType) => Promise<boolean>;
+    logout: () => void;
+    checkAuthStatus: () => void;
+    clearError: () => void;
+    updateProfile?: (userData: UserUpdateRequest) => Promise<boolean>;
+    refreshProfile?: (userId?: number, tipoPerfil?: string) => Promise<void>;
 };
 
 /**
@@ -338,35 +405,14 @@ export interface AuthProps {
     isLoggedIn: boolean;
     userName: string;
     profileImage?: string;
-    onLogin: (userData: UserData) => void; 
+    onLogin: (userData: UserData) => void;
     onLogout: () => void;
 }
 
 // ===========================================================
-// 8. PROPS DE COMPONENTES - CORREGIDOS
+// 8. PROPS DE COMPONENTES
 // ===========================================================
 
-/**
- * Propiedades (Props) base para un componente de campo de formulario genérico.
- */
-export interface InputFieldProps {
-    id: keyof FormDataType | keyof ContactData | keyof Errors | 
-        'calle' | 'numero' | 'villa' | 'complemento' | 'idComuna' |
-        `direccion.${keyof UserRegistroFormType['direccion']}`; 
-    label: string;
-    placeholder: string;
-    type?: 'text' | 'email' | 'tel' | 'password' | 'rut' | 'checkbox' | 'number';
-    value: string | boolean | number;
-    
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
-    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-    
-    error?: string | null;
-    required?: boolean;
-    dataTestId?: string;
-    disabled?: boolean;
-    isTextArea?: boolean; 
-}
 
 /**
  * Propiedades (Props) para campos de formulario especializados.
@@ -403,22 +449,18 @@ export type TipoEntidadHistorial = 'USUARIO' | 'EQUIPO';
  */
 export interface HistorialUsuario {
     idHistorial: number;
-    
-    // Relaciones con perfiles (solo una debe estar presente)
+
     usuario?: BaseUsuario | null;
     idUsuario?: number | null;
     equipo?: Equipo | null;
     idEquipo?: number | null;
-    
-    // Campos de estado
+
     idEstadoAnterior: number;
     idEstadoNuevo: number;
-    
-    // Metadatos
+
     fechaHistorial: string;
     detalle: string;
-    
-    // Campo discriminador calculado (opcional, para facilidad en frontend)
+
     tipoEntidad?: TipoEntidadHistorial;
 }
 
@@ -439,7 +481,7 @@ export interface HistorialUsuarioCreationDTO {
 export interface HistorialUsuarioResponse {
     idHistorial: number;
     tipoEntidad: TipoEntidadHistorial;
-    nombreEntidad: string;              
+    nombreEntidad: string;
     idEstadoAnterior: number;
     idEstadoNuevo: number;
     fechaHistorial: string;
@@ -455,7 +497,7 @@ export const determinarTipoEntidad = (historial: HistorialUsuario): TipoEntidadH
     } else if (historial.equipo || historial.idEquipo) {
         return 'EQUIPO';
     }
-    throw new Error('No se puede determinar el tipo de entidad del historial');
+    throw new Error("No se puede determinar el tipo de entidad del historial");
 };
 
 /**
@@ -471,7 +513,7 @@ export const obtenerNombreEntidad = (historial: HistorialUsuario): string => {
     } else if (historial.idEquipo) {
         return `Equipo #${historial.idEquipo}`;
     }
-    return 'Entidad desconocida';
+    return "Entidad desconocida";
 };
 
 /**
@@ -489,13 +531,13 @@ export const crearHistorialDTO = (
         idEstadoNuevo,
         detalle
     };
-    
+
     if (tipo === 'USUARIO') {
         dto.idUsuario = idEntidad;
     } else {
         dto.idEquipo = idEntidad;
     }
-    
+
     return dto;
 };
 
@@ -508,10 +550,11 @@ export const crearHistorialDTO = (
  */
 export const crearRegistroDTO = (formData: UserRegistroFormType): UserRegistroBackendType => {
     const { run, dv } = parsearRUT(formData.rutCompleto);
-    
+
     return {
         run,
         dv,
+        nombreUsuario: formData.nombreUsuario || '',
         nombre: formData.nombre,
         apaterno: formData.aPaterno,
         amaterno: formData.aMaterno,

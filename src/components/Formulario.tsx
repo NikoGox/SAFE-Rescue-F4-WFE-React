@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./formulario.module.css";
-import type { InputFieldProps as CustomInputFieldProps } from "../types/PerfilesType";
+import type { InputFieldProps as CustomInputFieldProps } from "../types/GlobalTypes";
 
 interface FormFieldProps extends CustomInputFieldProps {
   isTextArea?: boolean;

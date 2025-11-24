@@ -3,6 +3,7 @@ import * as Validaciones from '../utils/Validaciones';
 import styles from './SpecializedFields.module.css';
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 
+
 interface BaseSpecializedFieldProps {
     value: string | number | boolean;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

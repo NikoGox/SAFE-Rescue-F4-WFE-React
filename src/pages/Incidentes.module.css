@@ -214,15 +214,6 @@
   padding: 1rem;
 }
 
-.formulario-container {
-  background: var(--color-white);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-heavy);
-  max-width: 600px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-}
 
 .form-header {
   display: flex;
@@ -231,6 +222,7 @@
   padding: 1.5rem 2rem;
   border-bottom: 1px solid var(--color-light-gray);
   background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
+  
 }
 
 .form-header h2 {
@@ -243,18 +235,14 @@
   padding: 2rem;
 }
 
-.grid-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-}
-
 .full-width {
   grid-column: 1 / -1;
+  
 }
 
 .form-group {
   margin-bottom: 0;
+
 }
 
 .form-label {
@@ -438,14 +426,6 @@
   border: 1px solid #d6d8db;
 }
 
-.fila-detalles {
-  background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
-  border-left: 4px solid var(--color-primary);
-}
-
-.contenedor-detalles {
-  padding: 2rem;
-}
 
 .formulario-edicion {
   background: var(--color-white);
@@ -458,6 +438,7 @@
   margin-top: 0;
   margin-bottom: 1.5rem;
   color: var(--color-secondary);
+
 }
 
 .acciones-edicion {
@@ -478,6 +459,7 @@
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
   align-items: start;
+  
 }
 
 .detalles-texto h4 {
@@ -695,4 +677,313 @@
 
 .tabla-responsive::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, var(--color-primary-dark) 0%, #1a5276 100%);
+}
+
+/* Agregar al archivo Incidentes.module.css */
+
+.ubicacion-completa {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icono-ubicacion {
+  color: var(--color-primary);
+  font-size: 1.1rem;
+}
+
+.direccion-completa {
+  line-height: 1.4;
+}
+
+.direccion-completa div {
+  margin-bottom: 0.25rem;
+}
+
+.direccion-completa div:first-child {
+  font-weight: 600;
+  color: var(--color-secondary);
+}
+
+/* Estilos para la nueva columna título */
+.celda-titulo {
+  max-width: 200px;
+  min-width: 150px;
+}
+
+.celda-titulo strong {
+  font-weight: 600;
+  color: #334155;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Mensaje informativo */
+.info-message {
+  background-color: #e0f2fe;
+  border: 1px solid #bae6fd;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  font-size: 0.875rem;
+  color: #0369a1;
+}
+
+.info-message::before {
+  content: "ℹ️";
+  margin-right: 6px;
+}
+
+/* Título en detalles */
+.titulo-detalle {
+  color: #1e293b;
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-left: 4px solid #3b82f6;
+  padding-left: 12px;
+}
+
+/* Mantener esta versión de formulario-container (la más completa) */
+.formulario-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 900px;
+  margin: 2rem auto;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Grid form con padding */
+.grid-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--color-light-gray);
+  background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
+}
+
+/* Elementos que ocupan ancho completo */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Ajustar tamaño de inputs para formulario más ancho */
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+
+.fila-detalles td {
+  padding: 0 !important;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.fila-detalles {
+  background: linear-gradient(135deg, #f8fdff 0%, #e9f7fe 100%);
+  border-bottom: 2px solid var(--color-light-gray);
+  border-left: 4px solid var(--color-primary);
+
+}
+
+.contenedor-detalles {
+  background: var(--color-white);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-medium);
+  background: #f8fafc;
+  border-radius: 0 0 8px 8px;
+}
+
+/* Asegurar que la fila expandida ocupe todo el ancho */
+.fila-incidente.expandida {
+  background-color: #f1f5f9;
+}
+
+/* Ajustar formulario de edición dentro de los detalles */
+.formulario-edicion {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  margin: 0;
+}
+
+
+/* Hacer el formulario más ancho */
+.formulario-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  /* Más ancho */
+  max-width: 900px;
+  /* Ancho máximo aumentado */
+  margin: 2rem auto;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Ajustar grid para formulario más ancho */
+.grid-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* Dos columnas iguales */
+  gap: 1.5rem;
+  /* Más espacio entre elementos */
+  padding: 1.5rem;
+  /* Más padding interno */
+}
+
+/* Elementos que ocupan ancho completo */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Ajustar tamaño de inputs para formulario más ancho */
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+
+
+.fila-detalles td {
+  padding: 0 !important;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.contenedor-detalles {
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 0 0 8px 8px;
+}
+
+/* Asegurar que la fila expandida ocupe todo el ancho */
+.fila-incidente.expandida {
+  background-color: #f1f5f9;
+}
+
+/* Header del formulario más espacioso */
+.form-header {
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: between;
+  align-items: center;
+}
+
+.form-header h2 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 1.5rem;
+}
+
+/* Estilos para mensajes de carga y advertencia */
+.loading-text {
+  color: #3b82f6;
+  font-style: italic;
+}
+
+.warning-text {
+  color: #f59e0b;
+  font-style: italic;
+}
+
+/* Mejorar la tabla con la nueva columna título */
+.celda-titulo {
+  max-width: 200px;
+  min-width: 150px;
+}
+
+.celda-titulo strong {
+  font-weight: 600;
+  color: #334155;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+/* Ajustar ancho de columnas de la tabla */
+.celda-id {
+  width: 60px;
+  text-align: center;
+}
+
+.celda-tipo {
+  width: 140px;
+}
+
+.celda-ubicacion {
+  min-width: 200px;
+}
+
+.celda-fecha {
+  width: 150px;
+}
+
+.celda-acciones {
+  width: 180px;
+}
+
+/* Overlay del formulario más ancho */
+.overlay-form {
+  position: fixed;
+  top: -30px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 1000;
+  padding: 2rem 0;
+  overflow-y: auto;
+}
+
+/* Botón cerrar más visible */
+.btn-cerrar {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.btn-cerrar:hover {
+  background: #dc2626;
 }

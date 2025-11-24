@@ -1,4 +1,3 @@
-// src/types/IncidenteTypes.ts
 
 /**
  * Define la estructura de un Tipo de Incidente
@@ -19,7 +18,7 @@ export interface IncidenteResponse {
     tipoIncidente: TipoIncidente;
     idDireccion: number;
     idCiudadano: number;
-    idEstadoIncidente: number;  // ← Este ID referencia la interfaz Estado que ya tienes
+    idEstadoIncidente: number;
     idUsuarioAsignado?: number | null;
 }
 
@@ -30,8 +29,11 @@ export interface IncidenteCreationDTO {
     titulo: string;
     detalle: string;
     tipoIncidenteId: number;
+    
     idDireccion: number;
     idCiudadano: number;
+    direccionCompletaIncidente?: DireccionCompletaIncidente | null;
+    
 }
 
 /**
@@ -42,7 +44,7 @@ export interface IncidenteUpdateDTO {
     detalle?: string;
     tipoIncidenteId?: number;
     idDireccion?: number;
-    idEstadoIncidente?: number;  // ← Referencia al ID del Estado
+    idEstadoIncidente?: number;
     idUsuarioAsignado?: number | null;
 }
 
@@ -52,8 +54,8 @@ export interface IncidenteUpdateDTO {
 export interface HistorialIncidenteResponse {
     idHistorial: number;
     incidente: IncidenteResponse;
-    idEstadoAnterior: number;  // ← Referencia al ID del Estado anterior
-    idEstadoNuevo: number;     // ← Referencia al ID del Estado nuevo
+    idEstadoAnterior: number;
+    idEstadoNuevo: number;
     fechaHistorial: string;
     detalle: string;
 }
@@ -63,7 +65,139 @@ export interface HistorialIncidenteResponse {
  */
 export interface HistorialIncidenteCreationDTO {
     idIncidente: number;
-    idEstadoAnterior: number;  // ← Referencia al ID del Estado
-    idEstadoNuevo: number;     // ← Referencia al ID del Estado  
+    idEstadoAnterior: number;
+    idEstadoNuevo: number;
     detalle: string;
+}
+
+// ===========================================================
+// TIPOS PARA EL FRONTEND
+// ===========================================================
+
+
+export interface IncidentForm {
+    title: string,
+    type: string;
+    description: string;
+    location: string;
+    imageUrl: string;
+}
+
+export interface EditForm {
+    title: string,
+    description: string;
+    location: string;
+    type: string;
+    status: string;
+    imageUrl: string;
+}
+
+// Tipos para mapeo con el backend
+export interface IncidenteFrontend {
+    idIncidente: number;
+    titulo: string;
+    detalle: string;
+    fechaRegistro: string;
+    tipoIncidente: {
+        idTipoIncidente: number;
+        nombre: string;
+    };
+    ubicacion?: string;
+    estadoIncidente?: string;
+    imagenUrl?: string;
+}
+
+export interface IncidenteCreationFrontend {
+    titulo: string;
+    detalle: string;
+    tipoIncidenteId: number;
+    ubicacion: string;
+    imagenUrl?: string;
+}
+
+export interface IncidenteUpdateFrontend {
+    titulo?: string;
+    detalle?: string;
+    tipoIncidenteId?: number;
+    ubicacion?: string;
+    estadoIncidente?: string;
+    imagenUrl?: string;
+    idEstadoIncidente?: number;
+}
+
+// Tipos extendidos para geolocalización
+export interface IncidenteFrontendConGeolocalizacion {
+    idIncidente: number;
+    titulo: string;
+    detalle: string;
+    fechaRegistro: string;
+    tipoIncidente: {
+        idTipoIncidente: number;
+        nombre: string;
+    };
+    estadoIncidente?: string;
+    imagenUrl?: string;
+    idEstadoIncidente: number;
+
+    // Información de geolocalización
+    direccionCompletaIncidente: DireccionCompletaIncidente | null;
+}
+
+export interface IncidenteCreationFrontendConGeolocalizacion {
+    titulo: string;
+    detalle: string;
+    tipoIncidenteId: number;
+    direccion: {
+        calle: string;
+        numero: string;
+        villa?: string;
+        complemento?: string;
+        idComuna: number;
+        coordenadas?: {
+            latitud: number;
+            longitud: number;
+        };
+    };
+    imagenUrl?: string;
+}
+
+export interface DireccionCompletaIncidente {
+    idDireccion: number;
+    calle: string;
+    numero: string;
+    villa?: string;
+    complemento?: string;
+    comuna: {
+        idComuna: number;
+        nombre: string;
+        codigoPostal?: string;
+    };
+    region: {
+        idRegion: number;
+        nombre: string;
+        identificacion: string;
+    };
+    coordenadas?: {
+        latitud: number;
+        longitud: number;
+    };
+}
+
+
+export interface IncidenteCreationFrontendConGeolocalizacion {
+    titulo: string;
+    detalle: string;
+    tipoIncidenteId: number;
+    direccion: {
+        calle: string;
+        numero: string;
+        villa?: string;
+        complemento?: string;
+        idComuna: number;
+        coordenadas?: {
+            latitud: number;
+            longitud: number;
+        };
+    };
+    imagenUrl?: string;
 }
