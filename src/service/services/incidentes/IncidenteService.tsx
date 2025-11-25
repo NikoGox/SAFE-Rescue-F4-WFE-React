@@ -1,11 +1,12 @@
 // src/services/IncidenteService.ts
 
-import type { 
-  IncidenteResponse, 
-  IncidenteCreationDTO, 
-  IncidenteUpdateDTO 
-} from '../../../types/IncidenteType'; 
-import { incidentesClient, buildApiUrlPathIncidentes, IncidentesEndpoints } from '../../clients/IncidentesClient'; 
+import type {
+  IncidenteResponse,
+  IncidenteCreationDTO,
+  IncidenteUpdateDTO
+} from '../../../types/IncidenteType';
+import { incidentesClient, buildApiUrlPathIncidentes, IncidentesEndpoints } from '../../clients/IncidentesClient';
+import { IncidenteGeolocalizacionService } from './IncidenteGeolocalizacionService';
 
 class IncidenteService {
   /**
@@ -53,7 +54,7 @@ class IncidenteService {
         buildApiUrlPathIncidentes(IncidentesEndpoints.INCIDENTES),
         incidente
       );
-      
+
       if (response.status === 201) {
         return 'Incidente creado con éxito.';
       }
@@ -68,6 +69,25 @@ class IncidenteService {
     }
   }
 
+  async obtenerIncidenteConGeolocalizacion(id: number): Promise<any> {
+    try {
+      const incidente = await this.buscarIncidentePorId(id);
+
+      if (incidente.idDireccion) {
+        const direccionCompleta = await IncidenteGeolocalizacionService.obtenerDireccionCompleta(incidente.idDireccion);
+        return {
+          ...incidente,
+          direccionCompleta
+        };
+      }
+
+      return incidente;
+    } catch (error) {
+      console.error('Error obteniendo incidente con geolocalización:', error);
+      throw error;
+    }
+  }
+
   /**
    * Actualizar incidente existente
    */
@@ -77,7 +97,7 @@ class IncidenteService {
         buildApiUrlPathIncidentes(IncidentesEndpoints.INCIDENTES, `/${id}`),
         incidente
       );
-      
+
       if (response.status === 200) {
         return 'Actualizado con éxito';
       }
@@ -245,7 +265,7 @@ class IncidenteService {
     if (errorData?.errors) {
       return Object.values(errorData.errors).join(', ');
     }
-    
+
     // Mensajes específicos para incidentes
     if (errorData?.includes?.('TipoIncidente no existe')) {
       return 'El tipo de incidente especificado no existe';
@@ -259,7 +279,7 @@ class IncidenteService {
     if (errorData?.includes?.('Dirección no existe')) {
       return 'La dirección especificada no existe';
     }
-    
+
     return 'Error de validación en los datos del incidente';
   }
 

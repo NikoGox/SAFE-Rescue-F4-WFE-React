@@ -118,8 +118,8 @@ export interface UserDataBase extends BaseUsuario {
  */
 export interface CiudadanoData extends UserDataBase {
     tipoPerfil: 'CIUDADANO';
+    idDireccion?:number;
     direccion: {
-        idDireccion?: number;
         calle: string;
         numero: number | string;
         villa?: string;
@@ -141,6 +141,7 @@ export interface CiudadanoData extends UserDataBase {
  */
 export interface Bombero extends UserDataBase {
     tipoPerfil: 'BOMBERO' | 'JEFE_COMPANIA';
+    idDireccion?:number;
     equipo?: {
         idEquipo: number;
         nombre: string;

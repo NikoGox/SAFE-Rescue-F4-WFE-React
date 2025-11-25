@@ -1,6 +1,14 @@
 ╔══════════════════════════════════════════════╗
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
+❚❙❘ VERSIÓN 1.0.12.1
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se soluciona problema en página perfiles para mostrar los datos de direccion
+├─• Se mejoran los incidentes
+└─• Se se implementa con el backend la pagina de contactanos
+
+>>> Se necesita corregir la funcion de crear incidentes
+
 ❚❙❘ VERSIÓN 1.0.12
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
 ├─• Se corrigen problemas para el cargado de datos de usuario

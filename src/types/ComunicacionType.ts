@@ -14,7 +14,7 @@ export interface NotificacionResponse {
 }
 
 export interface NotificacionCreationDTO {
-    idUsuarioReceptor: string;
+    idUsuarioReceptor: number;
     detalle: string;
     idConversacion?: number | null;
     idEstado: number;
@@ -152,5 +152,14 @@ export const crearNotificacionSistema = (
 
 // Función para determinar si un mensaje fue editado (basado en lógica de negocio)
 export const fueMensajeEditado = (mensaje: MensajeResponse): boolean => {
-    return false; 
+    return false;
 };
+
+export interface ContactData {
+    nombre: string;
+    email: string;
+    telefono: string;
+    direccion: string;
+    mensaje: string;
+    idUsuarioReceptor?: number; 
+}

@@ -2,11 +2,10 @@ import React, { useState, useCallback, useEffect } from "react";
 import styles from "./Perfil.module.css";
 
 //HOOKS Y CONTEXTOS
-
-import { useImageUpload } from '../hooks/useImageUpload';
+import { useImageUploadPerfil } from '../hooks/useImageUploadPerfil';
 import { useAuth } from '../hooks/useAuth';
-import { useSincronizacion } from '../hooks/useSincronizacion';
-import { useCiudadano } from '../hooks/useCiudadano';
+import { useSincronizacion } from "../hooks/useSincronizacion";
+
 
 //imagenes y iconos 
 import Logo from "../assets/sr_logo.png";
@@ -26,11 +25,15 @@ import type { Region, Comuna } from '../types/GeolocalizacionType';
 //service
 import { RegionService } from '../service/services/geolocalizacion/RegionService';
 import { ComunaService } from '../service/services/geolocalizacion/ComunaService';
+import { DireccionCompletaService } from '../service/services/geolocalizacion/DireccionCompletaService';
+
 
 //componentes
 import FormField from '../components/Formulario';
 import { RutInputField, PhoneInputField } from '../components/SpecializedFields';
-import ImageUploadModal from '../components/ImageUploadModal';
+import ImageUploadModal from "../components/ImageUploadModal";
+
+
 
 // Interface para los datos del formulario de perfil
 interface PerfilFormData {
@@ -67,17 +70,23 @@ const Perfil: React.FC = () => {
         closeModal,
         handleImageUpload,
         handleImageDelete,
-    } = useImageUpload({
+    } = useImageUploadPerfil({
         entityType: 'USUARIO',
         entityId: authData?.idUsuario,
         onImageUpdated: (newUrl) => {
-            console.log(" Imagen actualizada:", newUrl);
-            // Refrescar perfil después de actualizar imagen
-            if (authData) {
-                refreshProfile(authData.idUsuario, authData.tipoPerfil).catch(console.error);
+            console.log("Imagen actualizada:", newUrl);
+            // Solo mostrar mensaje, no actualizar authData directamente
+            if (newUrl) {
+                setMessage({
+                    type: 'success',
+                    text: 'Foto de perfil actualizada exitosamente.'
+                });
+                setTimeout(() => setMessage(null), 3000);
             }
         }
     });
+
+
 
     // Estados para geografía
     const [regiones, setRegiones] = useState<Region[]>([]);
@@ -164,47 +173,6 @@ const Perfil: React.FC = () => {
         }
     };
 
-    const BuscadorCiudadano = () => {
-        const [idBusqueda, setIdBusqueda] = useState<number | ''>('');
-        const { ciudadano, cargando, error, buscarPorId } = useCiudadano();
-
-        const handleBuscar = async () => {
-            if (idBusqueda !== '' && idBusqueda > 0) {
-                await buscarPorId(idBusqueda);
-            }
-        };
-
-        return (
-            <div className="contenedor-busqueda">
-                <input
-                    type="number"
-                    placeholder="Ingresa ID del ciudadano"
-                    value={idBusqueda}
-                    onChange={(e) => setIdBusqueda(e.target.value === '' ? '' : Number(e.target.value))}
-                />
-
-                <button onClick={handleBuscar} disabled={cargando}>
-                    {cargando ? 'Buscando...' : 'Buscar'}
-                </button>
-
-                {error && (
-                    <div className="error">
-                        <p> Error: {error}</p>
-                    </div>
-                )}
-
-                {ciudadano && (
-                    <div className="resultado">
-                        <h3> Ciudadano Encontrado</h3>
-                        <p><strong>Nombre:</strong> {ciudadano.nombre} {ciudadano.aPaterno}</p>
-                        <p><strong>Correo:</strong> {ciudadano.correo}</p>
-                        <p><strong>Teléfono:</strong> {ciudadano.telefono}</p>
-                        <p><strong>RUT:</strong> {ciudadano.run}-{ciudadano.dv}</p>
-                    </div>
-                )}
-            </div>
-        );
-    };
 
     //  CARGAR REGIONES Y COMUNAS AL MONTAR
     useEffect(() => {
@@ -310,10 +278,9 @@ const Perfil: React.FC = () => {
         return regionEncontrada?.idRegion || 7;
     };
 
+    // Actualiza la función buildFormDataFromUserData:
     const buildFormDataFromUserData = (userData: UserData): PerfilFormData => {
         console.log("Construyendo datos desde UserData:", userData);
-        console.log("Tipo de perfil:", userData.tipoPerfil);
-        console.log("Datos completos:", JSON.stringify(userData, null, 2));
 
         const baseData = {
             nombre: userData.nombre || "",
@@ -365,13 +332,13 @@ const Perfil: React.FC = () => {
                 return {
                     ...baseData,
                     direccion: {
-                        calle: ciudadano.direccion?.calle || "",
-                        numero: (ciudadano.direccion?.numero || "").toString(),
-                        villa: ciudadano.direccion?.villa || "",
-                        complemento: ciudadano.direccion?.complemento || "",
-                        idComuna: comunaId
+                        calle: "",
+                        numero: "",
+                        villa: "",
+                        complemento: "",
+                        idComuna: 0
                     },
-                    idRegion: regionId
+                    idRegion: 0
                 };
             } else {
                 console.log("No hay dirección válida en los datos del ciudadano");
@@ -592,6 +559,65 @@ const Perfil: React.FC = () => {
         }
     };
 
+    // REEMPLAZA este useEffect con esta versión corregida:
+    useEffect(() => {
+        const loadUserAddress = async () => {
+            if (authData?.idDireccion) {
+                try {
+                    console.log("Cargando dirección del usuario, ID:", authData.idDireccion);
+                    const direccionCompleta = await DireccionCompletaService.getByIdCompleta(authData.idDireccion);
+
+                    if (direccionCompleta) {
+                        console.log("Dirección cargada exitosamente:", direccionCompleta);
+
+                        // VERIFICAR QUE LA ESTRUCTURA SEA CORRECTA
+                        if (!direccionCompleta.comuna || !direccionCompleta.comuna.region) {
+                            console.warn("La dirección no tiene comuna o región completa");
+                            return;
+                        }
+
+                        // Actualizar el formData con la dirección completa - CORREGIDO
+                        setFormData(prev => ({
+                            ...prev,
+                            direccion: {
+                                calle: direccionCompleta.calle || "",
+                                numero: direccionCompleta.numero?.toString() || "",
+                                villa: direccionCompleta.villa || "",
+                                complemento: direccionCompleta.complemento || "",
+                                idComuna: direccionCompleta.comuna.idComuna
+                            },
+                            idRegion: direccionCompleta.comuna.region.idRegion
+                        }));
+
+                        // También actualizar originalData
+                        setOriginalData(prev => ({
+                            ...prev,
+                            direccion: {
+                                calle: direccionCompleta.calle || "",
+                                numero: direccionCompleta.numero?.toString() || "",
+                                villa: direccionCompleta.villa || "",
+                                complemento: direccionCompleta.complemento || "",
+                                idComuna: direccionCompleta.comuna.idComuna
+                            },
+                            idRegion: direccionCompleta.comuna.region.idRegion
+                        }));
+                    } else {
+                        console.warn("No se pudo cargar la dirección completa del usuario");
+                    }
+                } catch (error) {
+                    console.error("Error al cargar dirección del usuario:", error);
+                    // No mostrar error al usuario para no causar confusión
+                }
+            } else {
+                console.log("Usuario no tiene dirección asociada (idDireccion no existe)");
+            }
+        };
+
+        if (authData?.idDireccion) {
+            loadUserAddress();
+        }
+    }, [authData?.idDireccion]);
+
     const handleEdit = () => {
         setOriginalData({ ...formData });
         setIsEditing(true);
@@ -664,17 +690,22 @@ const Perfil: React.FC = () => {
         }
     };
 
+    const handleImageDeleteWithParam = useCallback(async (imageUrl: string): Promise<void> => {
+        // Ignoramos el parámetro imageUrl y usamos la imagen actual del hook
+        await handleImageDelete();
+    }, [handleImageDelete]);
+
     const handleImageSaveClick = async (fotoFile: File) => {
         try {
-            console.log(" Iniciando upload de imagen...");
+            console.log("Iniciando upload de imagen...");
             await handleImageUpload(fotoFile);
             setMessage({
                 type: 'success',
-                text: ' Foto de perfil actualizada exitosamente.'
+                text: 'Foto de perfil actualizada exitosamente.'
             });
             setTimeout(() => setMessage(null), 3000);
         } catch (error: any) {
-            console.error(" Error al subir imagen:", error);
+            console.error("Error al subir imagen:", error);
             setMessage({
                 type: 'error',
                 text: error.message || 'Error al actualizar la foto de perfil.'
@@ -1063,14 +1094,23 @@ const Perfil: React.FC = () => {
                 </div>
             </div>
 
-            {/* MODAL DE IMAGEN */}
             <ImageUploadModal
                 isOpen={isModalOpen}
                 onClose={closeModal}
                 currentImage={currentImageUrl}
-                onImageUpload={handleImageSaveClick}
-                onImageDelete={handleImageDelete}
+                onImageUpload={handleImageUpload}
+                onImageDelete={handleImageDeleteWithParam}
                 isLoading={isImageLoading}
+                uploadError={null}
+                onSave={(imageUrl) => {
+                    if (imageUrl) {
+                        setMessage({
+                            type: 'success',
+                            text: 'Foto de perfil actualizada exitosamente.'
+                        });
+                    }
+                    closeModal();
+                }}
             />
         </div>
     );

@@ -1,4 +1,3 @@
-// src/pages/Incidentes.tsx
 import React, { useState, useEffect, useCallback } from "react";
 import styles from './Incidentes.module.css';
 
@@ -20,19 +19,16 @@ import { useImageUpload } from "../hooks/useImageUpload";
 import ImageUploadModal from "../components/ImageUploadModal";
 import IncidenteService from "../service/services/incidentes/IncidenteService";
 import TipoIncidenteService from "../service/services/incidentes/TipoIncidenteService";
-import { IncidenteGeolocalizacionService } from "../service/services/incidentes/IncidenteGeolocalizacionService";
+import { DireccionService } from "../service/services/geolocalizacion/DireccionService";
 import { ComunaService } from "../service/services/geolocalizacion/ComunaService";
 import { RegionService } from "../service/services/geolocalizacion/RegionService";
-import { DireccionService } from "../service/services/geolocalizacion/DireccionService";
-import { CoordenadasService } from "../service/services/geolocalizacion/CoordenadaService";
 
 import type {
     IncidenteFrontendConGeolocalizacion,
-    IncidenteCreationFrontendConGeolocalizacion,
     IncidenteUpdateFrontend,
     EditForm
 } from "../types/IncidenteType";
-import type { Comuna, Region, Direccion } from "../types/GeolocalizacionType";
+import type { Direccion, Comuna, Region } from "../types/GeolocalizacionType";
 
 interface TipoIncidenteOption {
     idTipoIncidente: number;
@@ -49,8 +45,7 @@ const Incidentes: React.FC = () => {
     const [editingIncident, setEditingIncident] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isLoadingTipos, setIsLoadingTipos] = useState<boolean>(false);
-    const [isLoadingGeolocalizacion, setIsLoadingGeolocalizacion] = useState<boolean>(false);
-    const [isLoadingGeografia, setIsLoadingGeografia] = useState(true);
+    const [isLoadingGeografia, setIsLoadingGeografia] = useState<boolean>(false);
 
     const [isImageModalOpen, setIsImageModalOpen] = useState<boolean>(false);
     const [currentImageUrl, setCurrentImageUrl] = useState<string>("");
@@ -86,51 +81,43 @@ const Incidentes: React.FC = () => {
         handleFileDelete
     } = useImageUpload();
 
+    // En la función loadDatosGeograficos, agreguemos más logs:
     const loadDatosGeograficos = useCallback(async (): Promise<void> => {
-        setIsLoadingGeolocalizacion(true);
+        setIsLoadingGeografia(true);
         try {
-            console.log(' Cargando datos geográficos...');
+            console.log('Cargando datos geográficos...');
 
             const [comunasData, regionesData] = await Promise.all([
                 ComunaService.getAll().catch(error => {
-                    console.error(' Error cargando comunas:', error);
-                    // Datos de respaldo como en Registrarse.tsx
-                    return [
-                        { idComuna: 1, nombre: 'Santiago', idRegion: 1 },
-                        { idComuna: 2, nombre: 'Providencia', idRegion: 1 },
-                        { idComuna: 3, nombre: 'Las Condes', idRegion: 1 },
-                        { idComuna: 4, nombre: 'Ñuñoa', idRegion: 1 }
-                    ];
+                    console.error('Error cargando comunas:', error);
+                    return [];
                 }),
                 RegionService.getAll().catch(error => {
-                    console.error(' Error cargando regiones:', error);
-                    // Datos de respaldo
-                    return [
-                        { idRegion: 1, nombre: 'Metropolitana de Santiago', identificacion: 'RM' }
-                    ];
+                    console.error('Error cargando regiones:', error);
+                    return [];
                 })
             ]);
 
-            console.log(' Comunas cargadas:', comunasData.length);
-            console.log(' Regiones cargadas:', regionesData.length);
+            console.log('Comunas recibidas del servicio:', comunasData);
+            console.log('Regiones recibidas del servicio:', regionesData);
 
             setComunas(comunasData);
             setRegiones(regionesData);
 
+            // Verificar si hay comunas de la región metropolitana
+            const comunasRM = comunasData.filter(comuna => {
+                const region = regionesData.find(r => r.idRegion === comuna.idRegion);
+                return region?.identificacion === 'RM' || region?.nombre.includes('Metropolitana');
+            });
+
+            console.log('Comunas de RM disponibles:', comunasRM);
+
         } catch (error) {
-            console.error(' Error crítico al cargar datos geográficos:', error);
-            // Datos de ejemplo de respaldo (igual que en Registrarse.tsx)
-            setComunas([
-                { idComuna: 1, nombre: 'Santiago', idRegion: 1 },
-                { idComuna: 2, nombre: 'Providencia', idRegion: 1 },
-                { idComuna: 3, nombre: 'Las Condes', idRegion: 1 },
-                { idComuna: 4, nombre: 'Ñuñoa', idRegion: 1 }
-            ]);
-            setRegiones([
-                { idRegion: 1, nombre: 'Metropolitana de Santiago', identificacion: 'RM' }
-            ]);
+            console.error('Error crítico al cargar datos geográficos:', error);
+            setComunas([]);
+            setRegiones([]);
         } finally {
-            setIsLoadingGeolocalizacion(false);
+            setIsLoadingGeografia(false);
         }
     }, []);
 
@@ -156,6 +143,34 @@ const Incidentes: React.FC = () => {
         }
     }, []);
 
+    // Función simplificada para obtener dirección básica
+    const obtenerDireccionBasica = async (idDireccion: number): Promise<string | null> => {
+        try {
+            if (!idDireccion || idDireccion <= 0) {
+                console.warn('ID de dirección inválido:', idDireccion);
+                return null;
+            }
+
+            console.log(`Obteniendo dirección básica para ID: ${idDireccion}`);
+
+            const direccion = await DireccionService.getById(idDireccion);
+            if (!direccion) {
+                console.warn(`No se encontró dirección con ID: ${idDireccion}`);
+                return null;
+            }
+
+            // Formatear dirección básica: calle + numero
+            const direccionBasica = `${direccion.calle || ''} ${direccion.numero || ''}`.trim();
+            console.log(`✅ Dirección básica obtenida: ${direccionBasica}`);
+
+            return direccionBasica || 'Dirección no disponible';
+
+        } catch (error) {
+            console.error(`❌ Error obteniendo dirección ${idDireccion}:`, error);
+            return null;
+        }
+    };
+
     const loadIncidents = useCallback(async (): Promise<void> => {
         setIsLoading(true);
         try {
@@ -170,23 +185,25 @@ const Incidentes: React.FC = () => {
                 return;
             }
 
-            // Enriquecer incidentes de forma más robusta
-            const incidentesEnriquecidos = await Promise.all(
+            // Enriquecer incidentes de forma simplificada
+            const incidentesEnriquecidos: IncidenteFrontendConGeolocalizacion[] = await Promise.all(
                 incidentesBackend.map(async (incidente) => {
                     try {
-                        let direccionCompletaIncidente = null;
+                        let direccionTexto = 'Ubicación no disponible';
 
-                        // Obtener información de dirección (con manejo de errores mejorado)
+                        // Obtener información de dirección básica
                         if (incidente.idDireccion && incidente.idDireccion > 0) {
                             try {
-                                direccionCompletaIncidente = await IncidenteGeolocalizacionService.obtenerDireccionCompleta(incidente.idDireccion);
+                                const direccionBasica = await obtenerDireccionBasica(incidente.idDireccion);
+                                if (direccionBasica) {
+                                    direccionTexto = direccionBasica;
+                                }
                             } catch (error) {
                                 console.error(` Error obteniendo dirección ${incidente.idDireccion}:`, error);
-                                // Continuar sin información de dirección
                             }
                         }
 
-                        return {
+                        const incidenteEnriquecido: IncidenteFrontendConGeolocalizacion = {
                             idIncidente: incidente.idIncidente,
                             titulo: incidente.titulo,
                             detalle: incidente.detalle,
@@ -194,13 +211,30 @@ const Incidentes: React.FC = () => {
                             tipoIncidente: incidente.tipoIncidente,
                             estadoIncidente: getEstadoFromId(incidente.idEstadoIncidente),
                             imagenUrl: getDefaultImageByType(incidente.tipoIncidente.nombre),
-                            direccionCompletaIncidente,
+                            direccionCompletaIncidente: {
+                                idDireccion: incidente.idDireccion || 0,
+                                calle: incidente.direccion || '',
+                                numero: '',
+                                comuna: {
+                                    idComuna: 0,
+                                    nombre: '',
+                                    idRegion: 0,
+                                    region: {
+                                        idRegion: 0,
+                                        nombre: '',
+                                        identificacion: ''
+                                    }
+                                }
+                            },
+                            direccionTexto: direccionTexto,
                             idEstadoIncidente: incidente.idEstadoIncidente
                         };
+
+                        return incidenteEnriquecido;
                     } catch (error) {
                         console.error(` Error procesando incidente ${incidente.idIncidente}:`, error);
                         // Retornar incidente básico
-                        return {
+                        const incidenteBasico: IncidenteFrontendConGeolocalizacion = {
                             idIncidente: incidente.idIncidente,
                             titulo: incidente.titulo,
                             detalle: incidente.detalle,
@@ -208,19 +242,35 @@ const Incidentes: React.FC = () => {
                             tipoIncidente: incidente.tipoIncidente,
                             estadoIncidente: getEstadoFromId(incidente.idEstadoIncidente),
                             imagenUrl: getDefaultImageByType(incidente.tipoIncidente.nombre),
-                            direccionCompletaIncidente: null,
+                            direccionCompletaIncidente: {
+                                idDireccion: 0,
+                                calle: '',
+                                numero: '',
+                                comuna: {
+                                    idComuna: 0,
+                                    nombre: '',
+                                    idRegion: 0,
+                                    region: {
+                                        idRegion: 0,
+                                        nombre: '',
+                                        identificacion: ''
+                                    }
+                                }
+                            },
+                            direccionTexto: 'Ubicación no disponible',
                             idEstadoIncidente: incidente.idEstadoIncidente
                         };
+                        return incidenteBasico;
                     }
                 })
             );
 
             const sortedIncidents = incidentesEnriquecidos.sort((a, b) => b.idIncidente - a.idIncidente);
             setIncidents(sortedIncidents);
-            console.log(' Incidentes cargados exitosamente:', sortedIncidents.length);
+            console.log(' ✅ Incidentes cargados exitosamente:', sortedIncidents.length);
 
         } catch (error) {
-            console.error(' Error al cargar incidentes:', error);
+            console.error(' ❌ Error al cargar incidentes:', error);
             setIncidents([]);
         } finally {
             setIsLoading(false);
@@ -251,21 +301,29 @@ const Incidentes: React.FC = () => {
         return imageMap[tipo] || DefaultIncidente;
     };
 
+    // Cargar datos en el orden correcto
     useEffect(() => {
         const loadData = async () => {
             try {
-                await Promise.all([
-                    loadDatosGeograficos(),
-                    loadTiposIncidente(),
-                    loadIncidents()
-                ]);
+                console.log('🔃 Iniciando carga de datos...');
+
+                // 1. Cargar datos geográficos
+                await loadDatosGeograficos();
+
+                // 2. Cargar tipos de incidente
+                await loadTiposIncidente();
+
+                // 3. Cargar incidentes
+                await loadIncidents();
+
+                console.log('✅ Todos los datos cargados exitosamente');
             } catch (error) {
-                console.error('Error loading initial data:', error);
+                console.error('❌ Error loading initial data:', error);
             }
         };
 
         loadData();
-    }, [loadDatosGeograficos, loadTiposIncidente, loadIncidents]);
+    }, []);
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
@@ -281,7 +339,6 @@ const Incidentes: React.FC = () => {
     };
 
     const handleImageSave = async (): Promise<void> => {
-        // Aquí deberías guardar la uploadedImageUrl en el estado correspondiente
         if (uploadedImageUrl) {
             if (imageUploadContext === 'new') {
                 setNewIncident(prev => ({
@@ -320,20 +377,114 @@ const Incidentes: React.FC = () => {
             return false;
         }
 
-        // Validar que la comuna sea de la región metropolitana
-        const idComuna = parseInt(newIncident.idComuna);
-        const comunaSeleccionada = comunas.find(c => c.idComuna === idComuna);
-        if (comunaSeleccionada) {
-            const regionComuna = regiones.find(r => r.idRegion === comunaSeleccionada.idRegion);
-            const esRegionMetropolitana = regionComuna?.identificacion === 'RM' || regionComuna?.nombre.includes('Metropolitana');
-
-            if (!esRegionMetropolitana) {
-                window.alert('Por el momento solo se pueden reportar incidentes en la Región Metropolitana');
-                return false;
-            }
-        }
-
         return true;
+    };
+
+    const crearDireccionYObtenerId = async (direccionData: {
+        calle: string;
+        numero: string;
+        villa?: string;
+        complemento?: string;
+        idComuna: number;
+    }): Promise<number> => {
+        try {
+            console.log('Datos de dirección a crear:', direccionData);
+            console.log('Comunas disponibles:', comunas);
+
+            // Verificar que la comuna existe en la lista cargada
+            const comunaExiste = comunas.find(c => c.idComuna === direccionData.idComuna);
+            console.log('Comuna encontrada:', comunaExiste);
+
+            if (!comunaExiste) {
+                console.warn(`Comuna con ID ${direccionData.idComuna} no encontrada en comunas cargadas`);
+
+                // Si no existe, intentar usar la primera comuna disponible
+                if (comunas.length > 0) {
+                    const primeraComuna = comunas[0];
+                    console.warn(`Usando primera comuna disponible: ${primeraComuna.nombre} (ID: ${primeraComuna.idComuna})`);
+                    direccionData.idComuna = primeraComuna.idComuna;
+                } else {
+                    throw new Error(`Comuna con ID ${direccionData.idComuna} no existe y no hay comunas disponibles`);
+                }
+            }
+
+            // Crear el objeto dirección
+            const datosDireccion: Omit<Direccion, 'idDireccion'> = {
+                calle: direccionData.calle,
+                numero: direccionData.numero,
+                villa: direccionData.villa || undefined,
+                complemento: direccionData.complemento || undefined,
+                idComuna: direccionData.idComuna
+            };
+
+            console.log('Enviando al servicio DireccionService.create:', datosDireccion);
+            const respuesta = await DireccionService.create(datosDireccion);
+            console.log('Respuesta del servicio DireccionService.create:', respuesta);
+
+            // MANEJAR DIFERENTES TIPOS DE RESPUESTA
+            let idDireccion: number;
+
+            if (typeof respuesta === 'string') {
+                // Si la respuesta es un string, intentar extraer el ID
+                console.log('La respuesta es un string, intentando extraer ID...');
+
+                const idMatch = respuesta.match(/\d+/);
+                if (idMatch) {
+                    idDireccion = parseInt(idMatch[0]);
+                    console.log('ID extraído del mensaje:', idDireccion);
+                } else {
+                    // Buscar la dirección recién creada
+                    console.log('No se pudo extraer ID del mensaje, buscando dirección creada...');
+                    const direcciones = await DireccionService.getAll();
+                    const direccionCreada = direcciones.find(dir =>
+                        dir.calle === direccionData.calle &&
+                        dir.numero === direccionData.numero &&
+                        dir.idComuna === direccionData.idComuna
+                    );
+
+                    if (direccionCreada && direccionCreada.idDireccion) {
+                        idDireccion = direccionCreada.idDireccion;
+                        console.log('ID obtenido de la búsqueda:', idDireccion);
+                    } else {
+                        throw new Error('No se pudo obtener el ID de la dirección creada');
+                    }
+                }
+            } else if (respuesta && typeof respuesta === 'object' && 'idDireccion' in respuesta) {
+                idDireccion = (respuesta as any).idDireccion;
+                console.log('ID obtenido del objeto respuesta:', idDireccion);
+            } else if (respuesta && typeof respuesta === 'object' && 'id' in respuesta) {
+                idDireccion = (respuesta as any).id;
+                console.log('ID obtenido del campo id:', idDireccion);
+            } else {
+                // Fallback: buscar la dirección recién creada
+                console.log('Tipo de respuesta no reconocido, buscando dirección creada...');
+                const direcciones = await DireccionService.getAll();
+                const direccionCreada = direcciones.find(dir =>
+                    dir.calle === direccionData.calle &&
+                    dir.numero === direccionData.numero &&
+                    dir.idComuna === direccionData.idComuna
+                );
+
+                if (direccionCreada && direccionCreada.idDireccion) {
+                    idDireccion = direccionCreada.idDireccion;
+                    console.log('ID obtenido de la búsqueda (fallback):', idDireccion);
+                } else {
+                    throw new Error('No se pudo obtener el ID de la dirección creada');
+                }
+            }
+
+            if (!idDireccion || idDireccion <= 0) {
+                throw new Error('ID de dirección no válido: ' + idDireccion);
+            }
+
+            console.log('✅ ID de dirección final obtenido:', idDireccion);
+            return idDireccion;
+
+        } catch (error) {
+            console.error('Error creando dirección:', error);
+            throw new Error('No se pudo crear la dirección para el incidente: ' + (error as Error).message);
+            
+        }
     };
 
     const handleSubmitIncident = async (e: React.FormEvent): Promise<void> => {
@@ -352,6 +503,7 @@ const Incidentes: React.FC = () => {
         setIsLoading(true);
         try {
             // PRIMERO crear la dirección y obtener el ID
+            console.log('🔄 Creando dirección para el incidente...');
             const idDireccion = await crearDireccionYObtenerId({
                 calle: newIncident.calle,
                 numero: newIncident.numero,
@@ -360,17 +512,18 @@ const Incidentes: React.FC = () => {
                 idComuna: idComuna
             });
 
+            console.log('✅ Dirección creada con ID:', idDireccion);
+
             // Obtener información de la comuna para persistencia visual
             const comunaSeleccionada = comunas.find(c => c.idComuna === idComuna);
-            const regionSeleccionada = regiones.find(r => r.idRegion === comunaSeleccionada?.idRegion);
 
-            // CORREGIR: Estructura completa del incidente según el backend
+            // Estructura del incidente según el backend
             const incidenteData = {
                 titulo: newIncident.title,
                 detalle: newIncident.description,
-                fechaRegistro: new Date().toISOString(), // Fecha actual
-                region: regionSeleccionada?.nombre || '',
-                comuna: comunaSeleccionada?.nombre || '',
+                fechaRegistro: new Date().toISOString(),
+                region: comunaSeleccionada?.region?.nombre || 'Región Metropolitana',
+                comuna: comunaSeleccionada?.nombre || 'Santiago',
                 direccion: `${newIncident.calle} ${newIncident.numero}`,
                 tipoIncidenteId: parseInt(newIncident.type),
                 idDireccion: idDireccion,
@@ -401,82 +554,11 @@ const Incidentes: React.FC = () => {
             alert("¡Incidente añadido correctamente!");
         } catch (error) {
             console.error('Error al crear incidente:', error);
-            alert('Error al crear incidente. Por favor, intenta nuevamente.');
+            alert('Error al crear incidente: ' + (error as Error).message);
         } finally {
             setIsLoading(false);
         }
     };
-
-    useEffect(() => {
-        console.log(' Estado actual de comunas:', comunas);
-        console.log(' Estado actual de regiones:', regiones);
-        console.log(' Comunas de RM:', getComunasRM());
-    }, [comunas, regiones]);
-
-    const crearDireccionYObtenerId = async (direccionData: {
-        calle: string;
-        numero: string;
-        villa?: string;
-        complemento?: string;
-        idComuna: number;
-        coordenadas?: number;
-    }): Promise<number> => {
-        try {
-            console.log('Datos de dirección a crear:', direccionData);
-            console.log('ID Comuna recibido:', direccionData.idComuna);
-            console.log('Tipo de ID Comuna:', typeof direccionData.idComuna);
-
-            // Verificar que la comuna existe
-            const comunaExiste = comunas.find(c => c.idComuna === direccionData.idComuna);
-            console.log('Comuna encontrada:', comunaExiste);
-
-            if (!comunaExiste) {
-                throw new Error(`Comuna con ID ${direccionData.idComuna} no existe en la lista cargada`);
-            }
-
-            // Crear el objeto dirección
-            const datosDireccion: Omit<Direccion, 'idDireccion'> = {
-                calle: direccionData.calle,
-                numero: direccionData.numero,
-                villa: direccionData.villa || undefined,
-                complemento: direccionData.complemento || undefined,
-                idComuna: direccionData.idComuna,
-                idCoordenadas: direccionData.coordenadas || undefined
-            };
-
-            console.log('Enviando al servicio DireccionService.create:', datosDireccion);
-            const mensajeRespuesta = await DireccionService.create(datosDireccion);
-            console.log('Dirección creada exitosamente:', mensajeRespuesta);
-
-            // Buscar la dirección recién creada
-            const direcciones = await DireccionService.getAll();
-            const direccionCreada = direcciones.find(dir =>
-                dir.calle === direccionData.calle &&
-                dir.numero === direccionData.numero &&
-                dir.idComuna === direccionData.idComuna
-            );
-
-            if (direccionCreada && direccionCreada.idDireccion) {
-                console.log('ID de dirección obtenido:', direccionCreada.idDireccion);
-                return direccionCreada.idDireccion;
-            } else {
-                throw new Error('No se pudo obtener el ID de la dirección creada');
-            }
-        } catch (error) {
-            console.error('Error creando dirección:', error);
-            throw new Error('No se pudo crear la dirección para el incidente');
-        }
-    };
-
-    // Función auxiliar para obtener comunas de la región metropolitana
-    const getComunasRM = useCallback((): Comuna[] => {
-        return comunas.filter(comuna => {
-            const region = regiones.find(r => r.idRegion === comuna.idRegion);
-            return region?.identificacion === 'RM' ||
-                region?.nombre.includes('Metropolitana') ||
-                region?.nombre.includes('Santiago');
-        });
-    }, [comunas, regiones]);
 
     const handleDeleteIncident = async (id: number): Promise<void> => {
         if (window.confirm("¿Estás seguro de que quieres eliminar este incidente?")) {
@@ -513,17 +595,17 @@ const Incidentes: React.FC = () => {
             setEditForm({
                 title: incident.titulo,
                 description: incident.detalle,
-                location: incident.direccionCompletaIncidente
-                    ? IncidenteGeolocalizacionService.formatearDireccion(incident.direccionCompletaIncidente)
-                    : "",
+                location: incident.direccionTexto ||
+                    (incident.direccionCompletaIncidente ?
+                        `${incident.direccionCompletaIncidente.calle || ''} ${incident.direccionCompletaIncidente.numero || ''}`.trim()
+                        : ''),
                 type: incident.tipoIncidente.idTipoIncidente.toString(),
-                status: getEstadoNombre(incident.idEstadoIncidente || 1), // ← CORREGIDO
+                status: getEstadoNombre(incident.idEstadoIncidente || 1),
                 imageUrl: incident.imagenUrl || DefaultIncidente
             });
             setExpandedIncident(id);
         }
     };
-
 
     const handleSaveIncident = async (id: number): Promise<void> => {
         if (!editForm.description || !editForm.type || !editForm.title) {
@@ -547,7 +629,7 @@ const Incidentes: React.FC = () => {
                 titulo: editForm.title,
                 detalle: editForm.description,
                 tipoIncidenteId: parseInt(editForm.type),
-                idEstadoIncidente: getEstadoId(editForm.status), // ← CORREGIDO: usar ID numérico
+                idEstadoIncidente: getEstadoId(editForm.status),
                 imagenUrl: editForm.imageUrl
             };
 
@@ -599,16 +681,16 @@ const Incidentes: React.FC = () => {
     };
 
     const formatearUbicacionTabla = (incident: IncidenteFrontendConGeolocalizacion): string => {
-        if (!incident.direccionCompletaIncidente) {
-            return 'Ubicación no disponible';
+        if (incident.direccionTexto) {
+            return incident.direccionTexto;
         }
 
-        const { calle, numero, comuna } = incident.direccionCompletaIncidente;
+        if (incident.direccionCompletaIncidente) {
+            const direccion = `${incident.direccionCompletaIncidente.calle || ''} ${incident.direccionCompletaIncidente.numero || ''}`.trim();
+            return direccion || 'Ubicación no disponible';
+        }
 
-        // Manejar casos donde la comuna no está disponible
-        const nombreComuna = comuna?.nombre || 'Comuna no disponible';
-
-        return `${calle} ${numero}, ${nombreComuna}`;
+        return 'Ubicación no disponible';
     };
 
     if (isLoading) {
@@ -617,8 +699,8 @@ const Incidentes: React.FC = () => {
                 <div className={styles['loading-container']}>
                     <div className={styles['loading-spinner']}></div>
                     <p>
-                        {isLoadingGeolocalizacion || isLoadingTipos
-                            ? 'Cargando datos del sistema...'
+                        {isLoadingTipos
+                            ? 'Cargando tipos de incidente...'
                             : 'Cargando incidentes...'
                         }
                     </p>
@@ -644,7 +726,7 @@ const Incidentes: React.FC = () => {
                         data-testid="btn-nuevo-incidente"
                         className={`${styles['btn-primario']} ${styles['btn-grande']}`}
                         onClick={() => setShowForm(true)}
-                        disabled={showForm || isLoadingTipos || isLoadingGeolocalizacion}
+                        disabled={showForm || isLoadingTipos}
                     >
                         Reportar Nuevo Incidente<TiPlus />
                     </button>
@@ -789,32 +871,35 @@ const Incidentes: React.FC = () => {
                                             onChange={(e) => handleInputChange(e, 'new')}
                                             className={styles['form-input']}
                                             required
-                                            disabled={isLoadingGeolocalizacion}
+                                            disabled={isLoadingGeografia}
                                         >
                                             <option value="">Seleccione una comuna</option>
-                                            {isLoadingGeolocalizacion ? (
+                                            {isLoadingGeografia ? (
                                                 <option disabled>Cargando comunas...</option>
                                             ) : comunas.length > 0 ? (
-                                                getComunasRM().map(comuna => (
+                                                comunas.map(comuna => (
                                                     <option key={comuna.idComuna} value={comuna.idComuna}>
-                                                        {comuna.nombre}
+                                                        {comuna.nombre} (ID: {comuna.idComuna})
                                                     </option>
                                                 ))
                                             ) : (
+                                                // Si no hay comunas cargadas, mostrar opciones por defecto
                                                 <>
                                                     <option value="1">Santiago</option>
                                                     <option value="2">Providencia</option>
                                                     <option value="3">Las Condes</option>
-                                                    <option value="4">Ñuñoa</option>
+                                                    <option value="4">Vitacura</option>
+                                                    <option value="5">Ñuñoa</option>
+                                                    <option value="6">La Florida</option>
+                                                    <option value="7">Maipú</option>
+                                                    <option value="8">ERROR</option>
                                                 </>
                                             )}
                                         </select>
-
-                                        {isLoadingGeolocalizacion && (
+                                        {isLoadingGeografia && (
                                             <small className={styles['loading-text']}>Cargando comunas...</small>
                                         )}
-
-                                        {comunas.length === 0 && !isLoadingGeolocalizacion && (
+                                        {comunas.length === 0 && !isLoadingGeografia && (
                                             <small className={styles['warning-text']}>
                                                 No se pudieron cargar las comunas. Usando lista local.
                                             </small>
@@ -887,7 +972,7 @@ const Incidentes: React.FC = () => {
                                         data-testid="submit-incident"
                                         type="submit"
                                         className={styles['btn-primario']}
-                                        disabled={isLoading}
+                                        disabled={isLoading || isLoadingGeografia}
                                     >
                                         {isLoading ? 'Enviando...' : 'Enviar Reporte'}
                                     </button>
@@ -964,7 +1049,7 @@ const Incidentes: React.FC = () => {
                                     <tr>
                                         <th>ID</th>
                                         <th>Tipo</th>
-                                        <th>Título</th> 
+                                        <th>Título</th>
                                         <th>Ubicación</th>
                                         <th>Estado</th>
                                         <th>Fecha/Hora</th>
@@ -982,7 +1067,7 @@ const Incidentes: React.FC = () => {
                                                     </span>
                                                     {incident.tipoIncidente.nombre}
                                                 </td>
-                                                <td className={styles['celda-titulo']}> 
+                                                <td className={styles['celda-titulo']}>
                                                     <strong>{incident.titulo}</strong>
                                                 </td>
                                                 <td className={styles['celda-ubicacion']}>
@@ -1172,24 +1257,11 @@ const Incidentes: React.FC = () => {
                                                                                     <strong>🏷️ Título:</strong>
                                                                                     <span>{incident.titulo}</span>
                                                                                 </div>
-                                                                                
+
                                                                                 <div className={styles['info-item']}>
                                                                                     <strong>📍 Ubicación:</strong>
                                                                                     <span>
-                                                                                        {incident.direccionCompletaIncidente ? (
-                                                                                            <div className={styles['direccion-completa']}>
-                                                                                                <div>{incident.direccionCompletaIncidente.calle} {incident.direccionCompletaIncidente.numero}</div>
-                                                                                                {incident.direccionCompletaIncidente.villa && (
-                                                                                                    <div>Villa: {incident.direccionCompletaIncidente.villa}</div>
-                                                                                                )}
-                                                                                                {incident.direccionCompletaIncidente.complemento && (
-                                                                                                    <div>Complemento: {incident.direccionCompletaIncidente.complemento}</div>
-                                                                                                )}
-                                                                                                
-                                                                                            </div>
-                                                                                        ) : (
-                                                                                            'Ubicación no disponible'
-                                                                                        )}
+                                                                                        {formatearUbicacionTabla(incident)}
                                                                                     </span>
                                                                                 </div>
                                                                                 <div className={styles['info-item']}>

@@ -20,6 +20,7 @@ export interface IncidenteResponse {
     idCiudadano: number;
     idEstadoIncidente: number;
     idUsuarioAsignado?: number | null;
+    direccion: string;
 }
 
 /**
@@ -138,6 +139,8 @@ export interface IncidenteFrontendConGeolocalizacion {
     estadoIncidente?: string;
     imagenUrl?: string;
     idEstadoIncidente: number;
+    direccionTexto: string;
+    idRegion: number;
 
     // Información de geolocalización
     direccionCompletaIncidente: DireccionCompletaIncidente | null;

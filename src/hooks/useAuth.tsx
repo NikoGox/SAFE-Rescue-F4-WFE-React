@@ -207,8 +207,6 @@ export const useAuth = (): UseAuthReturn => {
             localStorage.setItem('usuarioLogueado', JSON.stringify(userDataBase));
             setAuthData(userDataBase);
 
-            // Refrescar con parámetros
-            await refreshProfile(userDataBase.idUsuario, userDataBase.tipoPerfil);
 
             return true;
         } catch (err) {

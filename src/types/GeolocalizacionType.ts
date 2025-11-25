@@ -4,7 +4,7 @@
 export interface Region {
     idRegion: number;
     nombre: string;
-    identificacion: string; // Código de identificación de la región (ej: ISO)
+    identificacion: string;
 }
 
 /**
@@ -13,9 +13,8 @@ export interface Region {
 export interface Comuna {
     idComuna: number;
     nombre: string;
-    // Opcional, ya que no es 'nullable=false' en el modelo Java.
     codigoPostal?: string;
-    idRegion: number; // Clave foránea (debe ser expuesta por el DTO del backend)
+    region: Region;
 }
 
 /**
@@ -33,8 +32,8 @@ export interface CoordenadasSimple {
  */
 export interface Coordenadas {
     idCoordenadas: number;
-    latitud: number;  // Corresponde a Float en Java
-    longitud: number; // Corresponde a Float en Java
+    latitud: number;
+    longitud: number;
 }
 
 /**
@@ -45,15 +44,12 @@ export interface Direccion {
     idDireccion: number;
     calle: string;
     numero: string;
-
-    // Estos campos son opcionales en Java, por lo que se marcan como opcionales en TS.
     villa?: string;
     complemento?: string;
-
-    // Relaciones (expuestas como IDs en el DTO de respuesta)
-    idComuna: number;
+    idComuna?: number;
+    comuna?: Comuna;
     idCoordenadas?: number;
-    
+    coordenadas?: Coordenadas;
 }
 
 /**
@@ -66,6 +62,7 @@ export interface DireccionRequest {
     // Campos opcionales
     villa?: string;
     complemento?: string;
+    
 
     // Relación por ID
     idComuna: number;
@@ -80,13 +77,12 @@ export interface DireccionRequest {
  * Útil para integrar servicios de geocodificación externos.
  */
 export interface GeocodingResult {
-    coordenadas: CoordenadasSimple; // Latitud y longitud encontradas (formato simple)
-    direccionCompleta: string; // Dirección formateada
+    coordenadas: CoordenadasSimple; 
+    direccionCompleta: string; 
     precision: number;
 
     idCoordenada?: number;
 
-    // Información opcional de contexto
     idComuna?: number;
     idRegion?: number;
 }

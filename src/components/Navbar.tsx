@@ -81,17 +81,6 @@ const Navbar: React.FC = () => {
                             </Link>
                         </li>
 
-                        {/* Incidentes - Solo para usuarios autenticados */}
-                        {isLoggedIn && (
-                            <>
-                                <li className="nav-item"><span className={styles.espaciadorNavbar}>|</span></li>
-                                <li className="nav-item">
-                                    <Link className={`${styles.textANavbar} nav-link`} to="/incidentes" onClick={scrollToTop}>
-                                        Incidentes
-                                    </Link>
-                                </li>
-                            </>
-                        )}
                         
                         {/* Dropdown para acciones de usuario */}
                         <li className={`${styles['boton-login']} nav-item`}>
