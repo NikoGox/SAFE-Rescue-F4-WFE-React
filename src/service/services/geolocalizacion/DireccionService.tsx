@@ -1,9 +1,9 @@
 // src/services/geolocalizacion/DireccionService.ts
 
 import type { Direccion } from '../../../types/GeolocalizacionType.ts';
-import { 
-    geolocalizacionClient, 
-    buildApiUrlPathGeolocalizacion, 
+import {
+    geolocalizacionClient,
+    buildApiUrlPathGeolocalizacion,
     GeolocalizacionEndpoints,
     type GeolocalizacionEndpointsType
 } from '../../clients/GeolocalizacionClient.tsx';
@@ -25,12 +25,12 @@ export const DireccionService = {
         } catch (error) {
             const axiosError = error as AxiosError;
             console.error("[DireccionService] Error en getAll:", axiosError.message);
-            
+
             if (axiosError.response?.status === 204) {
                 // El backend devuelve 204 NO_CONTENT cuando no hay direcciones
                 return [];
             }
-            
+
             if (axiosError.response) {
                 throw new Error(`Error al obtener direcciones: ${axiosError.response.status}`);
             }
@@ -52,11 +52,11 @@ export const DireccionService = {
         } catch (error) {
             const axiosError = error as AxiosError;
             console.error(`[DireccionService] Error en getById(${idDireccion}):`, axiosError.message);
-            
+
             if (axiosError.response?.status === 404) {
                 throw new Error(`Dirección con ID ${idDireccion} no encontrada.`);
             }
-            
+
             if (axiosError.response) {
                 throw new Error(`Error al obtener dirección: ${axiosError.response.status}`);
             }
@@ -74,8 +74,14 @@ export const DireccionService = {
     create: async (direccion: Omit<Direccion, 'idDireccion'>): Promise<string> => {
         try {
             const urlPath = buildApiUrlPathGeolocalizacion(DIRECCIONES_RESOURCE);
+            console.log('🚨 DEBUG - URL de destino:', urlPath);
+            console.log('🚨 DEBUG - Datos enviados:', JSON.stringify(direccion, null, 2));
+
             const response = await geolocalizacionClient.post<string>(urlPath, direccion);
-            return response.data; // "Dirección creada con éxito."
+            
+            console.log('🚨 DEBUG - Respuesta exitosa:', response.data);
+            
+            return response.data; 
         } catch (error) {
             const axiosError = error as AxiosError;
             console.error("[DireccionService] Error en create:", axiosError.message, axiosError.response?.data);
@@ -90,6 +96,7 @@ export const DireccionService = {
             throw error;
         }
     },
+
 
     /**
      * Actualiza una dirección existente.
@@ -111,7 +118,7 @@ export const DireccionService = {
             if (axiosError.response?.status === 404) {
                 throw new Error(`Dirección con ID ${idDireccion} no encontrada.`);
             }
-            
+
             if (axiosError.response) {
                 // El backend devuelve mensaje de error en el body
                 if (axiosError.response.data) {
@@ -138,11 +145,11 @@ export const DireccionService = {
         } catch (error) {
             const axiosError = error as AxiosError;
             console.error(`[DireccionService] Error en delete(${idDireccion}):`, axiosError.message);
-            
+
             if (axiosError.response?.status === 404) {
                 throw new Error(`Dirección con ID ${idDireccion} no encontrada.`);
             }
-            
+
             if (axiosError.response) {
                 // El backend devuelve mensaje de error en el body
                 if (axiosError.response.data) {

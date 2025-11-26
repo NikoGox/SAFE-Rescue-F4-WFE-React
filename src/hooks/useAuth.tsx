@@ -1,17 +1,20 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type {
     UserData,
     AuthResponseDTO,
     UserUpdateRequest,
     CiudadanoData,
-    Bombero
+    Bombero,
+    convertirAUserData
 } from '../types/PerfilesType';
 import UseAuthService from '../service/services/perfiles/UseAuthService';
 import UsuarioService from '../service/services/perfiles/UsuarioService';
 import BomberoService from '../service/services/perfiles/BomberoService';
 import CiudadanoService from '../service/services/perfiles/CiudadanoService';
-import { convertirAUserData } from '../types/PerfilesType';
+import {FotoService} from '../service/services/registros/FotoService';
 import { getToken, clearToken, tokenManager } from '../service/clients/PerfilesClient';
+
+import PerfilDefault from "../assets/perfil-default.png";
 
 interface UseAuthReturn {
     isLoggedIn: boolean;
@@ -28,6 +31,7 @@ interface UseAuthReturn {
     restoreSession: (userData: UserData) => void;
     updateProfile: (userData: UserUpdateRequest) => Promise<boolean>;
     refreshProfile: (userId?: number, tipoPerfil?: string) => Promise<void>;
+    setAuthData: React.Dispatch<React.SetStateAction<UserData | null>>;
 }
 
 export const useAuth = (): UseAuthReturn => {
@@ -38,7 +42,9 @@ export const useAuth = (): UseAuthReturn => {
 
     const isLoggedIn = !!authData;
     const userName = authData?.nombre || '';
-    const profileImage = authData?.idFoto ? `/api/fotos/${authData.idFoto}` : undefined;
+    const profileImage = authData?.idFoto ? 
+    FotoService.obtenerUrlPublicaPorId(authData.idFoto) : 
+    undefined;
 
     // Enriquecer datos con tipoPerfil si no lo tiene
     const enrichUserData = useCallback((userData: UserData): UserData => {
@@ -263,6 +269,7 @@ export const useAuth = (): UseAuthReturn => {
 
     return {
         isLoggedIn,
+        setAuthData,
         userName,
         profileImage,
         authData,

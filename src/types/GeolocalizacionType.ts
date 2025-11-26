@@ -34,22 +34,37 @@ export interface Coordenadas {
     idCoordenadas: number;
     latitud: number;
     longitud: number;
+    precision?: number;
+    fechaRegistro?: string;
 }
 
 /**
  * Interfaz para la respuesta (lectura) de la API de Direccion.
  * Utiliza IDs para las relaciones foráneas (Comuna, Coordenadas).
  */
+// En tus tipos, debería verse así:
 export interface Direccion {
-    idDireccion: number;
+    idDireccion?: number;
     calle: string;
     numero: string;
-    villa?: string;
-    complemento?: string;
-    idComuna?: number;
-    comuna?: Comuna;
-    idCoordenadas?: number;
-    coordenadas?: Coordenadas;
+    villa?: string | null;
+    complemento?: string | null;
+    comuna: {
+        idComuna: number;
+        nombre: string;
+        codigoPostal: string;
+        region: {
+            idRegion: number;
+            nombre: string;
+            identificacion: string;
+        };
+    };
+    coordenadas: {
+        idCoordenadas: number;
+        latitud: number;
+        longitud: number;
+        precision?: number;
+    };
 }
 
 /**
@@ -62,7 +77,7 @@ export interface DireccionRequest {
     // Campos opcionales
     villa?: string;
     complemento?: string;
-    
+
 
     // Relación por ID
     idComuna: number;
@@ -77,8 +92,8 @@ export interface DireccionRequest {
  * Útil para integrar servicios de geocodificación externos.
  */
 export interface GeocodingResult {
-    coordenadas: CoordenadasSimple; 
-    direccionCompleta: string; 
+    coordenadas: CoordenadasSimple;
+    direccionCompleta: string;
     precision: number;
 
     idCoordenada?: number;
@@ -108,10 +123,4 @@ export interface Region {
     idRegion: number;
     nombre: string;
     identificacion: string;
-}
-
-export interface Coordenadas {
-    idCoordenadas: number;
-    latitud: number;
-    longitud: number;
 }

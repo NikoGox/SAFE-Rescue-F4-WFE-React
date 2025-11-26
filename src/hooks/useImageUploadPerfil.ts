@@ -1,21 +1,26 @@
 // src/hooks/useImageUploadPerfil.ts
 import { useState, useCallback } from 'react';
 import { FotoService } from '../service/services/registros/FotoService';
+import UsuarioService from '../service/services/perfiles/UsuarioService';
 
 interface UseImageUploadPerfilProps {
   entityType: 'USUARIO';
   entityId?: number;
-  onImageUpdated?: (newUrl: string | null) => void;
+  onImageUpdated?: (newUrl: string | null, newPhotoId?: number | null) => void;
 }
 
 interface UseImageUploadPerfilResult {
   isModalOpen: boolean;
   currentImageUrl: string | null;
+  currentPhotoId: number | null;
   isLoading: boolean;
+  isUploading: boolean;
   openModal: () => void;
   closeModal: () => void;
-  handleImageUpload: (file: File) => Promise<string>;
-  handleImageDelete: () => Promise<void>; // Cambiado: no recibe parámetro
+  handleImageSelect: (file: File) => Promise<string>;
+  handleImageSave: (file: File) => Promise<number>;
+  handleImageDelete: () => Promise<void>;
+  clearTemporaryImage: () => void;
 }
 
 export const useImageUploadPerfil = ({
@@ -25,78 +30,142 @@ export const useImageUploadPerfil = ({
 }: UseImageUploadPerfilProps): UseImageUploadPerfilResult => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [currentPhotoId, setCurrentPhotoId] = useState<number | null>(null);
+  const [temporaryImageUrl, setTemporaryImageUrl] = useState<string | null>(null);
+  const [temporaryFile, setTemporaryFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const openModal = useCallback(() => {
     setIsModalOpen(true);
-  }, []);
+    // Cargar imagen actual al abrir el modal
+    if (currentImageUrl) {
+      setTemporaryImageUrl(currentImageUrl);
+    }
+  }, [currentImageUrl]);
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false);
+    setTemporaryImageUrl(null);
+    setTemporaryFile(null);
   }, []);
 
-  const handleImageUpload = useCallback(async (file: File): Promise<string> => {
-    setIsLoading(true);
+  // Solo prepara la imagen (no la sube)
+  const handleImageSelect = useCallback(async (file: File): Promise<string> => {
     try {
-      console.log('Subiendo imagen de perfil...', file.name);
+      console.log('Preparando imagen de perfil...', file.name);
 
-      const fotoCreada = await FotoService.subirFoto(file);
-      const imageUrl = construirUrlCompleta(fotoCreada.url);
+      // Crear URL temporal para preview
+      const objectUrl = URL.createObjectURL(file);
 
-      console.log('Imagen de perfil subida exitosamente:', imageUrl);
+      console.log('Imagen preparada para upload:', file.name);
+      return objectUrl;
 
-      setCurrentImageUrl(imageUrl);
+    } catch (error: any) {
+      console.error("Error al preparar imagen:", error);
+      throw new Error(error.message || "Error al preparar la imagen.");
+    }
+  }, []);
 
-      if (onImageUpdated) {
-        onImageUpdated(imageUrl);
+  const handleImageSave = useCallback(async (file: File): Promise<number> => {
+    setIsUploading(true);
+    try {
+      console.log('📤 Subiendo imagen de perfil definitiva...', file.name);
+
+      if (!entityId) {
+        throw new Error("No se pudo identificar al usuario para asociar la foto.");
       }
 
-      return imageUrl;
-    } catch (error: any) {
-      console.error("Error al subir imagen de perfil:", error);
-      throw new Error(error.message || "Fallo la subida de imagen.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [onImageUpdated]);
+      // 1. Subir foto al servicio de registros (esto SÍ funciona)
+      const fotoCreada = await FotoService.subirFoto(file);
+      console.log('✅ Foto subida con ID:', fotoCreada.idFoto);
 
-  // handleImageDelete no recibe parámetros
+      // 2. SOLUCIÓN DEFINITIVA: Usar PATCH específico para foto
+      if (entityType === 'USUARIO') {
+        console.log(`🔗 Asociando foto ${fotoCreada.idFoto} al usuario ${entityId}`);
+
+        await UsuarioService.actualizarSoloFoto(entityId, fotoCreada.idFoto);
+        console.log('✅ Foto asociada al usuario mediante PATCH');
+      }
+
+      // 3. Actualizar estado local
+      const imageUrl = FotoService.obtenerUrlPublicaPorId(fotoCreada.idFoto);
+      setCurrentImageUrl(imageUrl);
+      setCurrentPhotoId(fotoCreada.idFoto);
+
+      // 4. Notificar al componente padre
+      if (onImageUpdated) {
+        onImageUpdated(imageUrl, fotoCreada.idFoto);
+      }
+
+      console.log('🎉 Imagen de perfil guardada exitosamente. ID:', fotoCreada.idFoto);
+      return fotoCreada.idFoto;
+
+    } catch (error: any) {
+      console.error("❌ Error al guardar imagen de perfil:", error);
+
+      let errorMessage = error.message || "Fallo al guardar la imagen.";
+
+      if (error.message.includes('403')) {
+        errorMessage = "No tienes permisos para actualizar el perfil. Contacta al administrador.";
+      } else if (error.message.includes('404')) {
+        errorMessage = "Usuario no encontrado.";
+      }
+
+      throw new Error(errorMessage);
+    } finally {
+      setIsUploading(false);
+    }
+  }, [entityId, entityType, onImageUpdated]);
+
   const handleImageDelete = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     try {
       console.log('Eliminando imagen de perfil actual');
 
-      // TODO: Implementar eliminación en backend cuando esté disponible
-      // Por ahora solo limpiamos el estado local
-      setCurrentImageUrl(null);
-
-      if (onImageUpdated) {
-        onImageUpdated(null);
+      // 1. Desasociar la foto del usuario
+      if (entityId && entityType === 'USUARIO' && currentPhotoId) {
+        console.log(`Desasociando foto ${currentPhotoId} del usuario ${entityId}`);
+        await UsuarioService.actualizarIdFoto(entityId, null);
       }
+
+      // 2. Actualizar estado local
+      setCurrentImageUrl(null);
+      setCurrentPhotoId(null);
+      setTemporaryImageUrl(null);
+      setTemporaryFile(null);
+
+      // 3. Notificar al componente padre
+      if (onImageUpdated) {
+        onImageUpdated(null, null);
+      }
+
+      console.log('Imagen de perfil eliminada');
+
     } catch (error: any) {
       console.error("Error al borrar imagen de perfil:", error);
       throw new Error(error.message || "Fallo al borrar la imagen.");
     } finally {
       setIsLoading(false);
     }
-  }, [onImageUpdated]);
+  }, [entityId, entityType, currentPhotoId, onImageUpdated]);
+
+  const clearTemporaryImage = useCallback(() => {
+    setTemporaryImageUrl(null);
+    setTemporaryFile(null);
+  }, []);
 
   return {
     isModalOpen,
     currentImageUrl,
+    currentPhotoId,
     isLoading,
+    isUploading,
     openModal,
     closeModal,
-    handleImageUpload,
+    handleImageSelect,
+    handleImageSave,
     handleImageDelete,
+    clearTemporaryImage,
   };
-};
-
-const construirUrlCompleta = (rutaArchivo: string): string => {
-  if (rutaArchivo.startsWith('http')) {
-    return rutaArchivo;
-  }
-
-  const baseUrl = 'http://localhost:8080';
-  return `${baseUrl}${rutaArchivo.startsWith('/') ? '' : '/'}${rutaArchivo}`;
 };

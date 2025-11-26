@@ -1,4 +1,4 @@
-import type { BaseUsuario, UserUpdateRequest, UserRegistroBackendType } from '../../../types/PerfilesType';
+import type { BaseUsuario, UserUpdateRequest, UserRegistroBackendType, UsuarioPatchRequest, UsuarioFotoPatchRequest } from '../../../types/PerfilesType';
 import { perfilesClient, buildApiUrlPathPerfiles, PerfilesEndpoints } from '../../../service/clients/PerfilesClient';
 
 class UsuarioService {
@@ -127,6 +127,85 @@ class UsuarioService {
       if (error.response?.status === 500) {
         throw new Error('Error al comunicarse con el servicio de fotos');
       }
+      this.handleError(error);
+      throw error;
+    }
+  }
+
+  async actualizarSoloFoto(idUsuario: number, idFoto: number | null): Promise<void> {
+    try {
+      console.log(`🖼️ Actualizando foto de perfil para usuario ${idUsuario}: ${idFoto}`);
+
+      // Usar el endpoint específico para foto
+      const patchData = {
+        idFoto: idFoto
+      };
+
+      const response = await perfilesClient.patch(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.USUARIOS, `/${idUsuario}/foto`),
+        patchData
+      );
+
+      console.log(`✅ Foto de perfil actualizada exitosamente via PATCH. ID: ${idFoto}`);
+      return response.data;
+
+    } catch (error: any) {
+      console.error('[UsuarioService] Error al actualizar foto:', error);
+
+      // Fallback al endpoint general PATCH si el específico falla
+      if (error.response?.status === 404) {
+        console.log('🔄 Endpoint específico no encontrado, usando PATCH general...');
+        const generalPatchData = { idFoto: idFoto };
+        return this.actualizarParcialUsuario(idUsuario, generalPatchData);
+      }
+
+      throw error;
+    }
+  }
+
+  // Método para PATCH general
+  async actualizarParcialUsuario(idUsuario: number, patchData: any): Promise<any> {
+    try {
+      console.log(`📝 Aplicando PATCH al usuario ${idUsuario}:`, patchData);
+
+      const response = await perfilesClient.patch(
+        buildApiUrlPathPerfiles(PerfilesEndpoints.USUARIOS, `/${idUsuario}`),
+        patchData
+      );
+
+      console.log('✅ PATCH aplicado exitosamente');
+      return response.data;
+
+    } catch (error: any) {
+      console.error('[UsuarioService] Error en PATCH:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Método mejorado para actualizar idFoto (usa PATCH en lugar de PUT)
+   */
+  async actualizarIdFoto(idUsuario: number, idFoto: number | null): Promise<void> {
+    try {
+      console.log(`📡 Actualizando idFoto del usuario ${idUsuario} a: ${idFoto}`);
+
+      // Usar el nuevo método PATCH
+      await this.actualizarSoloFoto(idUsuario, idFoto);
+
+    } catch (error: any) {
+      console.error('[UsuarioService] Error al actualizar idFoto:', error);
+
+      // Debug detallado
+      if (error.response) {
+        console.error('❌ Error del servidor:', {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data,
+          url: error.response.config?.url,
+          method: error.response.config?.method
+        });
+      }
+
       this.handleError(error);
       throw error;
     }

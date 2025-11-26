@@ -283,6 +283,69 @@ class IncidenteService {
     return 'Error de validación en los datos del incidente';
   }
 
+  async actualizarFotoIncidente(id: number, idFoto: number): Promise<void> {
+    try {
+      console.log(`🔄 Actualizando foto del incidente ${id} con idFoto: ${idFoto}`);
+
+      const response = await fetch(`http://localhost:8083/api-incidentes/v1/incidentes/${id}/foto`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idFoto: idFoto
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(` Error ${response.status}: ${errorText}`);
+
+        if (response.status === 404) {
+          throw new Error('Incidente no encontrado');
+        } else if (response.status === 400) {
+          throw new Error('Datos inválidos');
+        } else {
+          throw new Error(`Error al actualizar foto: ${response.status}`);
+        }
+      }
+
+      const result = await response.json();
+      console.log(' Foto actualizada correctamente:', result);
+
+    } catch (error) {
+      console.error(' Error en actualizarFotoIncidente:', error);
+      throw error;
+    }
+  }
+
+  // Método para actualización parcial general
+  async actualizarParcialIncidente(id: number, campos: any): Promise<void> {
+    try {
+      console.log(`🔄 Actualizando incidente ${id} con campos:`, campos);
+
+      const response = await fetch(`http://localhost:8083/api-incidentes/v1/incidentes/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(campos)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ Error ${response.status}: ${errorText}`);
+        throw new Error(`Error al actualizar incidente: ${response.status} ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Incidente actualizado correctamente:', result);
+
+    } catch (error) {
+      console.error('❌ Error en actualizarParcialIncidente:', error);
+      throw error;
+    }
+  }
   /**
    * Manejo centralizado de errores
    */

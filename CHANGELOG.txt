@@ -1,6 +1,14 @@
 ╔══════════════════════════════════════════════╗
 ║                REGISTRO DE CAMBIOS           ║
 ╚══════════════════════════════════════════════╝
+❚❙❘ VERSIÓN 1.0.13
+⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
+├─• Se soluciona problema en página perfiles para mostrar imagenes
+├─• Se soluciona problema en página incidentes para mostrar imagenes
+├─• Se mejora la lógica de incidentes, para poder crear y editar incidentes conmunicandose con la  base de datos
+├─• Se se implementa con el backend la pagina de donaciones
+└─• Se se implementan las pruebas unitarias
+
 ❚❙❘ VERSIÓN 1.0.12.1
 ⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺
 ├─• Se soluciona problema en página perfiles para mostrar los datos de direccion

@@ -26,7 +26,7 @@ import type { Region, Comuna } from '../types/GeolocalizacionType';
 import { RegionService } from '../service/services/geolocalizacion/RegionService';
 import { ComunaService } from '../service/services/geolocalizacion/ComunaService';
 import { DireccionCompletaService } from '../service/services/geolocalizacion/DireccionCompletaService';
-
+import { FotoService } from '../service/services/registros/FotoService';
 
 //componentes
 import FormField from '../components/Formulario';
@@ -54,8 +54,13 @@ interface PerfilFormData {
 }
 
 const Perfil: React.FC = () => {
-    const { authData, updateProfile, loading: authLoading, isLoggedIn, refreshProfile } = useAuth();
+    const { authData, setAuthData, updateProfile, loading: authLoading, isLoggedIn, refreshProfile } = useAuth();
     const [perfilData, setPerfilData] = useState<CiudadanoData | Bombero | null>(null);
+
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [newPhotoId, setNewPhotoId] = useState<number | null>(null);
+
 
     const {
         sincronizando,
@@ -65,22 +70,36 @@ const Perfil: React.FC = () => {
     const {
         isModalOpen,
         currentImageUrl,
+        currentPhotoId,
         isLoading: isImageLoading,
+        isUploading: isImageUploading,
         openModal,
         closeModal,
-        handleImageUpload,
+        handleImageSelect,
+        handleImageSave,
         handleImageDelete,
+        clearTemporaryImage,
     } = useImageUploadPerfil({
         entityType: 'USUARIO',
         entityId: authData?.idUsuario,
-        onImageUpdated: (newUrl) => {
-            console.log("Imagen actualizada:", newUrl);
-            // Solo mostrar mensaje, no actualizar authData directamente
-            if (newUrl) {
+        onImageUpdated: (newUrl, newPhotoId) => {
+            console.log("Imagen actualizada:", newUrl, "Photo ID:", newPhotoId);
+            if (newUrl && newPhotoId) {
                 setMessage({
                     type: 'success',
                     text: 'Foto de perfil actualizada exitosamente.'
                 });
+
+                // Actualizar authData con el nuevo idFoto
+                if (authData) {
+                    const updatedAuthData = {
+                        ...authData,
+                        idFoto: newPhotoId
+                    };
+                    setAuthData(updatedAuthData);
+                    localStorage.setItem('usuarioLogueado', JSON.stringify(updatedAuthData));
+                }
+
                 setTimeout(() => setMessage(null), 3000);
             }
         }
@@ -238,8 +257,7 @@ const Perfil: React.FC = () => {
         if (regionSeleccionada > 0) {
             // Filtrar TODAS las comunas de la región seleccionada (como en Registrarse)
             const comunasDeRegion = comunas.filter(c => {
-                console.log("Comparando: c.idRegion =", c.idRegion, "regionSeleccionada =", regionSeleccionada, "Coincide:", c.idRegion === regionSeleccionada);
-                return c.idRegion === regionSeleccionada;
+                return c.region.idRegion === regionSeleccionada;
             });
 
             console.log("Comunas filtradas para región", regionSeleccionada, ":", comunasDeRegion.length);
@@ -769,11 +787,18 @@ const Perfil: React.FC = () => {
 
                                 <div className={styles['profile-image-container']}>
                                     <img
-                                        src={authData?.idFoto ? `/api/fotos/${authData.idFoto}` : PerfilDefault}
+                                        src={authData?.idFoto ?
+                                            FotoService.obtenerUrlPublicaPorId(authData.idFoto) :
+                                            PerfilDefault
+                                        }
                                         alt="Foto de perfil"
                                         className={`${styles['foto-perfil']} rounded-circle`}
                                         data-testid="profile-image"
                                         key={authData?.idFoto}
+                                        onError={(e) => {
+                                            // Fallback si la imagen no carga
+                                            (e.target as HTMLImageElement).src = PerfilDefault;
+                                        }}
                                     />
                                     <button
                                         className={`${styles['btn-edit-image']} btn-sm btn-light`}
@@ -1096,21 +1121,35 @@ const Perfil: React.FC = () => {
 
             <ImageUploadModal
                 isOpen={isModalOpen}
-                onClose={closeModal}
+                onClose={() => {
+                    clearTemporaryImage();
+                    closeModal();
+                    setMessage(null);
+                }}
                 currentImage={currentImageUrl}
-                onImageUpload={handleImageUpload}
-                onImageDelete={handleImageDeleteWithParam}
                 isLoading={isImageLoading}
+                isUploading={isImageUploading}
                 uploadError={null}
-                onSave={(imageUrl) => {
-                    if (imageUrl) {
+                onImageSelect={handleImageSelect}
+                onImageSave={handleImageSave}
+                onImageDelete={handleImageDelete}
+                onSave={(imageUrl, photoId) => {
+                    if (imageUrl && photoId) {
                         setMessage({
                             type: 'success',
                             text: 'Foto de perfil actualizada exitosamente.'
                         });
+                        refreshProfile();
                     }
-                    closeModal();
                 }}
+                onError={(error) => {
+                    setMessage({
+                        type: 'error',
+                        text: error.message || 'Error al actualizar la foto de perfil.'
+                    });
+                }}
+                hasTemporaryImage={!!currentImageUrl}
+                clearTemporaryImage={clearTemporaryImage}
             />
         </div>
     );

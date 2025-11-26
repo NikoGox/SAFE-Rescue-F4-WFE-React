@@ -21,6 +21,7 @@ export interface IncidenteResponse {
     idEstadoIncidente: number;
     idUsuarioAsignado?: number | null;
     direccion: string;
+    imagenUrl: string;
 }
 
 /**
@@ -29,12 +30,16 @@ export interface IncidenteResponse {
 export interface IncidenteCreationDTO {
     titulo: string;
     detalle: string;
-    tipoIncidenteId: number;
-    
+    fechaRegistro: string;
+    region?: string;
+    comuna?: string;
+    direccion?: string;
+    tipoIncidenteId: number;  
     idDireccion: number;
     idCiudadano: number;
-    direccionCompletaIncidente?: DireccionCompletaIncidente | null;
-    
+    idEstadoIncidente: number;
+    idUsuarioAsignado?: number | null;
+    idFoto?: number | null;
 }
 
 /**
@@ -126,6 +131,7 @@ export interface IncidenteUpdateFrontend {
     idEstadoIncidente?: number;
 }
 
+
 // Tipos extendidos para geolocalización
 export interface IncidenteFrontendConGeolocalizacion {
     idIncidente: number;
@@ -140,7 +146,7 @@ export interface IncidenteFrontendConGeolocalizacion {
     imagenUrl?: string;
     idEstadoIncidente: number;
     direccionTexto: string;
-    idRegion: number;
+    idRegion?: number;
 
     // Información de geolocalización
     direccionCompletaIncidente: DireccionCompletaIncidente | null;

@@ -118,7 +118,7 @@ export interface UserDataBase extends BaseUsuario {
  */
 export interface CiudadanoData extends UserDataBase {
     tipoPerfil: 'CIUDADANO';
-    idDireccion?:number;
+    idDireccion?: number;
     direccion: {
         calle: string;
         numero: number | string;
@@ -141,7 +141,7 @@ export interface CiudadanoData extends UserDataBase {
  */
 export interface Bombero extends UserDataBase {
     tipoPerfil: 'BOMBERO' | 'JEFE_COMPANIA';
-    idDireccion?:number;
+    idDireccion?: number;
     equipo?: {
         idEquipo: number;
         nombre: string;
@@ -306,6 +306,7 @@ export type UserUpdateRequest = {
     nuevaContrasena?: string;
     idDireccion?: number;
     idEquipo?: number;
+    idFoto?: number;
 };
 
 // ===========================================================
@@ -541,6 +542,19 @@ export const crearHistorialDTO = (
 
     return dto;
 };
+
+export interface UsuarioPatchRequest {
+    idFoto?: number | null;
+    nombre?: string;
+    aPaterno?: string;
+    aMaterno?: string;
+    telefono?: string;
+    correo?: string;
+}
+
+export interface UsuarioFotoPatchRequest {
+  idFoto: number | null;
+}
 
 // ===========================================================
 // 10. FUNCIONES UTILITARIAS PARA REGISTRO

@@ -9,102 +9,137 @@ interface ImageUploadModalProps {
     onClose: () => void;
     currentImage: string | null;
     isLoading: boolean;
+    isUploading?: boolean;
     uploadError: string | null;
-    onImageUpload: (file: File) => Promise<string>;
-    onImageDelete: (imageUrl: string) => Promise<void>;
-    onImageReplace?: (file: File) => Promise<string>;
-    onSave?: (imageUrl: string | null) => void;
+    onImageSelect: (file: File) => Promise<string>;
+    onImageSave: (file: File) => Promise<number>;
+    onImageDelete: () => Promise<void>;
+    onSave?: (imageUrl: string | null, photoId?: number | null) => void;
+    onError?: (error: Error) => void; // ✅ AGREGAR ESTA PROP
+    hasTemporaryImage?: boolean;
+    clearTemporaryImage?: () => void;
 }
 
 const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
     isOpen,
     onClose,
     currentImage,
-    isLoading: externalIsLoading,
+    isLoading,
+    isUploading = false,
     uploadError,
-    onImageUpload,
+    onImageSelect,
+    onImageSave,
     onImageDelete,
-    onImageReplace,
-    onSave
+    onSave,
+    onError, // ✅ RECIBIR LA PROP
+    hasTemporaryImage = false,
+    clearTemporaryImage
 }) => {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
-    const [temporaryImage, setTemporaryImage] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false); // ✅ AGREGAR ESTADO LOCAL
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (isOpen) {
             setPreviewImage(currentImage);
-            setTemporaryImage(null);
+            setSelectedFile(null);
             setError(null);
-            setIsLoading(false);
+            setIsSaving(false);
         }
     }, [isOpen, currentImage]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            
-            // Mostrar preview inmediatamente
-            const objectUrl = URL.createObjectURL(file);
-            setPreviewImage(objectUrl);
-            setTemporaryImage(objectUrl);
+            setSelectedFile(file);
             setError(null);
-            
+
             try {
-                setIsLoading(true);
-                
-                // Subir la imagen al backend
-                const uploadedUrl = onImageReplace 
-                    ? await onImageReplace(file) 
-                    : await onImageUpload(file);
-                
-                // Actualizar con la URL real del backend
-                setPreviewImage(uploadedUrl);
-                setTemporaryImage(uploadedUrl);
-                
-            } catch (error: any) {
-                console.error("Error al subir imagen:", error);
-                setError(error.message || "Error al subir la imagen");
-                // Revertir a la imagen anterior si hay error
-                setPreviewImage(currentImage);
-                setTemporaryImage(null);
-            } finally {
-                setIsLoading(false);
-                // Limpiar el input file
+                // Solo prepara la imagen, no la sube
+                const previewUrl = await onImageSelect(file);
+                setPreviewImage(previewUrl);
+
+                // Limpiar el input file para permitir seleccionar el mismo archivo otra vez
                 if (fileInputRef.current) {
                     fileInputRef.current.value = "";
                 }
+            } catch (error: any) {
+                console.error("Error al preparar imagen:", error);
+                setError(error.message || "Error al preparar la imagen");
+                setSelectedFile(null);
+                setPreviewImage(currentImage);
             }
+        }
+    };
+
+    // ✅ MÉTODO handleSaveClick CORREGIDO
+    const handleSaveClick = async () => {
+        if (!selectedFile) return;
+
+        try {
+            setIsSaving(true);
+            setError(null);
+            
+            console.log('📤 Guardando imagen seleccionada...', selectedFile.name);
+            const photoId = await onImageSave(selectedFile);
+            console.log('✅ Imagen guardada con ID:', photoId);
+
+            // Obtener URL de preview para pasar al callback
+            const finalPreviewUrl = previewImage; // Usar la preview actual
+
+            // Éxito - notificar al componente padre
+            if (onSave) {
+                onSave(finalPreviewUrl, photoId);
+            }
+
+            // Cerrar modal después de guardar exitosamente
+            setTimeout(() => {
+                onClose();
+            }, 1000);
+
+        } catch (error: any) {
+            console.error('❌ Error al guardar imagen:', error);
+            setError(error.message || "Error al guardar la imagen");
+
+            // Notificar error al componente padre si existe la prop
+            if (onError) {
+                onError(error);
+            }
+        } finally {
+            setIsSaving(false);
         }
     };
 
     const handleDeleteClick = async () => {
-        if (previewImage) {
-            try {
-                setIsLoading(true);
-                await onImageDelete(previewImage);
-                setPreviewImage(null);
-                setTemporaryImage(null);
-                setError(null);
-            } catch (error: any) {
-                console.error("Error al borrar imagen:", error);
-                setError(error.message || "Error al borrar la imagen");
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    };
+        try {
+            setError(null);
+            await onImageDelete();
 
-    const handleSaveClick = () => {
-        if (onSave) {
-            onSave(previewImage);
+            if (onSave) {
+                onSave(null, null);
+            }
+            onClose();
+        } catch (error: any) {
+            console.error("Error al borrar imagen:", error);
+            setError(error.message || "Error al borrar la imagen");
         }
-        onClose();
     };
 
     const handleCancelClick = () => {
+        // Limpiar URLs temporales
+        if (previewImage && previewImage !== currentImage && previewImage.startsWith('blob:')) {
+            URL.revokeObjectURL(previewImage);
+        }
+        
+        if (clearTemporaryImage) {
+            clearTemporaryImage();
+        }
+        
+        setError(null);
+        setSelectedFile(null);
+        setPreviewImage(currentImage);
         onClose();
     };
 
@@ -114,8 +149,14 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
         }
     };
 
-    // Determinar si hay cambios para guardar
-    const hasChanges = temporaryImage !== null || previewImage !== currentImage;
+    // Determinar si hay cambios para habilitar el botón Guardar
+    const hasChanges = selectedFile !== null;
+
+    // Determinar si hay una imagen actual (para mostrar botón Eliminar)
+    const hasCurrentImage = currentImage !== null;
+
+    // Estado combinado de carga
+    const isProcessing = isLoading || isUploading || isSaving;
 
     if (!isOpen) return null;
 
@@ -124,29 +165,28 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             <div className={styles['modal-container']}>
                 <div className={styles['modal-content']}>
                     <div className={styles['modal-header']}>
-                        <h3>Gestionar Imagen del Incidente</h3>
-                        <button 
-                            onClick={handleCancelClick} 
+                        <h3>Gestionar Imagen de Perfil</h3>
+                        <button
+                            onClick={handleCancelClick}
                             className={styles['close-button']}
                             aria-label="Cerrar"
-                            disabled={isLoading}
+                            disabled={isProcessing}
                         >
                             <IoClose />
                         </button>
                     </div>
-                    
+
                     <div className={styles['modal-body']}>
                         <div className={styles['preview-container']}>
                             {previewImage ? (
-                                <img 
-                                    src={previewImage} 
-                                    alt="Vista previa" 
+                                <img
+                                    src={previewImage}
+                                    alt="Vista previa"
                                     className={styles['preview-image']}
-                                    onLoad={() => {
-                                        // Limpiar object URL temporal si existe
-                                        if (temporaryImage && temporaryImage.startsWith('blob:')) {
-                                            URL.revokeObjectURL(temporaryImage);
-                                        }
+                                    onError={(e) => {
+                                        // Fallback si la imagen de preview falla
+                                        console.error("Error cargando preview:", previewImage);
+                                        (e.target as HTMLImageElement).src = '/assets/perfil-default.png';
                                     }}
                                 />
                             ) : (
@@ -157,43 +197,46 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
                             )}
                         </div>
 
-                        <input 
-                            type="file" 
-                            accept="image/*" 
-                            onChange={handleFileChange} 
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
                             ref={fileInputRef}
-                            style={{display: 'none'}}
+                            style={{ display: 'none' }}
                             id="image-upload-input"
-                            disabled={isLoading}
+                            disabled={isProcessing}
                         />
-                        
+
                         <div className={styles['button-group']}>
-                            <label 
-                                htmlFor="image-upload-input" 
-                                className={`${styles['upload-button']} ${isLoading ? styles['disabled'] : ''}`}
+                            <label
+                                htmlFor="image-upload-input"
+                                className={`${styles['upload-button']} ${isProcessing ? styles['disabled'] : ''}`}
                             >
                                 <FaCloudUploadAlt />
-                                {previewImage ? 'Cambiar Imagen' : 'Subir Imagen'}
+                                {previewImage && previewImage !== currentImage ? 'Cambiar Imagen' : 'Seleccionar Imagen'}
                             </label>
-                            
-                            {previewImage && (
-                                <button 
-                                    onClick={handleDeleteClick} 
-                                    className={`${styles['delete-button']} ${isLoading ? styles['disabled'] : ''}`}
-                                    disabled={isLoading}
+
+                            {hasCurrentImage && (
+                                <button
+                                    onClick={handleDeleteClick}
+                                    className={`${styles['delete-button']} ${isProcessing ? styles['disabled'] : ''}`}
+                                    disabled={isProcessing}
                                 >
                                     <FaTrashAlt />
-                                    Eliminar
+                                    Eliminar Actual
                                 </button>
                             )}
                         </div>
 
-                        {(isLoading || externalIsLoading) && (
+                        {isProcessing && (
                             <div className={styles['loading-message']}>
-                                <p>Procesando imagen...</p>
+                                <p>
+                                    {isUploading || isSaving ? 'Guardando imagen...' : 
+                                     isLoading ? 'Procesando imagen...' : 'Cargando...'}
+                                </p>
                             </div>
                         )}
-                        
+
                         {(error || uploadError) && (
                             <div className={styles['error-message']}>
                                 <p>Error: {error || uploadError}</p>
@@ -203,20 +246,20 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
 
                     <div className={styles['modal-footer']}>
                         <div className={styles['footer-buttons']}>
-                            <button 
-                                onClick={handleCancelClick} 
+                            <button
+                                onClick={handleCancelClick}
                                 className={styles['cancel-button']}
-                                disabled={isLoading}
+                                disabled={isUploading || isSaving}
                             >
                                 Cancelar
                             </button>
-                            <button 
-                                onClick={handleSaveClick} 
+                            <button
+                                onClick={handleSaveClick}
                                 className={styles['save-button']}
-                                disabled={isLoading || !hasChanges}
+                                disabled={isProcessing || !hasChanges}
                             >
                                 <FaCheck />
-                                Guardar Imagen
+                                {isUploading || isSaving ? 'Guardando...' : 'Guardar Imagen'}
                             </button>
                         </div>
                     </div>
